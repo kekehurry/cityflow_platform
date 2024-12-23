@@ -1,6 +1,12 @@
 services:
   cityflow_database:
-    image: crpi-3e6elxy9dscu6371.cn-guangzhou.personal.cr.aliyuncs.com/kekehurry/cityflow_database:latest
+    build:
+      context: ./cityflow_database
+      dockerfile: Dockerfile
+      platforms:
+        - 'linux/amd64'
+        - 'linux/arm64'
+    image: ghcr.io/kekehurry/cityflow_database:latest
     ports:
       - '7474:7474'
       - '7687:7687'
@@ -16,7 +22,13 @@ services:
       - cityflow
 
   cityflow_executor:
-    image: crpi-3e6elxy9dscu6371.cn-guangzhou.personal.cr.aliyuncs.com/kekehurry/cityflow_executor:latest
+    build:
+      context: ./cityflow_executor
+      dockerfile: Dockerfile
+      platforms:
+        - 'linux/amd64'
+        - 'linux/arm64'
+    image: ghcr.io/kekehurry/cityflow_executor:latest
     ports:
       - '8000:8000'
     user: '1000:1000'
@@ -31,7 +43,13 @@ services:
       - cityflow
 
   cityflow_workstation:
-    image: crpi-3e6elxy9dscu6371.cn-guangzhou.personal.cr.aliyuncs.com/kekehurry/cityflow_workstation:latest
+    build:
+      context: ./cityflow_workstation
+      dockerfile: Dockerfile
+      platforms:
+        - 'linux/amd64'
+        - 'linux/arm64'
+    image: ghcr.io/kekehurry/cityflow_workstation:latest
     ports:
       - '3000:3000'
     user: '1000:1000'
