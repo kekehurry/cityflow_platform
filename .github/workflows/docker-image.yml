@@ -1,0 +1,55 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push City Flwo Database
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: ./cityflow_database
+        file: ./cityflow_database/Dockerfile
+        tags: ghcr.io/kekehurry/cityflow_database
+        platforms: linux/amd64,linux/arm64
+        push: true
+
+    - name: Build and Push City Flwo Executor
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: ./cityflow_executor
+        file: ./cityflow_executor/Dockerfile
+        tags: ghcr.io/kekehurry/cityflow_executor
+        platforms: linux/amd64,linux/arm64
+        push: true
+
+    - name: Build and Push City Flwo Workstation
+      uses: docker/build-push-action@v6.10.0
+      with:
+        context: ./cityflow_workstation
+        file: ./cityflow_workstation/Dockerfile
+        tags: ghcr.io/kekehurry/cityflow_workstation
+        platforms: linux/amd64,linux/arm64
+        push: true
+        
+
+      
+        
+      
+      
