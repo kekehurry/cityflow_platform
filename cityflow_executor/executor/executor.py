@@ -69,7 +69,10 @@ class CodeExecutor:
         self._last_update_time = time.time()
 
         if not os.path.exists(self._work_dir):
-            os.makedirs(self._work_dir)
+            try:
+                os.makedirs(self._work_dir)
+            except FileExistsError:
+                pass
             
         # Check if the image exists
         try:
@@ -152,7 +155,10 @@ class CodeExecutor:
             # foldername = f"codeblock_{md5(code.encode()).hexdigest()}"
             foldername = f"codeblock_{session_id}"
             if not os.path.exists(os.path.join(self._work_dir, foldername)):
-                os.makedirs(os.path.join(self._work_dir, foldername))
+                try:
+                    os.makedirs(os.path.join(self._work_dir, foldername))
+                except FileExistsError:
+                    pass
 
             filename = f"entrypoint"
             code_path = os.path.join(self._work_dir, foldername, filename)
