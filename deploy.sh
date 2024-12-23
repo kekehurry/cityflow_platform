@@ -1,19 +1,21 @@
 #!/bin/bash
 
 # Pull the required images
-docker pull gboeing/osmnx
-docker pull python:3-slim
+# docker pull gboeing/osmnx
+# docker pull python:3-slim
 
-docker network create cityflow
+docker network ls | grep -q cityflow || docker network create cityflow
 
-#if no user 1000:1000, create one
-sudo useradd -u 1000 -m cityflow
-sudo groupadd cityflow -g 1000
-sudo usermod -aG docker,cityflow cityflow
+sed -i '' "s/EXECUTOR_USER=.*/EXECUTOR_USER=$(id -u):$(id -g)/" .env
 
+sudo usermod -aG docker $USER
 
-sudo chown -R 1000:1000 cityflow_database
-sudo chown -R 1000:1000 cityflow_executor
-sudo chown -R 1000:1000 /var/run/docker.sock
+sudo chown $(id -u):$(id -g) cityflow_database
+sudo chown $(id -u):$(id -g) cityflow_executor
+sudo chown $(id -u):$(id -g) /var/run/docker.sock
+
+# reload docker daemon and restart docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 
 docker-compose up
