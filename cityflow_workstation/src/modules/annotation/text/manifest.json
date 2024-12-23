@@ -1,0 +1,13 @@
+{
+  "type": "annotation",
+  "module": "text",
+  "version": "0.0.1",
+  "config": {
+    "title": "Text",
+    "discription": "this module is useful for adding text to the workspace",
+    "author": "Kai Hu",
+    "width": 300,
+    "height": 50,
+    "icon": "text.png"
+  }
+}
