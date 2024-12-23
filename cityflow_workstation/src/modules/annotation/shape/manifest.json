@@ -1,0 +1,13 @@
+{
+  "type": "annotation",
+  "module": "shape",
+  "version": "0.0.1",
+  "config": {
+    "title": "Shape",
+    "discription": "this module is useful for drawing an rectangle/triangle/circle",
+    "author": "Kai Hu",
+    "width": 100,
+    "height": 100,
+    "icon": "shapes.png"
+  }
+}

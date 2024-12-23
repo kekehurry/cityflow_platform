@@ -1,0 +1,17 @@
+{
+    "type": "base",
+    "module": "commit",
+    "version": "0.0.1",
+    "config": {
+        "title": "CS Commit",
+        "discription" : "this module is useful to update the grid data in cityIO",
+        "author": "Kai Hu",
+        "width": 200,
+        "height": 35,
+        "input" : ["tableName","input"],
+        "run": false,
+        "icon": "send.png"
+    },
+    "entrypoint": "commit.js"
+}
+  

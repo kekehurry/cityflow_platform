@@ -1,0 +1,55 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap'); */
+@import url('https://fonts.font.im/css?family=Kalam');
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+html {
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+.kalam-light {
+    font-family: "Kalam", cursive;
+    font-weight: 300;
+    font-style: normal;
+}
+  
+.kalam-regular {
+    font-family: "Kalam", cursive;
+    font-weight: 400;
+    font-size: 1.2rem;
+    font-style: normal;
+}
+
+.kalam-bold {
+    font-family: "Kalam", cursive;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.annotation {
+    z-index : 2 !important;
+}
+
+.react-flow__edges {
+    z-index: 0 !important;
+}
+
+/* .react-flow__node {
+    z-index: 1 !important;
+} */
+
+/* .react-flow__node-pack {
+    z-index: 1 !important;
+} */
+
+.markdown-button {
+    color: "#616161";
+  }
+
+.markdown-button:hover {
+    color: #FFC400;
+  }

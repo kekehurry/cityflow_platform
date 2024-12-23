@@ -1,0 +1,175 @@
+'use client';
+import html2canvas from 'html2canvas';
+import FingerprintJS from 'fingerprintjs2';
+import { useState } from 'react';
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+export const initUserId = async () => {
+  if (typeof localStorage === 'undefined') {
+    return null;
+  }
+  const data = localStorage.getItem('cs_flow') || '{}';
+  const cs_data = JSON.parse(data);
+  let userId = cs_data['userId'];
+  if (!userId) {
+    const components = await FingerprintJS.getPromise();
+    userId = FingerprintJS.x64hash128(
+      components.map((component) => component.value).join(''),
+      31
+    );
+    cs_data['userId'] = userId;
+    localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+  }
+  return userId;
+};
+
+//get core modules
+export const getCoreModuleList = async () => {
+  const moduleList = await fetch(basePath + '/api/module/getModuleList')
+    .then((res) => res.json())
+    .then((data) => data.moduleList);
+  return moduleList;
+};
+
+export const getSettings = (module) => {
+  const updateManifest = (manifest) => {
+    manifest.entrypoint = manifest.entrypoint
+      ? manifest.entrypoint
+      : 'index.js';
+    manifest.data = {
+      input: null,
+      output: null,
+      module: `${module}/${manifest.entrypoint}`,
+    };
+    manifest.config = {
+      ...manifest.config,
+      run: manifest.config.hasOwnProperty('run') ? manifest.config.run : true,
+    };
+    return manifest;
+  };
+
+  return new Promise((resolve, reject) => {
+    import(`@/modules/${module}/manifest.json`)
+      .then((manifest) => {
+        import(`@/modules/${module}/${manifest.default.config.icon}`)
+          .then((icon) => {
+            let updatedManifest = updateManifest(manifest.default);
+            updatedManifest.config.icon = icon.default?.src;
+            resolve(updatedManifest);
+          })
+          .catch((err) => {
+            const updatedManifest = updateManifest(manifest.default);
+            resolve(updatedManifest);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+        resolve(null);
+      });
+  });
+};
+
+export const getFlowData = async ({ rfInstance, state }) => {
+  if (rfInstance) {
+    const flowData = rfInstance.toObject();
+    const newFlowData = {
+      ...flowData,
+      nodes: flowData.nodes.map((node) => {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            input: null,
+            output: null,
+          },
+          config: {
+            ...node.config,
+            scope: {},
+            run: false,
+          },
+        };
+      }),
+      edges: [...flowData.edges],
+      globalScale: 0.1,
+    };
+    const flowContainer = document.getElementById('react-flow');
+    const clonedFlowContainer = flowContainer.cloneNode(true);
+    clonedFlowContainer.style.background = '#0a0a0a';
+    clonedFlowContainer.style.position = 'absolute';
+    document.body.appendChild(clonedFlowContainer);
+    let screenShot;
+    await html2canvas(clonedFlowContainer).then((canvas) => {
+      screenShot = canvas.toDataURL();
+    });
+    document.body.removeChild(clonedFlowContainer);
+    const savedData = {
+      ...state,
+      ...newFlowData,
+      screenShot,
+    };
+    return savedData;
+  }
+};
+
+export const download = (data) => {
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${data.name || 'new_task'}.csflow.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+export const upload = (rfInstance, initStore) => {
+  const restore = new Promise((resolve, reject) => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.oninput = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const flow = JSON.parse(e.target.result);
+        if (flow) {
+          const { x = 0, y = 0, zoom = 1 } = flow.viewport;
+          const { nodes, edges } = flow;
+          rfInstance.setViewport({ x, y, zoom });
+          rfInstance.setNodes(nodes);
+          rfInstance.setEdges(edges);
+          resolve(flow);
+        }
+      };
+      reader.readAsText(file);
+    };
+    fileInput.click();
+  });
+  restore.then((flow) => {
+    initStore(flow);
+  });
+};
+
+export const useLocalStorage = (key, defaultValue) => {
+  const [localValue, setLocalValue] = useState(() => {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    const data = localStorage.getItem('cs_flow') || '{}';
+    const cs_data = JSON.parse(data);
+    let value = cs_data[key];
+    value = value ? value : defaultValue;
+    return value;
+  });
+  const setValue = (value) => {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    setLocalValue(value);
+    const data = localStorage.getItem('cs_flow') || '{}';
+    const cs_data = JSON.parse(data);
+    cs_data[key] = value;
+    localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+  };
+
+  return [localValue, setValue];
+};

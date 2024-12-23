@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run CityFlow Platform",
+      "type": "shell",
+      "dependsOn": [
+        "Run CityFlow Database",
+        "Run CityFlow Executor",
+        "Run CityFlow Workstation"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run CityFlow Database",
+      "type": "shell",
+      "command": "cd cityflow_database && docker start neo4j && ~/anaconda3/envs/pytorch/bin/python server.py",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Run CityFlow Executor",
+      "type": "shell",
+      "command": "cd cityflow_executor && ~/anaconda3/envs/pytorch/bin/python server.py",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Run CityFlow Workstation",
+      "type": "shell",
+      "command": "cd cityflow_workstation && npm run dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    }
+  ]
+}
