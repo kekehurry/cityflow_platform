@@ -19,7 +19,7 @@ echo "Environment setup..."
 
 # modify the .env file
 sed -i "s|EXECUTOR_USER=.*|EXECUTOR_USER=$(id -u):$(id -g)|" .env
-sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code/|" .env
+sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code|" .env
 sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
 sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
 sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://cityflow_database:7687|" .env
@@ -35,12 +35,6 @@ sudo usermod -aG docker $USER
 sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_database/data
 sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_executor/code
 sudo chown -R $(id -u):$(id -g) /var/run/docker.sock
-
-# reload docker daemon and restart docker
-sudo systemctl daemon-reload
-sudo systemctl restart docker
-
-
 
 echo "Lunching cityflow..."
 
