@@ -1,2 +1,4 @@
 **/.DS_Store
 docker-compose.yml
+*_mac.sh
+*.log
