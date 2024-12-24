@@ -75,7 +75,7 @@ const FlowSettings = (props) => {
       setInitLog('Initing environment...');
       setupExecutor(formValue.flowId, packages, formValue.image)
         .then((data) => {
-          setInitLog(data.console);
+          setInitLog(data?.console);
           setFlowInited(true);
         })
         .finally(() => {

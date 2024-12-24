@@ -9,6 +9,8 @@ done
 
 # Run the Python script
 
-python3 /workspace/init_db.py
+if [ "$INIT_DATABASE" ]; then
+  python init_db.py
+fi
 
 python3 /workspace/server.py

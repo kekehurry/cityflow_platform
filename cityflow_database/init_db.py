@@ -32,23 +32,26 @@ print('Loading workflows...')
 
 folder = '/workspace/json/basic' if os.path.exists('/workspace/json/basic') else 'json/basic'
 for file in os.listdir(folder):
-    file = os.path.join(folder,file)
-    flow = load_flow_data(file,basic=True,showcase=False)
-    save_workflow(flow,user_id=admin_id)
+    if file.endswith('.json'):
+        file = os.path.join(folder,file)
+        flow = load_flow_data(file,basic=True,showcase=False)
+        save_workflow(flow,user_id=admin_id)
 
 
 folder = '/workspace/json/tutorial' if os.path.exists('/workspace/json/tutorial') else 'json/tutorial'
 for file in os.listdir(folder):
-    file = os.path.join(folder,file)
-    flow = load_flow_data(file,basic=False,showcase=False)
-    flow['tutorial'] = True
-    save_workflow(flow,user_id=admin_id)
+    if file.endswith('.json'):
+        file = os.path.join(folder,file)
+        flow = load_flow_data(file,basic=False,showcase=False)
+        flow['tutorial'] = True
+        save_workflow(flow,user_id=admin_id)
 
 folder = '/workspace/json/showcase' if os.path.exists('/workspace/json/showcase') else 'json/showcase'
 for file in os.listdir(folder):
-    file = os.path.join(folder,file)
-    flow = load_flow_data(file,basic=False,showcase=True)
-    save_workflow(flow,user_id=admin_id)
+    if file.endswith('.json'):
+        file = os.path.join(folder,file)
+        flow = load_flow_data(file,basic=False,showcase=True)
+        save_workflow(flow,user_id=admin_id)
 
 
 print('creating fulltex indexes...')
