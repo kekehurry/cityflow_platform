@@ -9,6 +9,7 @@ from .utils import CodeResult
 import os
 import shutil
 import base64
+import requests
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -167,17 +168,28 @@ class CodeExecutor:
 
             if code_block.files:
                 for file in code_block.files:
-                    file_path = os.path.join(self._work_dir, foldername, file.path)
-                    raw_data = file.data
-                    if raw_data.startswith("data:"):
-                        with open(file_path, "wb") as f:
-                            base64_data = raw_data.split(",")[1]
-                            binary_data = base64.b64decode(base64_data)
-                            f.write(binary_data)
-                    else:
-                        with open(file_path, "w") as f:
-                            f.write(raw_data)
-
+                    try:
+                        file_path = os.path.join(self._work_dir, foldername, file.path)
+                        if file.path not in ['input','output','entrypoint','config']:
+                            if 'base64' in file.data:
+                                with open(file_path, "wb") as f:
+                                    base64_data = file.data.split(",")[1]
+                                    binary_data = base64.b64decode(base64_data)
+                                    f.write(binary_data)
+                            else:
+                                dataserver= os.getenv('NEXT_PUBLIC_DATASET_SERVER')
+                                file_data = requests.get(dataserver+file.data)
+                                if file_data:
+                                    with open(file_path, "wb") as f:
+                                        f.write(file_data.content)
+                            
+                        else:
+                            with open(file_path,"w") as f:
+                                f.write(file.data)
+                    except Exception as e:
+                            print(e)
+                            pass
+            
             command = ["sh", "-c", f"cd {foldername} && timeout {self._timeout} {_cmd(lang)} {filename}"]
             result = self._container.exec_run(command,user=self._user)
             exit_code = result.exit_code

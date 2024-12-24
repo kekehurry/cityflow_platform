@@ -20,6 +20,7 @@ echo "Environment setup..."
 sed -i "s|EXECUTOR_USER=.*|EXECUTOR_USER=$(id -u):$(id -g)|" .env
 sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code/|" .env
 sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
+sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
 sed -i "s/user:.*/user: '$(id -u):$(id -g)'/g" docker-compose.yml
 
 echo "User setup..."

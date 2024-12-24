@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
+from flask import send_file,send_from_directory
 from flask_cors import CORS
+import os
+import base64
 
 from utils.core import check_node_exists
 
@@ -59,7 +62,7 @@ def _search_workflows():
 @app.route('/get_module', methods=['POST'])
 def _get_module():
     id = request.json.get('moduleId')
-    module = get_module_info(id)
+    module = get_module(id)
     return jsonify(module)
 
 @app.route('/search_module', methods=['POST'])
@@ -67,7 +70,7 @@ def _search_modules():
     params = request.json.get('params', {})
     limit = request.json.get('limit', 25)
     ids = search_modules(params,limit)
-    modules = [get_module(id) for id in ids]
+    modules = [get_module_info(id) for id in ids]
     return jsonify(modules)
 
 
@@ -105,6 +108,10 @@ def _get_graph_overview():
     result = get_graph_overview()
     return jsonify(result)
 
+@app.route('/api/dataset/source/<path:path>',methods=['GET'])
+def _get_source_file(path):
+    return send_from_directory(os.getenv('DATABASE_SOURCE_DIR'), path)
+    
 if __name__ == '__main__':
-    app.run(debug=False, port=7575, host='0.0.0.0')
+    app.run(debug=True, port=7575, host='0.0.0.0')
 

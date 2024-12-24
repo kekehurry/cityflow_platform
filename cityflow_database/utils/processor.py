@@ -8,9 +8,11 @@ from .core import (
     add_link
 )
 from .llm import get_embedding  
+from .util import base642file, delete_file
 from hashlib import md5
 import uuid
 import json
+import os
 
 # Author
 def get_author(id):
@@ -89,6 +91,10 @@ def add_module(props):
     return add_node('Module', data)
 
 def delete_module(id):
+    module = get_module(id)
+    if module:
+        icon = module.get('icon')
+        delete_file(icon)
     return delete_node('Module',id)
 
 
@@ -118,7 +124,7 @@ def get_workflow(id):
             config = {k:json.loads(v) for k,v in module.items() if k not in ['base','embeddings']}
             nodes.append({**base, "config":config})
         workflow['nodes'] = nodes
-    return workflow
+        return workflow
 
 def get_workflow_info(id):
     cypher = '''
@@ -159,6 +165,10 @@ def set_workflow(id,props):
     return set_node('Workflow',id,props)
 
 def delete_workflow(id):
+    workflow = get_workflow(id)
+    if workflow:
+        screenshot = workflow.get('screenShot')
+        delete_file(screenshot)
     return delete_node('Workflow',id)
 
 
@@ -167,6 +177,9 @@ def add_workflow(props):
 
 
 def save_workflow(data,user_id):
+
+    source_folder = os.getenv('DATABASE_SOURCE_DIR')
+
     workflow_data = {k:v for k,v in data.items() if k not in ['nodes']}
     workflow_data['nodes'] = [module['id'] for module in data['nodes']]
     name = workflow_data.get('name','')
@@ -180,6 +193,11 @@ def save_workflow(data,user_id):
     previous_id = workflow_data.get('flowId')
     workflow_data['id'] = workflow_id 
     workflow_data['author_id'] = user_id
+    screenshot = workflow_data.get('screenShot') 
+    if screenshot and 'base64' in screenshot:
+        screenshot_path = os.path.join(source_folder,f"images/{workflow_id}.png")
+        workflow_data['screenShot'] = base642file(screenshot_path,screenshot)
+
     # delete existing workflow
     delete_workflow(workflow_id)
     # add track link
@@ -224,8 +242,26 @@ def save_workflow(data,user_id):
         if not name:
             name = uuid.uuid4().hex[:5]
             module['name'] = name
-
         module_id = md5(f"{user_id}/{name}".encode()).hexdigest()
+
+        icon = config.get('icon')
+        if icon:
+            icon_path = os.path.join(source_folder,f"icons/{module_id}.png")
+            icon_data = config['icon']
+            if 'base64' in icon_data:
+                config['icon'] = base642file(icon_path,icon)
+        
+        files = config.get('files',[])
+        file_urls = []
+        for file in files:
+            file_data = file.get('data')
+            file_id = md5(file_data.encode()).hexdigest()
+            file_path = os.path.join(source_folder,f"files/{file_id}")
+            if 'base64' in file_data:
+                file['data'] = base642file(file_path,file_data)
+            file_urls.append(file)
+        config['files'] = file_urls
+
         # save the mapping from old id to new id    
         id_maps[module['id']] = module_id
         # update the module id
