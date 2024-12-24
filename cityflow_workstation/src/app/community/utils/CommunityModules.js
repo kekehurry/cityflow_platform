@@ -9,7 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import theme from '@/theme';
-import { searchModule } from '@/utils/dataset';
+import { searchModule, useSearchModule } from '@/utils/dataset';
 
 const ModuleIcon = ({ manifest }) => {
   const [hover, setHover] = useState(false);
@@ -22,35 +22,18 @@ const ModuleIcon = ({ manifest }) => {
       localModuleList &&
         localModuleList.some(
           (m) =>
-            m.title === manifest.config.title &&
+            m.name === manifest.config.name &&
             m.category === manifest.config.category
         )
     );
   }, []);
 
-  useEffect(() => {
-    let data = localStorage.getItem('cs_flow');
-    data = data ? JSON.parse(data) : {};
-    data.customModules = data.customModules || [];
-    data.customModules = data.customModules.filter(
-      (m) =>
-        !(
-          m.title === manifest.config.title &&
-          m.category === manifest.config.category
-        )
-    );
-    if (isSaved) data.customModules.push(manifest.config);
-    localStorage.setItem('cs_flow', JSON.stringify(data));
-    // Dispatch the custom event to notify the app of the change
-    window.dispatchEvent(new Event('localStorageChange'));
-  }, [isSaved]);
-
   return (
     <Box position="relative">
       <Stack
         key={manifest.id}
-        onDoubleClick={() => {
-          window.location.href = '/flow?module=' + manifest.config.id;
+        onClick={() => {
+          window.location.href = '/flow?module=' + manifest.id;
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
@@ -70,13 +53,13 @@ const ModuleIcon = ({ manifest }) => {
         }}
       >
         <Avatar
-          alt={manifest.config.title}
+          alt={manifest.config.name}
           variant="rounded"
           src={manifest.config.icon}
           sx={{ width: 30, height: 30 }}
         />
         <Typography variant="caption" sx={{ userSelect: 'none' }}>
-          {manifest.config.title}
+          {manifest.config.name}
         </Typography>
         {hover && (
           <Radio
@@ -89,7 +72,6 @@ const ModuleIcon = ({ manifest }) => {
               '& .MuiSvgIcon-root': { fontSize: 10 },
               color: isSaved ? theme.palette.secondary.main : '#424242',
             }}
-            onClick={() => setSaved(!isSaved)}
             checked={isSaved}
           />
         )}
@@ -99,8 +81,8 @@ const ModuleIcon = ({ manifest }) => {
 };
 
 const CommunityModules = () => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const [communityModuleList, setCommunityModuleList] = useState([]);
+  const { data, error, isLoading } = useSearchModule({ custom: true });
 
   const moduleManifest = {
     type: 'expandUI',
@@ -110,29 +92,28 @@ const CommunityModules = () => {
 
   // Fetches custom modules from server
   useEffect(() => {
-    const params = { custom: true };
-    searchModule(params).then((communityModuleList) => {
-      communityModuleList.forEach((config) => {
+    if (data) {
+      data.forEach((config) => {
         config.custom = false;
         config.expand = false;
         config.run = false;
       });
-      const uniqueItems = communityModuleList?.filter(
+      const uniqueItems = data?.filter(
         (item, index, self) =>
-          index === self.findIndex((t) => t.title === item.title)
+          index === self.findIndex((t) => t.name === item.name)
       );
       setCommunityModuleList(uniqueItems);
-    });
-  }, []);
+    }
+  }, [data]);
 
   return (
     <Stack key={'custom'} direction="column" alignItems="left" spacing={1}>
       <ImageList cols={6}>
         {communityModuleList.map((config) => {
-          const id = nanoid();
+          const { id, ...info } = config;
           const newManifest = { ...moduleManifest };
           newManifest.id = id;
-          newManifest.config = { ...config };
+          newManifest.config = { ...info };
           return <ModuleIcon key={id} manifest={newManifest} />;
         })}
       </ImageList>
