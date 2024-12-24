@@ -1,6 +1,6 @@
 'use client';
 import ReactFlow, { Background } from 'reactflow';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   onConnect,
@@ -16,7 +16,8 @@ import { connect } from 'react-redux';
 import FlowPanel from './utils/FlowPanel';
 import PinBoard from './utils/PinBoard';
 import StyledControls from './utils/FlowControl';
-import Header from './utils/Header';
+import FlowHeader from './utils/FlowHeader';
+import Header from '@/components/Header';
 
 // import ContextMenu from './utils/ContextMenu';
 
@@ -37,9 +38,14 @@ import 'reactflow/dist/style.css';
 import { useSearchParams } from 'next/navigation';
 import theme from '@/theme';
 
-import { getWorkflow, getModule } from '@/utils/dataset';
+import {
+  // getWorkflow,
+  // getModule,
+  useGetWorkflow,
+  useGetModule,
+} from '@/utils/dataset';
 import { killExecutor } from '@/utils/executor';
-import { preloadModules } from '@/utils/package';
+import { preloadModules, usePreloadedModules } from '@/utils/package';
 import { setupExecutor } from '@/utils/executor';
 import { nanoid } from 'nanoid';
 
@@ -90,12 +96,17 @@ const FlowStation = (props) => {
   const module = searchParams.get('module');
   const run = searchParams.get('run');
   const pinBoard = searchParams.get('pinBoard');
+  const [initData, setInitData] = useState(null);
+  const workflowData = useGetWorkflow(id || null);
+  const moduleData = useGetModule(module || null);
+
+  const { modules, isLoading, error } = usePreloadedModules();
 
   const initAndRunALL = () => {
     if (props.state.packages == undefined) return;
     const packages = props.state.packages.split('\n');
-    preloadModules().then(() => {
-      // console.log('Initing environment...');
+    // console.log('Initing environment...');
+    modules &&
       setupExecutor(props.state.flowId, packages, props.state.image).then(
         (data) => {
           // console.log('Environment inited');
@@ -103,7 +114,6 @@ const FlowStation = (props) => {
           runAll();
         }
       );
-    });
   };
 
   const initFlow = (flow, instance) => {
@@ -121,51 +131,63 @@ const FlowStation = (props) => {
     instance.setEdges(flow.edges);
   };
 
-  const fetchFlow = (instance) => {
-    if (id) {
-      console.log('fetching workflow', id);
-      getWorkflow(id)
-        .then((data) => {
-          initFlow(data, instance);
-        })
-        .catch((err) => console.log(err));
-    }
-    // fetch module from server
-    else if (module) {
-      getModule(module)
-        .then((moduleData) => {
-          const flow = {
-            id: nanoid(),
-            nodes: [
-              {
-                id: module,
-                type: 'expand',
-                data: {
-                  input: null,
-                  output: null,
-                  module: 'core/builder/index.js',
-                },
-                position: {
-                  x: Math.random() * window.innerWidth * 0.3,
-                  y:
-                    Math.random() * window.innerHeight * 0.4 +
-                    window.innerHeight * 0.1,
-                },
-                config: { ...moduleData },
-              },
-            ],
-            edges: [],
-            viewport: { x: 0, y: 0, zoom: 1 },
-          };
-          initFlow(flow, instance);
-        })
-        .catch((err) => console.log(err));
-    }
+  const precoessModule = (moduleData) => {
+    return {
+      id: nanoid(),
+      nodes: [
+        {
+          id: module,
+          type: 'expand',
+          data: {
+            input: null,
+            output: null,
+            module: 'core/builder/index.js',
+          },
+          position: {
+            x: Math.random() * window.innerWidth * 0.3,
+            y:
+              Math.random() * window.innerHeight * 0.4 +
+              window.innerHeight * 0.1,
+          },
+          config: { ...moduleData },
+        },
+      ],
+      edges: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    };
   };
 
   const panOnDrag = [1, 2];
 
   const flow = (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      onConnect={onConnect}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      proOptions={{ hideAttribution: true }}
+      onContextMenu={(e) => e.preventDefault()}
+      onMove={(e, v) => updateViewPort(v)}
+      onInit={(instance) => {
+        initFlow(initData, instance);
+      }}
+      deleteKeyCode={null}
+      minZoom={0.1}
+      panOnDrag={panOnDrag}
+      selectionOnDrag
+    >
+      <FlowHeader />
+      <PinBoard />
+      {/* <ContextMenu /> */}
+      <StyledControls />
+      <Background />
+    </ReactFlow>
+  );
+
+  const workStation = (
     <div
       id="react-flow"
       style={{
@@ -174,35 +196,35 @@ const FlowStation = (props) => {
         height: '100%',
       }}
     >
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onConnect={onConnect}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        proOptions={{ hideAttribution: true }}
-        onContextMenu={(e) => e.preventDefault()}
-        onMove={(e, v) => updateViewPort(v)}
-        onInit={(instance) => {
-          fetchFlow(instance);
-        }}
-        deleteKeyCode={null}
-        minZoom={0.1}
-        panOnDrag={panOnDrag}
-        selectionOnDrag
-      >
-        <Header />
-        <PinBoard />
-        {/* <ContextMenu /> */}
-        <StyledControls />
-        <Background />
-      </ReactFlow>
+      {!id && !module ? (
+        flow
+      ) : initData ? (
+        flow
+      ) : (
+        <>
+          <Header />
+          <img
+            src="/static/fetching_2xlarge.gif"
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </>
+      )}
     </div>
   );
 
   const flowPanel = <FlowPanel />;
+
+  useEffect(() => {
+    if (workflowData?.data) {
+      setInitData(workflowData.data);
+    }
+    if (moduleData?.data) {
+      setInitData(precoessModule(moduleData.data));
+    }
+  }, [workflowData?.data, moduleData?.data]);
 
   useEffect(() => {
     // initialize the store when the component is unmounted
@@ -213,13 +235,13 @@ const FlowStation = (props) => {
   }, []);
 
   useEffect(() => {
-    if (pinBoard) {
+    if (pinBoard && modules) {
       setMeta({ globalScale: 1 });
       initAndRunALL();
-    } else if (run) {
+    } else if (run && modules) {
       initAndRunALL();
     }
-  }, [run, props.state.packages, pinBoard]);
+  }, [run, props.state.packages, pinBoard, modules]);
 
   return (
     <>
@@ -232,7 +254,7 @@ const FlowStation = (props) => {
         <ResizableDrawer
           direction="horizontal"
           childrenOne={flowPanel}
-          childrenTwo={flow}
+          childrenTwo={workStation}
         />
       </div>
     </>

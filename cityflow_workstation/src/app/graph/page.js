@@ -4,7 +4,7 @@ import SearchList from './utils/SearchList';
 import GraphViewer from './utils/GraphViewer';
 // import SearchList from './utils/SearchList';
 import ResizableDrawer from '@/components/ResizableDrawer';
-import SearchHeader from './utils/SearchHeader';
+import Header from '@/components/Header';
 
 export default function GraphSearch() {
   const [selectedNode, setSelectedNode] = useState(null);
@@ -25,7 +25,7 @@ export default function GraphSearch() {
   );
   return (
     <>
-      <SearchHeader />
+      <Header />
       <div
         style={{
           width: '100vw',

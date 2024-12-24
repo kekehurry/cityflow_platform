@@ -14,10 +14,12 @@ const SearchList = ({
 }) => {
   const [items, setItems] = useState(results || []);
 
-  const handleNodeClick = (e, id, type) => {
+  const handleNodeClick = (e, id, label) => {
     setSelectedNode(id);
-    if (id === selectedNode) {
-      typeof window !== 'undefined' && window.open(`/flow?id=${id}`, '_blank');
+    if (typeof window !== 'undefined' && id === selectedNode) {
+      label === 'Module'
+        ? window.open(`/flow?module=${id}`, '_blank')
+        : window.open(`/flow?id=${id}`, '_blank');
     }
   };
 
@@ -68,7 +70,7 @@ const SearchList = ({
                   borderRadius={2}
                   showInfo={true}
                   titleSize="h6"
-                  onClick={(e) => handleNodeClick(e, item.id)}
+                  onClick={(e) => handleNodeClick(e, item.id, item.label)}
                   selected={selectedNode === item.id}
                 />
               </div>

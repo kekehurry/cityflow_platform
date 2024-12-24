@@ -94,6 +94,17 @@ export const getWorkflow = async (flowId) => {
   }
 };
 
+export const useGetWorkflow = (flowId) => {
+  const { data, error } = useSWR(['/api/dataset/getWorkflow', flowId], () =>
+    getWorkflow(flowId)
+  );
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
+};
+
 export const getModule = async (moduleId) => {
   const api = '/api/dataset/getModule';
   const res = await fetch(basePath + api, {
@@ -108,6 +119,17 @@ export const getModule = async (moduleId) => {
   if (res && res.ok) {
     return await res.json();
   }
+};
+
+export const useGetModule = (moduleId) => {
+  const { data, error } = useSWR(['/api/dataset/getModule', moduleId], () =>
+    getModule(moduleId)
+  );
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
 };
 
 export const searchModule = async (params, limit = 100) => {
@@ -126,6 +148,19 @@ export const searchModule = async (params, limit = 100) => {
   }
 };
 
+export const useSearchModule = (params, limit = 100) => {
+  const { data, error } = useSWR(
+    ['/api/dataset/searchModule', params, limit],
+    () => searchModule(params, limit)
+  );
+
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
+};
+
 export const getAuthor = async (authorId) => {
   const api = '/api/dataset/getAuthor';
   const res = await fetch(basePath + api, {
@@ -140,6 +175,18 @@ export const getAuthor = async (authorId) => {
   if (res && res.ok) {
     return await res.json();
   }
+};
+
+export const useGetAuthor = (authorId) => {
+  const { data, error } = useSWR(['/api/dataset/getAuthor', authorId], () =>
+    getAuthor(authorId)
+  );
+
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
 };
 
 export const deleteWorkflow = async (flowId) => {
@@ -170,6 +217,19 @@ export const fullTextSearch = async (query, limit = 25) => {
   if (res && res.ok) {
     return await res.json();
   }
+};
+
+export const useFullTextSearch = (query, limit = 25) => {
+  const { data, error } = useSWR(
+    ['/api/dataset/fulltextSearch', query, limit],
+    () => fullTextSearch(query, limit)
+  );
+
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
 };
 
 export const semanticSearch = async (query, limit = 5) => {

@@ -36,12 +36,6 @@ export default function ShareCard({
     });
   };
 
-  // useEffect(() => {
-  //   checkNode(id).then((data) => {
-  //     data && setIsVisible(true);
-  //   });
-  // }, []);
-
   return (
     <>
       {isVisible && data && (
