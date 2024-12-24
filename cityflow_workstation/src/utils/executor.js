@@ -1,5 +1,6 @@
 import { initUserId } from './local';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+import useSWR from 'swr';
 
 export const setupExecutor = async (
   flowId,
@@ -92,6 +93,40 @@ with open('output', 'w') as f:
   if (res && res.ok) {
     return await res.json();
   }
+};
+
+export const useExecuteCode = ({
+  flowId,
+  sessionId,
+  moduleCode,
+  files,
+  language,
+  input,
+  config,
+  image,
+}) => {
+  const { data, error } = useSWR(
+    [
+      '/api/executor/execute',
+      { flowId, sessionId, moduleCode, files, language, input, config, image },
+    ],
+    () =>
+      executeCode({
+        flowId,
+        sessionId,
+        moduleCode,
+        files,
+        language,
+        input,
+        config,
+        image,
+      })
+  );
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
 };
 
 export const removeSession = async (flowId, sessionId) => {

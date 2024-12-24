@@ -70,13 +70,17 @@ const ShareBoard = (props) => {
         rfInstance,
         state: { ...res, ...formValue },
       });
-      const flowId = await saveWorkflow(flowData).then((flowId) => {
-        publish ? setPublishing(true) : setSharing(true);
-        return flowId;
-      });
-      if (publish) {
+      const flowId = await saveWorkflow(flowData)
+        .then((flowId) => {
+          publish ? setPublishing(true) : setSharing(true);
+          return flowId;
+        })
+        .finally(() => {
+          publish ? setPublishing(false) : setSharing(false);
+        });
+      if (publish && flowId) {
         window.location.href = `/flow?id=${flowId}&pinBoard=true`;
-      } else {
+      } else if (flowId) {
         window.location.href = `/flow?id=${flowId}`;
       }
       setDialogOpen(false);

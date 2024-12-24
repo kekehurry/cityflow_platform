@@ -4,7 +4,7 @@ import MonacoEditor from '@monaco-editor/react';
 import theme from '@/theme';
 import _ from 'lodash';
 
-import { executeCode, removeSession } from '@/utils/executor';
+import { executeCode, removeSession, useExecuteCode } from '@/utils/executor';
 import ChatBot from './utils/ChatBot';
 import FileUploader from './utils/FileUploader';
 import ControlButtons from './utils/ControlButtons';
@@ -90,6 +90,8 @@ export default function ModuleBuilder(props) {
   };
   const [userId, setUserId] = useState(null);
   const [formValue, setFormValue] = useState({ ...initForm });
+  const [params, setParams] = useState(null);
+  const executeResult = useExecuteCode(params || {});
 
   // init
   useEffect(() => {
@@ -131,35 +133,53 @@ export default function ModuleBuilder(props) {
   }, [formValue.type]);
 
   useEffect(() => {
-    let response;
-    const params = {
-      sessionId: id,
-      flowId: flowId,
-      userName: flowAuthor,
-      moduleCode: formValue.code.module,
-      files: formValue.files,
-      language: formValue.language,
-      input: input,
-      config: config,
-      image: image,
-    };
     if (run && config.type !== 'interface') {
-      setLoading(true);
-      executeCode({ ...params })
-        .then((res) => {
-          response = res;
-          const output = JSON.parse(res.output, null, 2);
-          setOutput({ ...output });
-          setLog(res.console);
-        })
-        .catch((err) => {
-          setLog({ ...response });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      setParams({
+        sessionId: id,
+        flowId: flowId,
+        userName: flowAuthor,
+        moduleCode: formValue.code.module,
+        files: formValue.files,
+        language: formValue.language,
+        input: input,
+        config: config,
+        image: image,
+      });
+      //   setLoading(true);
+      //   executeCode({ ...params })
+      //     .then((res) => {
+      //       response = res;
+      //       const output = JSON.parse(res.output, null, 2);
+      //       setOutput({ ...output });
+      //       setLog(res.console);
+      //     })
+      //     .catch((err) => {
+      //       setLog({ ...response });
+      //     })
+      //     .finally(() => {
+      //       setLoading(false);
+      //     });
     }
   }, [run, input, flowId]);
+
+  useEffect(() => {
+    if (executeResult?.isLoading) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+
+    if (executeResult?.data) {
+      const res = executeResult.data;
+      const output = res?.output && JSON.parse(res.output, null, 2);
+      setOutput({ ...output });
+      setLog(res?.console);
+    }
+
+    if (executeResult?.error) {
+      setLog(executeResult.error);
+    }
+  }, [executeResult?.isLoading, executeResult?.error, executeResult?.data]);
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);

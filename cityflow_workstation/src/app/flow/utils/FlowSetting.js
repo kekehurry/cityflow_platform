@@ -11,7 +11,7 @@ import { LoadingButton } from '@mui/lab';
 import React, { useState, useEffect, useRef } from 'react';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { preloadModules } from '@/utils/package';
+import { preloadModules, usePreloadedModules } from '@/utils/package';
 import { setupExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
@@ -58,6 +58,7 @@ const FlowSettings = (props) => {
   const [loading, setLoading] = useState(false);
   const [initLog, setInitLog] = useState('');
   const [author, setAuthor] = useLocalStorage('author', null);
+  const { modules, isLoading, error } = usePreloadedModules();
   // set flowInited
   const setFlowInited = (value) => {
     setMeta({ flowInited: value });
@@ -70,18 +71,16 @@ const FlowSettings = (props) => {
     setAuthor(formValue.author);
     setLoading(true);
     const packages = formValue.packages.split('\n');
-    setInitLog('Loading modules...');
-    preloadModules().then(() => {
-      setInitLog('Initing environment...');
-      setupExecutor(formValue.flowId, packages, formValue.image)
-        .then((data) => {
-          setInitLog(data.console);
-          setFlowInited(true);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    });
+    modules && setInitLog('initing environment...');
+    setupExecutor(formValue.flowId, packages, formValue.image)
+      .then((data) => {
+        setInitLog(data?.console);
+        setFlowInited(true);
+      })
+      .finally(() => {
+        setLoading(false);
+        setInitLog('');
+      });
   };
 
   const handleFormChange = (event) => {
@@ -152,6 +151,18 @@ const FlowSettings = (props) => {
       packages: props.state?.packages || '',
     });
   }, [props.state?.flowId]);
+
+  useEffect(() => {
+    if (isLoading) {
+      setInitLog('loading modules...');
+    }
+    if (error) {
+      setInitLog('failed to load modules');
+    }
+    if (modules) {
+      setInitLog('modules loaded');
+    }
+  }, [isLoading, error, modules]);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -274,7 +285,7 @@ const FlowSettings = (props) => {
           InputLabelProps={{ shrink: true }}
         />
         <LoadingButton
-          loading={loading}
+          loading={loading || isLoading}
           variant="contained"
           color="primary"
           onClick={hangleSubmit}
