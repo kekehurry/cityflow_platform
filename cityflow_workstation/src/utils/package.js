@@ -1,3 +1,5 @@
+import useSWR from 'swr';
+
 export const mapPackages = {
   react: () => import('react'),
   '@mui/material': () => import('@mui/material'),
@@ -35,4 +37,14 @@ export const preloadModules = async () => {
     }
   }
   return preloadedModules;
+};
+
+export const usePreloadedModules = () => {
+  const { data, error } = useSWR('preloadModules', preloadModules);
+
+  return {
+    modules: data,
+    isLoading: !error && !data,
+    error: error,
+  };
 };

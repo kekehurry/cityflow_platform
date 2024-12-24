@@ -48,7 +48,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   setMeta: (meta) => dispatch(updateMeta(meta)),
 });
 
-const Header = (props) => {
+const FlowHeader = (props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogName, setDialogName] = useState('Share');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -266,4 +266,4 @@ const Header = (props) => {
   );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+export default connect(mapStateToProps, mapDispatchToProps)(FlowHeader);

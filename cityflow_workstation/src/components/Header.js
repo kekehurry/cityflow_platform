@@ -7,7 +7,7 @@ import HomeIcon from '@mui/icons-material/Home';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-const SearchHeader = (props) => {
+const Header = (props) => {
   return (
     <div style={{ position: 'relative' }}>
       <AppBar
@@ -107,4 +107,4 @@ const SearchHeader = (props) => {
   );
 };
 
-export default SearchHeader;
+export default Header;
