@@ -24,7 +24,7 @@ sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|"
 sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
 sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://cityflow_database:7687|" .env
 sed -i "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://cityflow_database:7575|" .env
-sed -i "s|NEXT_PUBLIC_EXECUTOR_SERVER=*|NEXT_PUBLIC_EXECUTOR_SERVER=http://cityflow_executor:8000|" .env
+sed -i "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://cityflow_executor:8000|" .env
 sed -i "s|user:.*|user: '$(id -u):$(id -g)'|g" docker-compose.yml
 
 # change user to current user
@@ -38,4 +38,6 @@ sudo chown -R $(id -u):$(id -g) /var/run/docker.sock
 
 echo "Lunching cityflow..."
 
-docker-compose up -d
+docker-compose pull
+
+docker-compose up

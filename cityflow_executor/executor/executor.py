@@ -190,7 +190,8 @@ class CodeExecutor:
                             print(e)
                             pass
             
-            command = ["sh", "-c", f"cd {os.path.join(self._container.working_dir, foldername)} && timeout {self._timeout} {_cmd(lang)} {filename}"]
+            working_dir = self._container.attrs["Config"]["WorkingDir"]
+            command = ["sh", "-c", f"cd {os.path.join(working_dir, foldername)} && timeout {self._timeout} {_cmd(lang)} {filename}"]
             result = self._container.exec_run(command,user=self._user)
             exit_code = result.exit_code
             output = result.output.decode("utf-8")
