@@ -53,8 +53,9 @@ def get_module(id):
 
 def get_module_info(id):
     node = get_node('Module',id)
-    info_keys = ['name','description','author','icon']
+    info_keys = ['name','description','author','icon','category']
     node_info = {k:node[k] for k in info_keys}
+    node_info['id'] = id
     return node_info
 
 def search_modules( params, limit=25):
@@ -95,6 +96,9 @@ def delete_module(id):
     if module:
         icon = module.get('icon')
         delete_file(icon)
+        files = module.get('files',[])
+        for file in files:
+            delete_file(file['data'])
     return delete_node('Module',id)
 
 

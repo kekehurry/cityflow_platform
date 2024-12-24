@@ -16,7 +16,8 @@ import { connect } from 'react-redux';
 import FlowPanel from './utils/FlowPanel';
 import PinBoard from './utils/PinBoard';
 import StyledControls from './utils/FlowControl';
-import Header from './utils/Header';
+import FlowHeader from './utils/FlowHeader';
+import Header from '@/components/Header';
 
 // import ContextMenu from './utils/ContextMenu';
 
@@ -44,7 +45,7 @@ import {
   useGetModule,
 } from '@/utils/dataset';
 import { killExecutor } from '@/utils/executor';
-import { preloadModules } from '@/utils/package';
+import { preloadModules, usePreloadedModules } from '@/utils/package';
 import { setupExecutor } from '@/utils/executor';
 import { nanoid } from 'nanoid';
 
@@ -99,11 +100,13 @@ const FlowStation = (props) => {
   const workflowData = useGetWorkflow(id || null);
   const moduleData = useGetModule(module || null);
 
+  const { modules, isLoading, error } = usePreloadedModules();
+
   const initAndRunALL = () => {
     if (props.state.packages == undefined) return;
     const packages = props.state.packages.split('\n');
-    preloadModules().then(() => {
-      // console.log('Initing environment...');
+    // console.log('Initing environment...');
+    modules &&
       setupExecutor(props.state.flowId, packages, props.state.image).then(
         (data) => {
           // console.log('Environment inited');
@@ -111,7 +114,6 @@ const FlowStation = (props) => {
           runAll();
         }
       );
-    });
   };
 
   const initFlow = (flow, instance) => {
@@ -158,6 +160,34 @@ const FlowStation = (props) => {
   const panOnDrag = [1, 2];
 
   const flow = (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      onConnect={onConnect}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      proOptions={{ hideAttribution: true }}
+      onContextMenu={(e) => e.preventDefault()}
+      onMove={(e, v) => updateViewPort(v)}
+      onInit={(instance) => {
+        initFlow(initData, instance);
+      }}
+      deleteKeyCode={null}
+      minZoom={0.1}
+      panOnDrag={panOnDrag}
+      selectionOnDrag
+    >
+      <FlowHeader />
+      <PinBoard />
+      {/* <ContextMenu /> */}
+      <StyledControls />
+      <Background />
+    </ReactFlow>
+  );
+
+  const workStation = (
     <div
       id="react-flow"
       style={{
@@ -166,40 +196,21 @@ const FlowStation = (props) => {
         height: '100%',
       }}
     >
-      {initData ? (
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          onConnect={onConnect}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          proOptions={{ hideAttribution: true }}
-          onContextMenu={(e) => e.preventDefault()}
-          onMove={(e, v) => updateViewPort(v)}
-          onInit={(instance) => {
-            initFlow(initData, instance);
-          }}
-          deleteKeyCode={null}
-          minZoom={0.1}
-          panOnDrag={panOnDrag}
-          selectionOnDrag
-        >
-          <Header />
-          <PinBoard />
-          {/* <ContextMenu /> */}
-          <StyledControls />
-          <Background />
-        </ReactFlow>
+      {!id && !module ? (
+        flow
+      ) : initData ? (
+        flow
       ) : (
-        <img
-          src="/static/fetching_large.gif"
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-        />
+        <>
+          <Header />
+          <img
+            src="/static/fetching_2xlarge.gif"
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </>
       )}
     </div>
   );
@@ -224,13 +235,13 @@ const FlowStation = (props) => {
   }, []);
 
   useEffect(() => {
-    if (pinBoard) {
+    if (pinBoard && modules) {
       setMeta({ globalScale: 1 });
       initAndRunALL();
-    } else if (run) {
+    } else if (run && modules) {
       initAndRunALL();
     }
-  }, [run, props.state.packages, pinBoard]);
+  }, [run, props.state.packages, pinBoard, modules]);
 
   return (
     <>
@@ -243,7 +254,7 @@ const FlowStation = (props) => {
         <ResizableDrawer
           direction="horizontal"
           childrenOne={flowPanel}
-          childrenTwo={flow}
+          childrenTwo={workStation}
         />
       </div>
     </>
