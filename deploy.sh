@@ -1,5 +1,9 @@
 #!/bin/bash
 
+DATABASE_HOST='cityflow_database'
+EXECUTOR_HOST='cityflow_executor'
+
+
 echo "Checking dependencies..."
 # Check if gboeing/osmnx image exists, if not, pull it
 if ! docker images | grep -q "gboeing/osmnx"; then
@@ -22,9 +26,9 @@ sed -i "s|EXECUTOR_USER=.*|EXECUTOR_USER=$(id -u):$(id -g)|" .env
 sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code|" .env
 sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
 sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
-sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://cityflow_database:7687|" .env
-sed -i "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://cityflow_database:7575|" .env
-sed -i "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://cityflow_executor:8000|" .env
+sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
+sed -i "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
+sed -i "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
 sed -i "s|user:.*|user: '$(id -u):$(id -g)'|g" docker-compose.yml
 
 # change user to current user
@@ -41,6 +45,6 @@ echo "Lunching cityflow..."
 
 docker-compose pull
 
-docker-compose dowm
+docker-compose down
 
 docker-compose up -d
