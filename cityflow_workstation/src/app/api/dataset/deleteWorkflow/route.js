@@ -11,13 +11,13 @@ export const POST = async (req) => {
   const datasetServer = process.env.NEXT_PUBLIC_DATASET_SERVER;
   try {
     // Parse the request body
-    const { flowId } = await req.json();
+    const { flowId, userId } = await req.json();
 
     // Make a POST request to the dataset server
     const response = await fetch(`${datasetServer}/delete_workflow`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ flowId }),
+      body: JSON.stringify({ flowId, userId }),
     });
 
     if (response.ok) {
@@ -31,10 +31,7 @@ export const POST = async (req) => {
     );
   } catch (error) {
     // console.error('Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 };
 

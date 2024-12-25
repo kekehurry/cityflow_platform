@@ -2,6 +2,7 @@
 import html2canvas from 'html2canvas';
 import FingerprintJS from 'fingerprintjs2';
 import { useState } from 'react';
+import { nanoid } from 'nanoid';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -186,4 +187,65 @@ export const useLocalStorage = (key, defaultValue) => {
   };
 
   return [localValue, setValue];
+};
+
+export const getUserModule = (id) => {
+  const data = localStorage.getItem('cs_flow') || '{}';
+  const cs_data = JSON.parse(data);
+  const userModules = cs_data['userModules'] || [];
+  return userModules.find((item) => item.id === id);
+};
+
+export const saveUserModule = (data) => {
+  const cs_data = JSON.parse(localStorage.getItem('cs_flow') || '{}');
+  let userModules = cs_data['userModules'] || [];
+  const index = userModules.findIndex((item) => item.id === data.id);
+  if (index > -1) {
+    userModules[index] = data;
+  } else {
+    userModules.push(data);
+  }
+  cs_data['userModules'] = userModules;
+  localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+};
+
+export const deleteUserModule = (id) => {
+  const cs_data = JSON.parse(localStorage.getItem('cs_flow') || '{}');
+  let userModules = cs_data['userModules'] || [];
+  userModules = userModules.filter((item) => item.id !== id);
+  cs_data['userModules'] = userModules;
+  localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+};
+
+export const getUserFlow = (id) => {
+  const data = localStorage.getItem('cs_flow') || '{}';
+  const cs_data = JSON.parse(data);
+  const userFlows = cs_data['userFlows'] || [];
+  return userFlows.find((item) => item.id === id);
+};
+
+export const saveUserFlow = async ({ rfInstance, state }) => {
+  const data = await getFlowData({ rfInstance, state });
+  if (!data?.id) {
+    data.id = nanoid();
+  }
+  const cs_data = JSON.parse(localStorage.getItem('cs_flow') || '{}');
+  let userFlows = cs_data['userFlows'] || [];
+  const index = userFlows.findIndex((item) => item.id === data.id);
+  if (index > -1) {
+    userFlows[index] = data;
+  } else {
+    userFlows.push(data);
+  }
+  cs_data['userFlows'] = userFlows;
+  localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+  alert('Your workflow has been saved locally!');
+};
+
+export const deleteUserFlow = async (id) => {
+  const cs_data = JSON.parse(localStorage.getItem('cs_flow') || '{}');
+  let userFlows = cs_data['userFlows'] || [];
+  userFlows = userFlows.filter((item) => item.id !== id);
+  cs_data['userFlows'] = userFlows;
+  localStorage.setItem('cs_flow', JSON.stringify(cs_data));
 };

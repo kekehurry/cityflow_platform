@@ -7,10 +7,11 @@ import {
   Fade,
   IconButton,
 } from '@mui/material';
-import { use, useEffect, useState } from 'react';
+import { useState } from 'react';
 import theme from '@/theme';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { deleteWorkflow } from '@/utils/dataset';
+import { deleteUserFlow } from '@/utils/local';
 
 export default function ShareCard({
   data,
@@ -26,14 +27,20 @@ export default function ShareCard({
   onClick,
   selected,
   edit,
+  local,
 }) {
   const { id, name, author, description, screenShot, label, score } = data;
   const [hover, setHover] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+
   const handleDelete = () => {
-    deleteWorkflow(id).then(() => {
-      setIsVisible(false);
-    });
+    local
+      ? deleteUserFlow(id).then(() => {
+          setIsVisible(false);
+        })
+      : deleteWorkflow(id).then(() => {
+          setIsVisible(false);
+        });
   };
 
   return (

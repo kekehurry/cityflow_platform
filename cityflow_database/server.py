@@ -84,7 +84,13 @@ def _get_author():
 @app.route('/delete_workflow', methods=['POST'])
 def _delete_workflow():
     id = request.json.get('flowId')
-    workflow = delete_workflow(id)
+    user_id = request.json.get('userId')
+    workflow = get_workflow(id)
+    if workflow['author_id'] != user_id:
+        print('Unauthorized Access')
+        return jsonify({'error': 'Unauthorized  Access'}, 500)
+    else:
+        workflow = delete_workflow(id)
     return jsonify(workflow)
 
 

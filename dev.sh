@@ -2,6 +2,10 @@
 
 DATABASE_HOST='127.0.0.1'
 EXECUTOR_HOST='127.0.0.1'
+# UID=$(id -u)
+# GID=$(id -g)
+UID=1000
+GID=1000
 
 # Initialize conda in the current shell session
 eval "$(conda shell.bash hook)"
@@ -47,32 +51,32 @@ echo "Environment setup..."
 
 # Detect OS and set sed command accordingly
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    SED_COMMAND="sed -i ''"
+    SED_COMMAND=""
 else
-    SED_COMMAND="sed -i"
+    SED_COMMAND=
 fi
 
 # modify the .env file
-$SED_COMMAND "s|EXECUTOR_USER=.*|EXECUTOR_USER=$(id -u):$(id -g)|" .env
-$SED_COMMAND "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=${PWD}/cityflow_executor/code|" .env
-$SED_COMMAND "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
-$SED_COMMAND "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
-$SED_COMMAND "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
-$SED_COMMAND "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
-$SED_COMMAND "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
-$SED_COMMAND "s|user:.*|user: '$(id -u):$(id -g)'|g" docker-compose.yml
+sed -i "${SED_COMMAND}" "s|EXECUTOR_USER=.*|EXECUTOR_USER=${UID}:${GID}|" .env
+sed -i "${SED_COMMAND}" "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=${PWD}/cityflow_executor/code|" .env
+sed -i "${SED_COMMAND}" "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
+sed -i "${SED_COMMAND}" "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
+sed -i "${SED_COMMAND}" "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
+sed -i "${SED_COMMAND}" "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
+sed -i "${SED_COMMAND}" "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
+sed -i "${SED_COMMAND}" "s|user:.*|user: '${UID}:${GID}'|g" docker-compose.yml
 
 # copy the .env file to the cityflow_workstation
-cp .env cityflow_workstation/.env
+echo "copy .env file"
+cp .env "${PWD}/cityflow_workstation/.env"
 
 # change user to current user
 echo "User setup..."
-sudo usermod -aG docker $USER
 
 # change the owner of the cityflow_database and cityflow_executor
-sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_database/data
-sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_executor/code
-sudo chown -R $(id -u):$(id -g) /var/run/docker.sock
+sudo chown -R ${UID}:${GID} ${PWD}/cityflow_database/data
+sudo chown -R ${UID}:${GID} ${PWD}/cityflow_executor/code
+sudo chown -R ${UID}:${GID} /var/run/docker.sock
 
 # echo "Lunching cityflow..."
 
