@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -15,7 +15,7 @@ import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { searchWorkflow, getAuthor, useSearchWorkflow } from '@/utils/dataset';
+import { getAuthor, useSearchWorkflow } from '@/utils/dataset';
 import { initUserId, useLocalStorage } from '@/utils/local';
 
 const mapStateToProps = (state, ownProps) => {
@@ -33,13 +33,16 @@ const UserPage = () => {
   const [flowLoading, setFlowLoading] = useState(false);
   const [edit, setEdit] = useState(false);
   const [items, setItems] = useState([]);
+
   const [displayName, setDisplayName] = useState('');
   const [author, setAuthor] = useLocalStorage('author', null);
+
   const [authorId, setAuthorId] = useState(null);
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [userId, setUserId] = useState(null);
   const { data, error, isLoading } = useSearchWorkflow({ author_id: authorId });
+  const [userFlows, setUserFlows] = useLocalStorage('userFlows', []);
   const basicData = useSearchWorkflow({ tutorial: true });
 
   useEffect(() => {
@@ -74,8 +77,9 @@ const UserPage = () => {
       }
     }
     if (isLoading) {
+      const length = Math.max(4 - userFlows?.length || 0, 0);
       setItems(
-        Array.from({ length: 4 }, (_, i) => i + 1).map((i) => {
+        Array.from({ length: length }, (_, i) => i + 1).map((i) => {
           return {
             id: i,
             name: '',

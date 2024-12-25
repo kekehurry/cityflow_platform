@@ -41,7 +41,7 @@ export default function ControlButtons({ setConfig, config, formValue }) {
       basic: false,
     };
     window.dispatchEvent(
-      new CustomEvent('localStorageChange', { detail: newManifest })
+      new CustomEvent('localModulesChange', { detail: newManifest })
     );
   };
 

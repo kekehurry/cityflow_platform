@@ -131,19 +131,22 @@ export const ModuleList = (props) => {
   }, [userModules, basicModules]);
 
   useEffect(() => {
-    const saveModuleToLocalStorage = (e) => {
-      const newModule = e.detail;
-      const newModules = [...userModules, newModule];
+    const saveUserModule = (e) => {
+      const data = e.detail;
+      let newModules = userModules;
+      const index = userModules.findIndex((item) => item.id === data.id);
+      if (index > -1) {
+        newModules[index] = data;
+      } else {
+        newModules.push(data);
+      }
       setUserModules(newModules);
     };
-    window.addEventListener('localStorageChange', saveModuleToLocalStorage);
+    window.addEventListener('localModulesChange', saveUserModule);
     return () => {
-      window.removeEventListener(
-        'localStorageChange',
-        saveModuleToLocalStorage
-      );
+      window.removeEventListener('locaModulesChange', saveUserModule);
     };
-  }, [userModules]);
+  }, []);
 
   return (
     <Box id="ModulePanel" hidden={tab !== 1}>

@@ -1,6 +1,6 @@
 'use client';
 import ReactFlow, { Background } from 'reactflow';
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 
 import {
   onConnect,
@@ -38,15 +38,11 @@ import 'reactflow/dist/style.css';
 import { useSearchParams } from 'next/navigation';
 import theme from '@/theme';
 
-import {
-  // getWorkflow,
-  // getModule,
-  useGetWorkflow,
-  useGetModule,
-} from '@/utils/dataset';
+import { useGetWorkflow, useGetModule } from '@/utils/dataset';
 import { killExecutor } from '@/utils/executor';
-import { preloadModules, usePreloadedModules } from '@/utils/package';
+import { usePreloadedModules } from '@/utils/package';
 import { setupExecutor } from '@/utils/executor';
+import { getUserFlow } from '@/utils/local';
 import { nanoid } from 'nanoid';
 
 const mapStateToProps = (state, ownProps) => {
@@ -95,8 +91,10 @@ const FlowStation = (props) => {
   const id = searchParams.get('id');
   const module = searchParams.get('module');
   const run = searchParams.get('run');
+  const local = searchParams.get('local');
   const pinBoard = searchParams.get('pinBoard');
   const [initData, setInitData] = useState(null);
+  const [localFlowData, setLocalFlowData] = useState(null);
   const workflowData = useGetWorkflow(id || null);
   const moduleData = useGetModule(module || null);
 
@@ -218,13 +216,24 @@ const FlowStation = (props) => {
   const flowPanel = <FlowPanel />;
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const flowData = getUserFlow(id);
+      console.log(flowData);
+      setLocalFlowData(flowData);
+    }
+  }, []);
+
+  useEffect(() => {
     if (workflowData?.data) {
       setInitData(workflowData.data);
     }
     if (moduleData?.data) {
       setInitData(precoessModule(moduleData.data));
     }
-  }, [workflowData?.data, moduleData?.data]);
+    if (localFlowData) {
+      setInitData(localFlowData);
+    }
+  }, [workflowData?.data, moduleData?.data, localFlowData]);
 
   useEffect(() => {
     // initialize the store when the component is unmounted

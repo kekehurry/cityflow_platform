@@ -11,7 +11,7 @@ services:
       - '7474:7474'
       - '7687:7687'
       - '7575:7575'
-    user: '1000:1000'
+    user: '501:1000'
     volumes:
       - ./cityflow_database/data:/data
       - ./cityflow_database/source:/workspace/source
@@ -32,7 +32,7 @@ services:
     image: ghcr.io/kekehurry/cityflow_executor:latest
     ports:
       - '8000:8000'
-    user: '1000:1000'
+    user: '501:1000'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./cityflow_executor/code:/workspace/code
@@ -53,7 +53,7 @@ services:
     image: ghcr.io/kekehurry/cityflow_workstation:latest
     ports:
       - '3000:3000'
-    user: '1000:1000'
+    user: '501:1000'
     env_file:
       - .env
     privileged: true
