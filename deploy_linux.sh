@@ -33,6 +33,7 @@ sudo usermod -aG docker $USER
 
 # change the owner of the cityflow_database and cityflow_executor
 sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_database/data
+sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_database/source
 sudo chown -R $(id -u):$(id -g) ${PWD}/cityflow_executor/code
 sudo chown -R $(id -u):$(id -g) /var/run/docker.sock
 
@@ -40,4 +41,6 @@ echo "Lunching cityflow..."
 
 docker-compose pull
 
-docker-compose up
+docker-compose dowm
+
+docker-compose up -d
