@@ -2,9 +2,15 @@ from utils.processor import *
 from utils.core import *
 from utils.llm import *
 from hashlib import md5
+import os
 
 
 print('Initializing database...')
+
+source_dir = os.getenv('DATABASE_SOURCE_DIR')
+for folder in ['files','icons','images']:
+    if not os.path.exists(os.path.join(source_dir,folder)): 
+        os.makedirs(os.path.join(source_dir,folder))
 
 init_db()
 admin_passkey = 'admin/kai'

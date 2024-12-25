@@ -5,6 +5,34 @@
   "prettier.semi": true,
   "prettier.tabWidth": 2,
   "prettier.trailingComma": "es5",
+  "remote.forwardOnOpen": true,
+  "remote.SSH.defaultForwardedPorts": [
+    {
+      "remotePort": 3000,
+      "localPort": 3000,
+      "label": "CityFlow WorkStation"
+    },
+    {
+      "remotePort": 8000,
+      "localPort": 8000,
+      "label": "CityFlow Executor"
+    },
+    {
+      "remotePort": 7575,
+      "localPort": 7575,
+      "label": "CityFlow Database"
+    },
+    {
+      "remotePort": 7474,
+      "localPort": 7474,
+      "label": "Neo4J Browser"
+    },
+    {
+      "remotePort": 7687,
+      "localPort": 7687,
+      "label": "Neo4J Database"
+    }
+  ],
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
