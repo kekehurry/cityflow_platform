@@ -14,6 +14,7 @@ services:
     user: '1000:1000'
     volumes:
       - ./cityflow_database/data:/data
+      - ./cityflow_database/source:/workspace/source
     env_file:
       - .env
     privileged: true

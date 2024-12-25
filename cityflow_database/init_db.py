@@ -7,7 +7,7 @@ import os
 
 print('Initializing database...')
 
-source_dir = os.getenv('DATABASE_SOURCE_DIR')
+source_dir = '/workspace/source' if os.path.exists('/workspace/source') else 'source'
 for folder in ['files','icons','images']:
     if not os.path.exists(os.path.join(source_dir,folder)): 
         os.makedirs(os.path.join(source_dir,folder))
