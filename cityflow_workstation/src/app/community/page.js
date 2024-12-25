@@ -135,7 +135,7 @@ const Community = () => {
                   {flowLoading ? (
                     <CircularProgress size={20} sx={{ color: '#fff' }} />
                   ) : (
-                    'Get Start'
+                    'Get Started'
                   )}
                 </Button>
               </Link>

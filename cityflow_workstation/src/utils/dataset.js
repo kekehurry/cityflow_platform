@@ -1,5 +1,6 @@
 import useSWR from 'swr';
 import { initUserId } from './local';
+import user from '@/app/author/user';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -191,12 +192,13 @@ export const useGetAuthor = (authorId) => {
 
 export const deleteWorkflow = async (flowId) => {
   const api = '/api/dataset/deleteWorkflow';
+  const userId = await initUserId();
   return fetch(basePath + api, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ flowId }),
+    body: JSON.stringify({ flowId, userId }),
   }).catch((error) => {
     console.error('Error:', error);
   });

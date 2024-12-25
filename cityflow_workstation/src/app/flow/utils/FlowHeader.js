@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import DownloadIcon from '@mui/icons-material/Download';
 import { useReactFlow } from 'reactflow';
 import { upload } from '@/utils/local';
 import ShareBoard from './ShareBoard';
@@ -29,6 +30,8 @@ import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 import { preloadModules } from '@/utils/package';
 import { setupExecutor, killExecutor } from '@/utils/executor';
+import { saveUserFlow } from '@/utils/local';
+import { saveWorkflow } from '@/utils/dataset';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -93,6 +96,13 @@ const FlowHeader = (props) => {
   const actions = [
     {
       icon: <SaveIcon />,
+      name: 'Save',
+      onClick: () => {
+        saveUserFlow({ rfInstance, state: props.state });
+      },
+    },
+    {
+      icon: <DownloadIcon />,
       name: 'Download',
       onClick: () => {
         setDialogOpen(true);
