@@ -5,7 +5,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Type, Union
 class File(BaseModel):
     """(Experimental) A class that represents a file."""
     path: str = Field(description="The path of the file.")
-    data: str = Field(description="The content of the file.")
+    data: Optional[str] = Field(description="The content of the file.")
 
 class CodeBlock(BaseModel):
     """(Experimental) A class that represents a code block."""
