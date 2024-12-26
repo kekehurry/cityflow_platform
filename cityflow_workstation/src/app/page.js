@@ -11,6 +11,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 const Home = () => {
   const [flowLoading, setFlowLoading] = useState(false);
+  const [authorLoading, setAuthorLoading] = useState(false);
   const [communityLoading, setCommunityLoading] = useState(false);
   return (
     <>
@@ -64,7 +65,23 @@ const Home = () => {
                   {flowLoading ? (
                     <CircularProgress size={20} sx={{ color: '#fff' }} />
                   ) : (
-                    'Get Start'
+                    'Get Started'
+                  )}
+                </Button>
+              </Link>
+              <Link href="/author" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => {
+                    setAuthorLoading(true);
+                  }}
+                  sx={{ width: 150, height: 35, borderRadius: 10 }}
+                >
+                  {authorLoading ? (
+                    <CircularProgress size={20} sx={{ color: '#fff' }} />
+                  ) : (
+                    'Home Page'
                   )}
                 </Button>
               </Link>
