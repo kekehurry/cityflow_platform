@@ -23,26 +23,19 @@ docker network ls | grep -q cityflow || docker network create cityflow
 
 echo "Environment setup..."
 
-# Detect OS and set sed command accordingly
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    SED_COMMAND=""
-else
-    SED_COMMAND=
-fi
-
 # modify the .env file
-sed -i "${SED_COMMAND}" "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
-sed -i "${SED_COMMAND}" "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code|" .env
-sed -i "${SED_COMMAND}" "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
-sed -i "${SED_COMMAND}" "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=/workspace/source|" .env
-sed -i "${SED_COMMAND}" "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
-sed -i "${SED_COMMAND}" "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
-sed -i "${SED_COMMAND}" "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
-sed -i "${SED_COMMAND}" "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
+sed -i "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
+sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code|" .env
+sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
+sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=/workspace/source|" .env
+sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
+sed -i "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
+sed -i "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
+sed -i "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
 
 
 if [[ ! " $@ " =~ " --beian " ]]; then
-  sed -i "${SED_COMMAND}" "s|BEIAN=.*|BEIAN=|" .env
+  sed -i "s|BEIAN=.*|BEIAN=|" .env
 fi
 
 # change user to current user
