@@ -8,7 +8,7 @@ export const GET = async () => {
   dotenv.config({ path: envPath });
 
   // Get environment variables
-  const datasetServer = process.env.NEXT_PUBLIC_DATASET_SERVER;
+  const datasetServer = process.env.DATASET_SERVER;
   try {
     const response = await fetch(`${datasetServer}/get_graph_overview`);
 

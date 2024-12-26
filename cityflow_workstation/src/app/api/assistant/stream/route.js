@@ -8,9 +8,9 @@ export const POST = async (req) => {
   dotenv.config({ path: envPath });
 
   // Get environment variables
-  const BASE_URL = process.env.NEXT_PUBLIC_LLM_BASE_URL;
-  const API_KEY = process.env.NEXT_PUBLIC_LLM_API_KEY;
-  const LLM_MODEL = process.env.NEXT_PUBLIC_LLM_MODEL;
+  const BASE_URL = process.env.LLM_BASE_URL;
+  const API_KEY = process.env.LLM_API_KEY;
+  const LLM_MODEL = process.env.LLM_MODEL;
 
   try {
     // Parse the request body

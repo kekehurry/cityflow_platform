@@ -4,9 +4,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-base_url = os.getenv('NEXT_PUBLIC_LLM_BASE_URL')
-api_key = os.getenv('NEXT_PUBLIC_LLM_API_KEY')
-embedding_model = os.getenv('NEXT_PUBLIC_EMBEDDING_MODEL')
+base_url = os.getenv('LLM_BASE_URL')
+api_key = os.getenv('LLM_API_KEY')
+embedding_model = os.getenv('EMBEDDING_MODEL')
 
 def get_embedding(text,base_url=base_url,api_key=api_key, embedding_model=embedding_model):
     url = base_url + '/embeddings'

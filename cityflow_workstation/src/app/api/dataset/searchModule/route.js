@@ -8,7 +8,7 @@ export const POST = async (req) => {
   dotenv.config({ path: envPath });
 
   // Get environment variables
-  const datasetServer = process.env.NEXT_PUBLIC_DATASET_SERVER;
+  const datasetServer = process.env.DATASET_SERVER;
   const { params, limit = 100 } = await req.json();
 
   try {

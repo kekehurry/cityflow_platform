@@ -8,7 +8,7 @@ export const POST = async (req) => {
   dotenv.config({ path: envPath });
 
   // Get environment variables
-  const executorServer = process.env.NEXT_PUBLIC_EXECUTOR_SERVER;
+  const executorServer = process.env.EXECUTOR_SERVER;
   try {
     // Parse the request body
     const { flowId, userId, image } = await req.json();
