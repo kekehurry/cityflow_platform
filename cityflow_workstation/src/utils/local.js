@@ -27,7 +27,7 @@ export const initUserId = async () => {
 
 //get core modules
 export const getCoreModuleList = async () => {
-  const moduleList = await fetch(basePath + '/api/module/getModuleList')
+  const moduleList = await fetch(basePath + '/api/local/getModuleList')
     .then((res) => res.json())
     .then((data) => data.moduleList);
   return moduleList;
@@ -248,4 +248,12 @@ export const deleteUserFlow = async (id) => {
   userFlows = userFlows.filter((item) => item.id !== id);
   cs_data['userFlows'] = userFlows;
   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+};
+
+// only for server in China
+export const getBeiAn = async () => {
+  const beiAn = await fetch(basePath + '/api/local/getBeiAn').then((res) =>
+    res.json()
+  );
+  return beiAn;
 };

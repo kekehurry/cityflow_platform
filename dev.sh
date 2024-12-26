@@ -2,15 +2,13 @@
 
 DATABASE_HOST='127.0.0.1'
 EXECUTOR_HOST='127.0.0.1'
-# UID=$(id -u)
-# GID=$(id -g)
-UID=1000
-GID=1000
+PUID=$(id -u)
+PGID=$(id -g)
 
 # Initialize conda in the current shell session
+echo "Activating conda environment..."
 eval "$(conda shell.bash hook)"
 conda activate cityflow
-
 
 echo "Checking dependencies..."
 
@@ -57,26 +55,32 @@ else
 fi
 
 # modify the .env file
-sed -i "${SED_COMMAND}" "s|EXECUTOR_USER=.*|EXECUTOR_USER=${UID}:${GID}|" .env
+sed -i "${SED_COMMAND}" "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
 sed -i "${SED_COMMAND}" "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=${PWD}/cityflow_executor/code|" .env
 sed -i "${SED_COMMAND}" "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
 sed -i "${SED_COMMAND}" "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
 sed -i "${SED_COMMAND}" "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
 sed -i "${SED_COMMAND}" "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
 sed -i "${SED_COMMAND}" "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
-sed -i "${SED_COMMAND}" "s|user:.*|user: '${UID}:${GID}'|g" docker-compose.yml
+sed -i "${SED_COMMAND}" "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
+
+
+if [[ ! " $@ " =~ " --beian " ]]; then
+  sed -i "${SED_COMMAND}" "s|BEIAN=.*|BEIAN=|" .env
+fi
+
 
 # copy the .env file to the cityflow_workstation
 echo "copy .env file"
-cp .env "${PWD}/cityflow_workstation/.env"
+cp .env "${PWD}/cityflow_workstation/.env.local"
 
 # change user to current user
 echo "User setup..."
 
 # change the owner of the cityflow_database and cityflow_executor
-sudo chown -R ${UID}:${GID} ${PWD}/cityflow_database/data
-sudo chown -R ${UID}:${GID} ${PWD}/cityflow_executor/code
-sudo chown -R ${UID}:${GID} /var/run/docker.sock
+sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/data
+sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_executor/code
+sudo chown -R ${PUID}:${PGID} /var/run/docker.sock
 
 # echo "Lunching cityflow..."
 
