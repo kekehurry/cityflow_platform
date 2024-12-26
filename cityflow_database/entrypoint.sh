@@ -10,7 +10,7 @@ done
 # Run the Python script
 
 if [ "$INIT_DATABASE" ]; then
-  python init_db.py
+  python3 init_db.py
 fi
 
 python3 /workspace/server.py
