@@ -13,6 +13,8 @@ import requests
 from dotenv import load_dotenv
 load_dotenv()
 
+dataserver= os.getenv('DATASET_SERVER')
+
 def _wait_for_ready(container: Any, timeout: int = 60, stop_time: float = 0.1) -> None:
     elapsed_time = 0.0
     while container.status != "running" and elapsed_time < timeout:
@@ -177,7 +179,6 @@ class CodeExecutor:
                                     binary_data = base64.b64decode(base64_data)
                                     f.write(binary_data)
                             else:
-                                dataserver= os.getenv('NEXT_PUBLIC_DATASET_SERVER')
                                 file_data = requests.get(dataserver+file.data)
                                 if file_data:
                                     with open(file_path, "wb") as f:
