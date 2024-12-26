@@ -159,11 +159,11 @@ const Community = () => {
           </Stack>
           <CommunityShowcase />
         </Stack>
-        <Footer />
+        <Footer showBeiAn={!scrolled} />
         <IconButton
           sx={{
             position: 'absolute',
-            bottom: scrolled ? '-95%' : -15,
+            bottom: scrolled ? '-85%' : -15,
             left: '50%',
             transform: 'translate(-50%, -50%)',
           }}
@@ -176,17 +176,18 @@ const Community = () => {
             });
           }}
         >
-          {scrolled ? (
-            <KeyboardArrowUpIcon sx={{ fontSize: 20 }} />
-          ) : (
-            <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
-          )}
+          {
+            scrolled && <KeyboardArrowUpIcon sx={{ fontSize: 20 }} />
+            // : (
+            //   <KeyboardArrowDownIcon sx={{ fontSize: 20 }} />
+            // )
+          }
         </IconButton>
       </Box>
       <Box
         sx={{
           width: '100vw',
-          height: '95vh',
+          height: '85vh',
           p: 10,
           pt: 0,
           overflow: 'auto',

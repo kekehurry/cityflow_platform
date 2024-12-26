@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getAuthor, useSearchWorkflow } from '@/utils/dataset';
 import { initUserId, useLocalStorage } from '@/utils/local';
+import Footer from '@/components/Footer';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -195,6 +196,17 @@ const UserPage = () => {
           </Stack>
         </Stack>
         <UserFlows items={items} edit={edit} />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 40,
+            width: '90%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <Footer />
+        </Box>
       </Box>
     </>
   );
