@@ -48,8 +48,13 @@ sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/source
 sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_executor/code
 sudo chown -R ${PUID}:${PGID} /var/run/docker.sock
 
-echo "Lunching cityflow..."
 
+echo "Removing dangling images..."
+# remove dangling images
+docker rmi $(docker images --filter "dangling=true" -q)
+
+
+echo "Lunching cityflow..."
 docker-compose pull
 
 docker-compose down
