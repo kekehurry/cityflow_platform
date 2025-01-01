@@ -1,0 +1,38 @@
+name: Deploy to CityFlow MIT Server
+
+on:
+  workflow_run:
+    workflows:
+      - Build and Push to GHCR
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    - name: Add server to known_hosts
+      run: |
+        if ! ssh-keygen -F cityflow.media.mit.edu > /dev/null; then
+          ssh-keyscan -H cityflow.media.mit.edu >> ~/.ssh/known_hosts
+        fi
+
+    - name: SSH into server
+      run: |
+        ssh jiajie@cityflow.media.mit.edu << 'EOF'
+        cd ~/cityflow_platform
+        git checkout -f
+        git pull origin main
+        chmod +x ./deploy.sh
+        ./deploy.sh
+        EOF

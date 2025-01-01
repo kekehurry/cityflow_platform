@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import { getMapboxToken } from './local';
 
 export const mapPackages = {
   react: () => import('react'),
@@ -25,7 +26,7 @@ export const mapPackages = {
   '@react-three/drei': () => import('@react-three/drei'),
   '@react-three/fiber': () => import('@react-three/fiber'),
   '@react-three/rapier': () => import('@react-three/rapier'),
-  constants: () => ({ mapboxToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN }),
+  constants: async () => ({ mapboxToken: await getMapboxToken() }),
 };
 
 export const preloadModules = async () => {

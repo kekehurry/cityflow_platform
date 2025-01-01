@@ -64,7 +64,7 @@ export default function Footer({ showBeiAn = true }) {
           </a>
           <Divider orientation="vertical" flexItem />
           <a
-            href="https://www.media.mit.edu/people/kaihu/overview/"
+            href="http://arhukai.com/"
             style={{
               color: theme.palette.text.secondary,
               textDecoration: 'none',

@@ -251,6 +251,14 @@ export const deleteUserFlow = async (id) => {
 };
 
 // only for server in China
+export const getMapboxToken = async () => {
+  const mapboxToken = await fetch(basePath + '/api/local/getMapboxToken').then(
+    (res) => res.json()
+  );
+  return mapboxToken;
+};
+
+// only for server in China
 export const getBeiAn = async () => {
   const beiAn = await fetch(basePath + '/api/local/getBeiAn').then((res) =>
     res.json()
