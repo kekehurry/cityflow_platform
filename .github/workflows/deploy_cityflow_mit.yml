@@ -1,4 +1,4 @@
-name: Deploy to CityFlow Server
+name: Deploy to CityFlow MIT Server
 
 on:
   workflow_run:
