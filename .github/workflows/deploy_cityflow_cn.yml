@@ -23,8 +23,8 @@ jobs:
 
     - name: Add server to known_hosts
       run: |
-        if ! ssh-keygen -F cityflow.cn > /dev/null; then
-          ssh-keyscan -H cityflow.cn >> ~/.ssh/known_hosts
+        if ! ssh-keygen -F 8.138.167.208 > /dev/null; then
+          ssh-keyscan -H 8.138.167.208 >> ~/.ssh/known_hosts
         fi
 
     - name: SSH into server
