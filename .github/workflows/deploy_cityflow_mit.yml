@@ -1,4 +1,4 @@
-name: Deploy to CityFlow MIT Server
+name: Deploy to CityFlow Server
 
 on:
   workflow_run:
@@ -23,13 +23,13 @@ jobs:
 
     - name: Add server to known_hosts
       run: |
-        if ! ssh-keygen -F cityflow.media.mit.edu > /dev/null; then
-          ssh-keyscan -H cityflow.media.mit.edu >> ~/.ssh/known_hosts
+        if ! ssh-keygen -F ${{ secrets.SSH_HOST_NAME }} > /dev/null; then
+          ssh-keyscan -H ${{ secrets.SSH_HOST_NAME }} >> ~/.ssh/known_hosts
         fi
 
     - name: SSH into server
       run: |
-        ssh jiajie@cityflow.media.mit.edu << 'EOF'
+        ssh {{ secrets.SSH_USER_NAME }}@${{ secrets.SSH_HOST_NAME }} << 'EOF'
         cd ~/cityflow_platform
         git checkout -f
         git pull origin main
