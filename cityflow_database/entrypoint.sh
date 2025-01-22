@@ -13,4 +13,4 @@ if [ "$INIT_DATABASE" ]; then
   python3 init_db.py
 fi
 
-python3 /workspace/server.py
+python3 /cityflow_workstation/server.py

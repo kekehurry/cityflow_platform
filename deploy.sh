@@ -1,9 +1,9 @@
 #!/bin/bash
 
-DATABASE_HOST='cityflow_database'
-EXECUTOR_HOST='cityflow_executor'
-PUID=$(id -u)
-PGID=$(id -g)
+DATABASE_HOST='127.0.0.1'
+EXECUTOR_HOST='127.0.0.1'
+PUID=501
+PGID=20
 
 
 echo "Checking dependencies..."
@@ -24,30 +24,37 @@ docker network ls | grep -q cityflow || docker network create cityflow
 echo "Environment setup..."
 
 # modify the .env file
-sed -i "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
-sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/workspace/code|" .env
-sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
-sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=/workspace/source|" .env
-sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
-sed -i "s|DATASET_SERVER=.*|DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
-sed -i "s|EXECUTOR_SERVER=.*|EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
-sed -i "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
+sed -i '' "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
+sed -i '' "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/cityflow_executor/code|" .env
+sed -i '' "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
+sed -i '' "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=/cityflow_database/source|" .env
+sed -i '' "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
+sed -i '' "s|DATASET_SERVER=.*|DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
+sed -i '' "s|EXECUTOR_SERVER=.*|EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
+
+# sed -i "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
 
 
 if [[ ! " $@ " =~ " --beian " ]]; then
-  sed -i "s|BEIAN=.*|BEIAN=|" .env
+  sed -i '' "s|BEIAN=.*|BEIAN=|" .env
 fi
 
 # change user to current user
 echo "User setup..."
-sudo usermod -aG docker $USER
+# sudo usermod -aG docker $USER
 
 # change the owner of the cityflow_database and cityflow_executor
-sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/data
-sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/source
-sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_executor/code
-sudo chown -R ${PUID}:${PGID} /var/run/docker.sock
+chown -R ${PUID}:${PGID} ${PWD}/cityflow_executor/code
+chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/source
+chown -R neo4j:neo4j ${PWD}/cityflow_database/data
+chown -R ${PUID}:${PGID} ${PWD}/start-services.sh
+chown -R ${PUID}:${PGID} /var/run/docker.sock
 
+
+# Fix typo in chmod and ensure script is executable
+chmod +x ./start-services.sh
+# Change file permissions to be readable and executable by all users
+chmod 755 ./start-services.sh
 
 echo "Removing dangling images..."
 
@@ -65,8 +72,18 @@ fi
 
 
 echo "Lunching cityflow..."
-docker-compose pull
 
-docker-compose down
-
-docker-compose up -d
+docker run -it --rm\
+  -p 3000:3000 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v ./cityflow_executor/code:/cityflow_executor/code \
+  -v ./cityflow_database/data:/data \
+  -v ./cityflow_database/source:/cityflow_database/source \
+  -v ./start-services.sh:/usr/local/bin/start-services.sh \
+  -e CITYFLOW_PASSWD=cityflow \
+  -e PUID=${PUID} \
+  -e PGID=${PGID} \
+  --user ${PUID}:${PGID} \
+  --env-file ./.env \
+  --name=cityfow_platform \
+  cityflow-platform:latest

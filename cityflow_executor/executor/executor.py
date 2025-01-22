@@ -27,9 +27,9 @@ def _wait_for_ready(container: Any, timeout: int = 60, stop_time: float = 0.1) -
     
 def _cmd(lang: str) -> str:
     if lang == "python":
-        return "python"
+        return "python /cityflow_runner/execute.py"
     elif lang == "javascript":
-        return "node"
+        return "node /cityflow_runner/execute.js"
     else:
         raise ValueError(f"Unsupported language {lang}")
     
@@ -44,10 +44,10 @@ def _pm(lang: str) -> str:
 class CodeExecutor: 
     DEFAULT_EXECUTION_POLICY: ClassVar[Dict[str, bool]] = {
         "python": True,
-        "javascript": False,
+        "javascript": True,
     }
     def __init__(self, 
-                image: str = "python:3-slim", 
+                image: str = "cityflow-runner:latest", 
                 container_name = None,
                 timeout: int = 60,
                 auto_remove: bool = True,
@@ -66,7 +66,8 @@ class CodeExecutor:
         self._auto_remove = auto_remove
         self._bind_dir = os.path.join(os.getenv("EXECUTOR_BIND_DIR", bind_dir),container_name)
         self._work_dir = os.path.join(os.getenv("EXECUTOR_WORK_DIR", work_dir), container_name)
-        self._user = os.getenv("EXECUTOR_USER", "1000")
+        self._user = os.getenv("EXECUTOR_USER", "1000:1000")
+        print("docker user",self._user)
         self._stop_container = stop_container  
         self._mem_limit = os.getenv("EXECUTOR_MEMORY_LIMIT",memory_limit)
         self._last_update_time = time.time()
@@ -98,8 +99,7 @@ class CodeExecutor:
                 entrypoint="/bin/sh",
                 tty=True,
                 auto_remove=self._auto_remove,
-                volumes={self._bind_dir: {"bind": "/workspace", "mode": "rw"}},
-                working_dir="/workspace",
+                volumes={self._bind_dir: {"bind": "/cityflow_runner/workflow", "mode": "rw"}},
                 mem_limit=self._mem_limit,
                 network="cityflow",
                 user=self._user
@@ -133,7 +133,7 @@ class CodeExecutor:
         for package in packages:
             if package:
                 pm = _pm(lang)
-                result = self._container.exec_run([_pm(lang), "install", package, "--root-user-action=ignore"])
+                result = self._container.exec_run([_pm(lang), "install", package])
                 exit_code = result.exit_code
                 output = result.output.decode("utf-8")
                 console_outputs.append(output)
@@ -191,8 +191,10 @@ class CodeExecutor:
                             print(e)
                             pass
             
-            working_dir = self._container.attrs["Config"]["WorkingDir"]
-            command = ["sh", "-c", f"cd {os.path.join(working_dir, foldername)} && timeout {self._timeout} {_cmd(lang)} {filename}"]
+            runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
+            runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
+            command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
+            
             result = self._container.exec_run(command,user=self._user)
             exit_code = result.exit_code
             output = result.output.decode("utf-8")
@@ -209,8 +211,18 @@ class CodeExecutor:
             with open(os.path.join(self._work_dir, foldername, "output"), "r") as f:
                 final_output = f.read()
 
+        final_config = ""
+        if os.path.exists(os.path.join(self._work_dir, foldername, "config")):
+            with open(os.path.join(self._work_dir, foldername, "config"), "r") as f:
+                final_config = f.read()
+
+        rendered_html = ""
+        if os.path.exists(os.path.join(self._work_dir, foldername, "index.html")):
+            with open(os.path.join(self._work_dir, foldername, "index.html"), "r") as f:
+                rendered_html = f.read()
+        
         self._last_update_time = time.time()
-        return CodeResult(exit_code=last_exit_code, console="".join(console_outputs), output=final_output)
+        return CodeResult(exit_code=last_exit_code, console="".join(console_outputs), output=final_output, config=final_config, html=rendered_html)
 
     def remove_session(self, session_id: str) -> None:
         """Remove the session."""

@@ -147,7 +147,7 @@ const FlowSettings = (props) => {
       tag: props.state?.tag || '',
       city: props.state?.city || '',
       author: author,
-      image: props.state?.image || 'python:3-slim',
+      image: props.state?.image || 'cityflow-runner:latest',
       packages: props.state?.packages || '',
     });
   }, [props.state?.flowId]);
@@ -262,7 +262,7 @@ const FlowSettings = (props) => {
           id="image"
           fullWidth
           label="image"
-          value={formValue?.image || 'python:3-slim'}
+          value={formValue?.image || 'cityflow-runner:latest'}
           onChange={(e) => {
             handleFormChange({
               target: { id: 'image', value: e.target.value },
@@ -270,8 +270,9 @@ const FlowSettings = (props) => {
           }}
           InputLabelProps={{ shrink: true }}
         >
-          <MenuItem value="gboeing/osmnx:latest">gboeing/osmnx:latest</MenuItem>
-          <MenuItem value="python:3-slim">python:3-slim</MenuItem>
+          <MenuItem value="cityflow-runner:latest">
+            cityflow-runner:latest
+          </MenuItem>
         </TextField>
         <TextField
           id="packages"

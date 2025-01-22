@@ -51,23 +51,23 @@ export const executeCode = async ({
     path: 'config',
   };
 
-  const inputCode = `
-import json
+  //   const inputCode = `
+  // import json
 
-# Load input
-with open('input', 'r') as f1:
-    input_data = json.load(f1)
+  // # Load input
+  // with open('input', 'r') as f1:
+  //     input_data = json.load(f1)
 
-# Load config.json
-with open('config', 'r') as f2:
-    config_data = json.load(f2)
+  // # Load config.json
+  // with open('config', 'r') as f2:
+  //     config_data = json.load(f2)
 
-output_data = None
-`;
-  const outputCode = `
-with open('output', 'w') as f:
-  f.write(json.dumps(output_data))
-`;
+  // output_data = None
+  // `;
+  //   const outputCode = `
+  // with open('output', 'w') as f:
+  //   f.write(json.dumps(output_data))
+  // `;
   const api = '/api/executor/execute';
   const res = await fetch(api, {
     method: 'POST',
@@ -82,7 +82,8 @@ with open('output', 'w') as f:
       codeBlocks: [
         {
           files: [...(files || []), inputFile, configFile],
-          code: inputCode + moduleCode + outputCode,
+          // code: inputCode + moduleCode + outputCode,
+          code: moduleCode,
           language: language,
         },
       ],

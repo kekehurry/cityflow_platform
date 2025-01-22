@@ -4,7 +4,7 @@ import MonacoEditor from '@monaco-editor/react';
 import theme from '@/theme';
 import _ from 'lodash';
 
-import { executeCode, removeSession, useExecuteCode } from '@/utils/executor';
+import { removeSession, useExecuteCode } from '@/utils/executor';
 import ChatBot from './utils/ChatBot';
 import FileUploader from './utils/FileUploader';
 import ControlButtons from './utils/ControlButtons';
@@ -13,10 +13,10 @@ import { initUserId } from '@/utils/local';
 
 const initCode = {
   interface: `
-//import packages from the scope
+//import packages
 import React from 'react';
 
-// load necessary variables from the scope
+// load necessary variables from global props
 const {input,config,setConfig,setOutput} = props;
 
 // main function

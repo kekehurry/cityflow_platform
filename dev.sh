@@ -82,7 +82,7 @@ sudo chown -R ${PUID}:${PGID} /var/run/docker.sock
 
 # docker-compose pull
 
-docker-compose down
+# docker-compose down
 
 trap ' \
 echo "\nStopping cityflow..." && \

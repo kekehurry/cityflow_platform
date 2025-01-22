@@ -1,0 +1,7 @@
+Flask
+Flask_Cors
+docker
+pydantic
+neo4j
+requests
+python-dotenv

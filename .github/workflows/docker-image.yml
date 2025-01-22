@@ -21,30 +21,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and Push City Flwo Database
+    - name: Build and Push City Flwo Platform
       uses: docker/build-push-action@v6.10.0
       with:
-        context: ./cityflow_database
-        file: ./cityflow_database/Dockerfile
-        tags: ghcr.io/kekehurry/cityflow_database
-        platforms: linux/amd64,linux/arm64
-        push: true
-
-    - name: Build and Push City Flwo Executor
-      uses: docker/build-push-action@v6.10.0
-      with:
-        context: ./cityflow_executor
-        file: ./cityflow_executor/Dockerfile
-        tags: ghcr.io/kekehurry/cityflow_executor
-        platforms: linux/amd64,linux/arm64
-        push: true
-
-    - name: Build and Push City Flwo Workstation
-      uses: docker/build-push-action@v6.10.0
-      with:
-        context: ./cityflow_workstation
-        file: ./cityflow_workstation/Dockerfile
-        tags: ghcr.io/kekehurry/cityflow_workstation
+        context: ./
+        file: ./Dockerfile
+        tags: ghcr.io/kekehurry/cityflow_platform
         platforms: linux/amd64,linux/arm64
         push: true
         
