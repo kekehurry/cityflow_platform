@@ -23,7 +23,6 @@ export default function ConfigTab({
   setFormValue,
   config,
   setConfig,
-  mapPackages,
   height = 540,
 }) {
   const [iconLoading, setIconLoading] = useState(false);
@@ -233,7 +232,7 @@ export default function ConfigTab({
           <TextField
             id="width"
             onChange={handleFormChange}
-            value={formValue.width || 300}
+            value={formValue.width}
             size="small"
             InputProps={{ style: { fontSize: 8 } }}
           />
@@ -243,93 +242,12 @@ export default function ConfigTab({
           <TextField
             id="height"
             onChange={handleFormChange}
-            value={formValue.height || 200}
+            value={formValue.height}
             size="small"
             InputProps={{ style: { fontSize: 8 } }}
           />
         </Stack>
       </Stack>
-      {/* <Typography variant="caption">Session ID</Typography>
-      <TextField
-        id="sessionID"
-        onChange={handleFormChange}
-        value={formValue.sessionID || ''}
-        size="small"
-        InputProps={{ style: { fontSize: 8 } }}
-      /> */}
-
-      {/* <Typography variant="caption">Assistant</Typography> */}
-      {/* <Stack direction="row" spacing={1} justifyContent="space-between">
-        <TextField
-          id="baseUrl"
-          fullWidth
-          onChange={handleFormChange}
-          value={formValue.baseUrl}
-          label="Base Url"
-          size="small"
-          InputProps={{ style: { fontSize: 8 } }}
-          InputLabelProps={{ style: { fontSize: 8 } }}
-        />
-        <TextField
-          id="secretKey"
-          fullWidth
-          onChange={handleFormChange}
-          value={formValue.secretKey}
-          label="Secret Key"
-          size="small"
-          InputProps={{ style: { fontSize: 8 } }}
-          InputLabelProps={{ style: { fontSize: 8 } }}
-        />
-        <TextField
-          id="model"
-          fullWidth
-          onChange={handleFormChange}
-          value={formValue.model}
-          label="Model"
-          size="small"
-          InputProps={{ style: { fontSize: 8 } }}
-          InputLabelProps={{ style: { fontSize: 8 } }}
-        />
-      </Stack> */}
-      {formValue.language === 'javascript' && (
-        <>
-          <Typography variant="caption">Packages</Typography>
-          <FormControl>
-            <Select
-              id="packages"
-              sx={{ fontSize: 8 }}
-              multiple
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={value}
-                      label={value}
-                      style={{
-                        height: 20,
-                        fontSize: 8,
-                        p: 1,
-                      }}
-                    />
-                  ))}
-                </Box>
-              )}
-              value={formValue.packages}
-              onChange={(e) => {
-                handleFormChange({
-                  target: { id: 'packages', value: e.target.value },
-                });
-              }}
-            >
-              {Object.keys(mapPackages).map((p) => (
-                <MenuItem key={p} value={p}>
-                  {p}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </>
-      )}
     </Stack>
   );
 }

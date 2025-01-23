@@ -1,42 +1,40 @@
 #!/bin/bash
-
 DATABASE_HOST='127.0.0.1'
 EXECUTOR_HOST='127.0.0.1'
-PUID=501
-PGID=20
+PUID=$(id -u)
+PGID=$(id -g)
 
 
-echo "Checking dependencies..."
-# Check if gboeing/osmnx image exists, if not, pull it
-if ! docker images | grep -q "gboeing/osmnx"; then
-    docker pull gboeing/osmnx
-fi
 
-# Check if python:3-slim image exists, if not, pull it
-if ! docker images | grep -q "python.*3-slim"; then
-    docker pull python:3-slim
-fi
+# Check if cityflow_runner:latest exists, if not, pull it
+
+# echo "Checking dependencies..."
+
+# if ! docker images | grep -q "cityflow_runner:latest"; then
+#     docker pull cityflow_runner:latest
+# fi
 
 echo "Creating cityflow network..."
 
 docker network ls | grep -q cityflow || docker network create cityflow
 
+
 echo "Environment setup..."
 
 # modify the .env file
-sed -i '' "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
-sed -i '' "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/cityflow_executor/code|" .env
-sed -i '' "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
-sed -i '' "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=/cityflow_database/source|" .env
-sed -i '' "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
-sed -i '' "s|DATASET_SERVER=.*|DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
-sed -i '' "s|EXECUTOR_SERVER=.*|EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
+sed -i "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
+sed -i "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=/cityflow_executor/code|" .env
+sed -i "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
+sed -i "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=/cityflow_database/source|" .env
+sed -i "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
+sed -i "s|DATASET_SERVER=.*|DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
+sed -i "s|EXECUTOR_SERVER=.*|EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
 
 # sed -i "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
 
 
 if [[ ! " $@ " =~ " --beian " ]]; then
-  sed -i '' "s|BEIAN=.*|BEIAN=|" .env
+  sed -i "s|BEIAN=.*|BEIAN=|" .env
 fi
 
 # change user to current user
@@ -79,8 +77,6 @@ docker run -it --rm\
   -v ./cityflow_executor/code:/cityflow_executor/code \
   -v ./cityflow_database/data:/data \
   -v ./cityflow_database/source:/cityflow_database/source \
-  -v ./start-services.sh:/usr/local/bin/start-services.sh \
-  -e CITYFLOW_PASSWD=cityflow \
   -e PUID=${PUID} \
   -e PGID=${PGID} \
   --user ${PUID}:${PGID} \

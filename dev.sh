@@ -15,14 +15,14 @@ echo "Checking dependencies..."
 docker image prune -f --filter "dangling=true"
 
 # Check if gboeing/osmnx image exists, if not, pull it
-if ! docker images | grep -q "gboeing/osmnx"; then
-    docker pull gboeing/osmnx
-fi
+# if ! docker images | grep -q "gboeing/osmnx"; then
+#     docker pull gboeing/osmnx
+# fi
 
-# Check if python:3-slim image exists, if not, pull it
-if ! docker images | grep -q "python.*3-slim"; then
-    docker pull python:3-slim
-fi
+# # Check if python:3-slim image exists, if not, pull it
+# if ! docker images | grep -q "python.*3-slim"; then
+#     docker pull python:3-slim
+# fi
 
 if [ "$(docker ps -aq -f name=neo4j)" ]; then
     docker start neo4j
@@ -41,9 +41,9 @@ else
         neo4j:5.20.0
 fi
 
-# echo "Creating cityflow network..."
+echo "Creating cityflow network..."
 
-# docker network ls | grep -q cityflow || docker network create cityflow
+docker network ls | grep -q cityflow || docker network create cityflow
 
 echo "Environment setup..."
 
@@ -58,7 +58,6 @@ sed -i '' "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database
 sed -i '' "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
 sed -i '' "s|DATASET_SERVER=.*|DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
 sed -i '' "s|EXECUTOR_SERVER=.*|EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
-sed -i '' "s|user:.*|user: '${PUID}:${PGID}'|g" docker-compose.yml
 
 
 if [[ ! " $@ " =~ " --beian " ]]; then
@@ -78,11 +77,8 @@ sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/data
 sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_executor/code
 sudo chown -R ${PUID}:${PGID} /var/run/docker.sock
 
-# echo "Lunching cityflow..."
 
-# docker-compose pull
-
-# docker-compose down
+echo "Lunching cityflow..."
 
 trap ' \
 echo "\nStopping cityflow..." && \

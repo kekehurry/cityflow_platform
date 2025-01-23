@@ -22,5 +22,5 @@ class CodeResult(BaseModel):
     exit_code: int = Field(description="The exit code of the code execution.")
     console: str = Field(description="The console output of the code execution.")
     output: str = Field(description="The output of the code execution.")
-    config: Optional[str] = Field(description="The updated config of the code execution.")
-    html: Optional[str] = Field(description="The html output of the code execution.")
+    config: Optional[str] = Field(default="",description="The updated config of the code execution.")
+    html: Optional[str] = Field(default="",description="The html output of the code execution.")

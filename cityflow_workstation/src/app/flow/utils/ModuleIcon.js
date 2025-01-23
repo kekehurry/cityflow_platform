@@ -5,6 +5,7 @@ import theme from '@/theme';
 import { addNode } from '@/store/actions';
 import { nanoid } from 'nanoid';
 import { useRef, useEffect, useState } from 'react';
+import { getModule } from '@/utils/dataset';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -49,7 +50,6 @@ const ModuleIcon = (props) => {
   // delete user module
   const handleDelete = (manifest) => {
     const config = manifest.config;
-    console.log(userModules);
     let newModules = userModules.filter(
       (m) => !(m.name === config.name && m.category === config.category)
     );

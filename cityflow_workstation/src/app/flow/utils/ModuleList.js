@@ -61,6 +61,7 @@ export const ModuleList = (props) => {
   const [basicModules, setBasicModules] = useState([]);
   const [coreModules, setCoreModules] = useState({});
   const [groupedModules, setGroupedModules] = useState({});
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -126,12 +127,8 @@ export const ModuleList = (props) => {
         });
       return groupedModules;
     };
-    const groupedModules = groupModules([...basicModules, ...userModules]);
-    setGroupedModules({ ...groupedModules });
-  }, [userModules, basicModules]);
 
-  useEffect(() => {
-    const saveUserModule = (e) => {
+    const updateModules = (e) => {
       const data = e.detail;
       let newModules = userModules;
       const index = userModules.findIndex((item) => item.id === data.id);
@@ -141,12 +138,20 @@ export const ModuleList = (props) => {
         newModules.push(data);
       }
       setUserModules(newModules);
+      const groupedModules = groupModules(newModules);
+      const groupedBasicModules = groupModules(basicModules);
+      setGroupedModules({ ...groupedBasicModules, ...groupedModules });
     };
-    window.addEventListener('localModulesChange', saveUserModule);
+
+    const groupedModules = groupModules([...basicModules, ...userModules]);
+    setGroupedModules({ ...groupedModules });
+
+    window.addEventListener('localModulesChange', updateModules);
+
     return () => {
-      window.removeEventListener('locaModulesChange', saveUserModule);
+      window.removeEventListener('localModulesChange', updateModules);
     };
-  }, []);
+  }, [userModules, basicModules]);
 
   return (
     <Box id="ModulePanel" hidden={tab !== 1}>

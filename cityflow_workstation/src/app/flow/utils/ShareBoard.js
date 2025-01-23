@@ -19,6 +19,8 @@ import { saveWorkflow } from '@/utils/dataset';
 import { connect } from 'react-redux';
 import { useLocalStorage } from '@/utils/local';
 
+const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
+
 const StyledInput = styled(TextField)({
   '& .MuiOutlinedInput-root': {
     // borderRadius: '15px',
@@ -68,7 +70,7 @@ const ShareBoard = (props) => {
       const { nodes, edges, ...res } = props.state;
       const flowData = await getFlowData({
         rfInstance,
-        state: { ...res, ...formValue },
+        state: { ...res, ...formValue, basic: false },
       });
       const flowId = await saveWorkflow(flowData)
         .then((flowId) => {
@@ -107,7 +109,7 @@ const ShareBoard = (props) => {
       city: props.state?.city || '',
       author: author || '',
       packages: props.state?.packages || '',
-      image: props.state?.image || 'python:3-slim',
+      image: defaultRunner,
     });
   }, [
     props.state?.name,
@@ -190,7 +192,7 @@ const ShareBoard = (props) => {
               id="image"
               fullWidth
               label="image"
-              value={formValue?.image || 'python:3-slim'}
+              value={defaultRunner}
               onChange={(e) => {
                 handleValueChange({
                   target: { id: 'image', value: e.target.value },
@@ -198,10 +200,7 @@ const ShareBoard = (props) => {
               }}
               InputLabelProps={{ shrink: true }}
             >
-              <MenuItem value="gboeing/osmnx:latest">
-                gboeing/osmnx:latest
-              </MenuItem>
-              <MenuItem value="python:3-slim">python:3-slim</MenuItem>
+              <MenuItem value={defaultRunner}>{defaultRunner}</MenuItem>
             </TextField>
           </Stack>
         </DialogContent>

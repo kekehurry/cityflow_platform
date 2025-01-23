@@ -2,10 +2,14 @@ import { initUserId } from './local';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 import useSWR from 'swr';
 
+const defaultRunner =
+  process.env.NEXT_PUBLIC_DEFAULT_RUNNER ||
+  'ghcr.io/kekehurry/cityflow_runner:latest';
+
 export const setupExecutor = async (
   flowId,
   packages,
-  image = 'python:3-slim',
+  image,
   language = 'python'
 ) => {
   const api = '/api/executor/setup';
@@ -19,7 +23,7 @@ export const setupExecutor = async (
       flowId,
       userId,
       packages,
-      image,
+      image: defaultRunner,
       language,
     }),
   }).catch((err) => {
@@ -50,24 +54,6 @@ export const executeCode = async ({
     data: JSON.stringify(rest),
     path: 'config',
   };
-
-  //   const inputCode = `
-  // import json
-
-  // # Load input
-  // with open('input', 'r') as f1:
-  //     input_data = json.load(f1)
-
-  // # Load config.json
-  // with open('config', 'r') as f2:
-  //     config_data = json.load(f2)
-
-  // output_data = None
-  // `;
-  //   const outputCode = `
-  // with open('output', 'w') as f:
-  //   f.write(json.dumps(output_data))
-  // `;
   const api = '/api/executor/execute';
   const res = await fetch(api, {
     method: 'POST',
@@ -78,7 +64,7 @@ export const executeCode = async ({
       flowId,
       userId,
       sessionId,
-      image,
+      image: defaultRunner,
       codeBlocks: [
         {
           files: [...(files || []), inputFile, configFile],
@@ -120,7 +106,7 @@ export const useExecuteCode = ({
         language,
         input,
         config,
-        image,
+        image: defaultRunner,
       })
   );
   return {
@@ -162,7 +148,7 @@ export const killExecutor = async (flowId, image) => {
     body: JSON.stringify({
       flowId,
       userId,
-      image,
+      image: defaultRunner,
     }),
   }).catch((err) => {
     console.error(err);

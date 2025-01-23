@@ -29,11 +29,11 @@ class ExecutorManage:
     
     def get_executor(self, container_name: str):
         if container_name in self._container_registry:
-            print(f"Get container {container_name}")
-            return self._container_registry[container_name]
-        else:
-            print(f"Container {container_name} not found.")
-            return None
+            excutor = self._container_registry[container_name]
+            if excutor.check():
+                print(f"Get container {container_name}")
+                return self._container_registry[container_name]
+        return None
 
     def keep_alive(self, container_name: str):
         if container_name in self._container_registry:

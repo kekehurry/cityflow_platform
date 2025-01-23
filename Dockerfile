@@ -53,9 +53,7 @@ RUN apt-get update && \
       tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && \
     apt-get install -y docker-ce docker-ce-cli containerd.io && \
-    pip3 install -r requirements.txt
 
 EXPOSE 3000 
 
-# Replace multiple CMDs with single ENTRYPOINT
 CMD ["/usr/local/bin/start-services.sh"]

@@ -29,7 +29,7 @@ def _cmd(lang: str) -> str:
     if lang == "python":
         return "python /cityflow_runner/execute.py"
     elif lang == "javascript":
-        return "node /cityflow_runner/execute.js"
+        return "node /cityflow_runner/execute.js --compile"
     else:
         raise ValueError(f"Unsupported language {lang}")
     
@@ -54,7 +54,7 @@ class CodeExecutor:
                 bind_dir =None,
                 work_dir = "code",
                 stop_container: bool = True,
-                memory_limit = "512m"
+                memory_limit = "1024m"
                 ):
         self._client = docker.from_env()
         self._image = image
@@ -99,10 +99,12 @@ class CodeExecutor:
                 entrypoint="/bin/sh",
                 tty=True,
                 auto_remove=self._auto_remove,
-                volumes={self._bind_dir: {"bind": "/cityflow_runner/workflow", "mode": "rw"}},
-                mem_limit=self._mem_limit,
+                volumes={
+                    self._bind_dir: {"bind": "/cityflow_runner/workflow", "mode": "rw"},
+                },
                 network="cityflow",
-                user=self._user
+                # mem_limit=self._mem_limit,
+                # user=self._user
             )
         # Start the container if it is not running
         if self._container.status != "running":
@@ -124,7 +126,13 @@ class CodeExecutor:
     
     def check(self) -> bool:
         """Check if the container is running."""
-        return self._container.status == "running"
+        try:
+            container = self._client.containers.get(self._container_name)
+            if container:
+                return container.status == "running"
+            return False
+        except Exception:
+            return False
 
     def setup(self, packages: List[str], lang:str) -> None:
         """Set up the code executor."""

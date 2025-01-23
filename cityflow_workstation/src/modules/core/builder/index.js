@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Stack, TextField, Tabs, Tab, Typography } from '@mui/material';
 import MonacoEditor from '@monaco-editor/react';
 import theme from '@/theme';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 
 import { removeSession, useExecuteCode } from '@/utils/executor';
 import ChatBot from './utils/ChatBot';
@@ -14,13 +14,11 @@ import { initUserId } from '@/utils/local';
 const initCode = {
   interface: `
 //import packages
-import React from 'react';
-
-// load necessary variables from global props
-const {input,config,setConfig,setOutput} = props;
+import {useState} from 'react';
 
 // main function
-export default function CustomUI(){
+export default function CustomUI(props){
+    const {input,config,setConfig,setOutput} = props; 
     return (
     <div style={{textAlign:"center"}}>
         <h3>{config?.name}</h3>
@@ -29,26 +27,18 @@ export default function CustomUI(){
 }
 `,
   module: `
-#Available variables:
-# input_data: input data, e.g. input1 = input_data['input1']
-# config_data: module configuration value, e.g. title = config_data['title']
-# output_data: the variable to store output data, e.g. output_data['output1'] = output1
+# import packages
+import cityflow.module as cm;
 
-#Do something with the input
-def main(input_data):
-    if input_data:
-        output_data = {
-            "output": input_data["input"]
-        }
-    else:
-        output_data = {
-            "output": config_data["title"]
-        }
-    return output_data
+# main function
+def main():
+    return {
+    "output": cm.config["title"]
+    }
 
 #Set the output
-output_data = main(input_data)
-print(output_data)
+cm.output = main()
+print(cm.output)
 `,
 };
 
@@ -64,7 +54,6 @@ export default function ModuleBuilder(props) {
     setOutput,
     run,
     setLoading,
-    mapPackages,
   } = props;
   const [log, setLog] = useState(null);
   const [tab, setTab] = useState(0);
@@ -84,12 +73,12 @@ export default function ModuleBuilder(props) {
     port: config.type === 'server' ? config.port || 8080 : null,
     language: config.language || 'javascript',
     description: config.description || 'No description',
-    packages: config.packages || ['react', '@mui/material'],
     code: config.code || initCode,
     files: config.files || [],
   };
   const [userId, setUserId] = useState(null);
   const [formValue, setFormValue] = useState({ ...initForm });
+  const [codeSubmited, setCodeSubmited] = useState(false);
   const [params, setParams] = useState(null);
   const executeResult = useExecuteCode(params || {});
 
@@ -133,45 +122,35 @@ export default function ModuleBuilder(props) {
   }, [formValue.type]);
 
   useEffect(() => {
-    if (run && config.type !== 'interface') {
+    if (codeSubmited || (formValue.language == 'python' && config.run)) {
+      setLog(null);
       setParams({
         sessionId: id,
         flowId: flowId,
         userName: flowAuthor,
-        moduleCode: formValue.code.module,
+        moduleCode: formValue.code[formValue.type],
         files: formValue.files,
         language: formValue.language,
         input: input,
         config: config,
         image: image,
       });
-      //   setLoading(true);
-      //   executeCode({ ...params })
-      //     .then((res) => {
-      //       response = res;
-      //       const output = JSON.parse(res.output, null, 2);
-      //       setOutput({ ...output });
-      //       setLog(res.console);
-      //     })
-      //     .catch((err) => {
-      //       setLog({ ...response });
-      //     })
-      //     .finally(() => {
-      //       setLoading(false);
-      //     });
     }
-  }, [run, input, flowId]);
+  }, [codeSubmited, config.run, formValue.language, input]);
 
   useEffect(() => {
     if (executeResult?.isLoading) {
       setLoading(true);
     } else {
       setLoading(false);
+      setCodeSubmited(false);
     }
 
     if (executeResult?.data) {
       const res = executeResult.data;
       const output = res?.output && JSON.parse(res.output, null, 2);
+      const html = res?.html;
+      setConfig({ ...config, html: html });
       setOutput({ ...output });
       setLog(res?.console);
     }
@@ -209,8 +188,18 @@ export default function ModuleBuilder(props) {
         setFormValue={setFormValue}
         config={config}
         setConfig={setConfig}
-        mapPackages={mapPackages}
-        height={540}
+        height={270}
+      />
+      <Typography variant="caption">Logs</Typography>
+      <TextField
+        id="log"
+        multiline
+        className="nowheel"
+        lable="Log"
+        fullWidth
+        value={log ? JSON.stringify(log) : ''}
+        rows={10}
+        sx={{ background: theme.palette.node.main }}
       />
     </Box>
   );
@@ -236,18 +225,7 @@ export default function ModuleBuilder(props) {
         <FileUploader
           formValue={formValue}
           setFormValue={setFormValue}
-          height={320}
-        />
-        <Typography variant="caption">Logs</Typography>
-        <TextField
-          id="log"
-          multiline
-          className="nowheel"
-          lable="Log"
-          fullWidth
-          value={log ? JSON.stringify(log) : ''}
-          rows={6}
-          sx={{ background: theme.palette.node.main }}
+          height={500}
         />
       </Stack>
     </Box>
@@ -283,22 +261,17 @@ export default function ModuleBuilder(props) {
           </Tabs>
           <Box style={{ height: '600px' }} className="nowheel nodrag">
             <ControlButtons
-              setConfig={setConfig}
               config={config}
               formValue={formValue}
+              setConfig={setConfig}
+              setCodeSubmited={setCodeSubmited}
             />
             {editorTabs.map((tab, index) => (
               <Box hidden={editor !== index} key={tab}>
                 <MonacoEditor
                   width="100%"
                   height="600px"
-                  language={
-                    tab === 'packages'
-                      ? 'python'
-                      : tab === 'interface'
-                      ? 'javascript'
-                      : 'python'
-                  }
+                  language={tab === 'interface' ? 'javascript' : 'python'}
                   theme="vs-dark"
                   value={formValue.code[tab]}
                   onChange={(value) => handleCodeChange(value, tab)}
@@ -334,19 +307,17 @@ export default function ModuleBuilder(props) {
               id={1}
               disableRipple
             />
-            {config.type !== 'interface' && (
-              <Tab
-                label="Dependency"
-                sx={{ fontSize: 12, minHeight: 10, height: 10 }}
-                id={2}
-                disableRipple
-              />
-            )}
+            <Tab
+              label="Dependency"
+              sx={{ fontSize: 12, minHeight: 10, height: 10 }}
+              id={2}
+              disableRipple
+            />
           </Tabs>
           <Box style={{ padding: 20 }} className="nowheel nodrag">
             {configTab}
             {assistantTab}
-            {config.type !== 'interface' && dependencyTab}
+            {dependencyTab}
           </Box>
         </Box>
       </Stack>

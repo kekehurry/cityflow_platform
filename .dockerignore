@@ -1,6 +1,7 @@
 ./cityflow_workstation/.next
 ./cityflow_workstation/node_modules
 ./cityflow_workstation/.env.local
+./cityflow_workstation/package-lock.json
 
 ./cityflow_executor/code
 
@@ -21,5 +22,6 @@ deploy.sh
 *.tmp
 .git
 .gitignore
+*package-lock.json
 
 

@@ -96,7 +96,9 @@ def execute():
         'container_name': executor._container_name,
         'exit_code': code_result.exit_code, 
         'console': code_result.console,
-        'output': code_result.output
+        'output': code_result.output,
+        'config': code_result.config,
+        'html': code_result.html,
     })
 
 @app.route('/remove_session', methods=['POST'])

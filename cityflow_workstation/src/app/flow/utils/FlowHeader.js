@@ -28,7 +28,6 @@ import AppsIcon from '@mui/icons-material/Apps';
 import HomeIcon from '@mui/icons-material/Home';
 import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { preloadModules } from '@/utils/package';
 import { setupExecutor, killExecutor } from '@/utils/executor';
 import { saveUserFlow } from '@/utils/local';
 import { saveWorkflow } from '@/utils/dataset';
@@ -64,16 +63,14 @@ const FlowHeader = (props) => {
 
   const initAndRunALL = () => {
     const packages = props.state.packages.split('\n');
-    preloadModules().then(() => {
-      setLoading(true);
-      setupExecutor(props.state.flowId, packages, props.state.image).then(
-        (data) => {
-          props.setMeta({ flowInited: true });
-          runAll();
-          setLoading(false);
-        }
-      );
-    });
+    setLoading(true);
+    setupExecutor(props.state.flowId, packages, props.state?.image).then(
+      (data) => {
+        props.setMeta({ flowInited: true });
+        runAll();
+        setLoading(false);
+      }
+    );
   };
 
   const killContainerAndStopAll = () => {

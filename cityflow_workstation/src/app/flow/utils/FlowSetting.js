@@ -11,12 +11,13 @@ import { LoadingButton } from '@mui/lab';
 import React, { useState, useEffect, useRef } from 'react';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { preloadModules, usePreloadedModules } from '@/utils/package';
 import { setupExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
 import { useLocalStorage } from '@/utils/local';
 import { initUserId } from '@/utils/local';
+
+const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -58,7 +59,6 @@ const FlowSettings = (props) => {
   const [loading, setLoading] = useState(false);
   const [initLog, setInitLog] = useState('');
   const [author, setAuthor] = useLocalStorage('author', null);
-  const { modules, isLoading, error } = usePreloadedModules();
   // set flowInited
   const setFlowInited = (value) => {
     setMeta({ flowInited: value });
@@ -71,7 +71,7 @@ const FlowSettings = (props) => {
     setAuthor(formValue.author);
     setLoading(true);
     const packages = formValue.packages.split('\n');
-    modules && setInitLog('initing environment...');
+    setInitLog('initing environment...');
     setupExecutor(formValue.flowId, packages, formValue.image)
       .then((data) => {
         setInitLog(data?.console);
@@ -147,22 +147,10 @@ const FlowSettings = (props) => {
       tag: props.state?.tag || '',
       city: props.state?.city || '',
       author: author,
-      image: props.state?.image || 'cityflow-runner:latest',
+      image: props.state?.image,
       packages: props.state?.packages || '',
     });
   }, [props.state?.flowId]);
-
-  useEffect(() => {
-    if (isLoading) {
-      setInitLog('loading modules...');
-    }
-    if (error) {
-      setInitLog('failed to load modules');
-    }
-    if (modules) {
-      setInitLog('modules loaded');
-    }
-  }, [isLoading, error, modules]);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -262,7 +250,7 @@ const FlowSettings = (props) => {
           id="image"
           fullWidth
           label="image"
-          value={formValue?.image || 'cityflow-runner:latest'}
+          value={defaultRunner}
           onChange={(e) => {
             handleFormChange({
               target: { id: 'image', value: e.target.value },
@@ -270,23 +258,36 @@ const FlowSettings = (props) => {
           }}
           InputLabelProps={{ shrink: true }}
         >
-          <MenuItem value="cityflow-runner:latest">
-            cityflow-runner:latest
-          </MenuItem>
+          <MenuItem value={defaultRunner}>{defaultRunner}</MenuItem>
         </TextField>
-        <TextField
-          id="packages"
-          fullWidth
-          label="packages"
-          onChange={handleFormChange}
-          value={formValue?.packages || ''}
-          multiline
-          rows={8}
-          placeholder="python packages required for this workflow, one package per line"
-          InputLabelProps={{ shrink: true }}
-        />
+        <Stack direction="row" spacing={2} justifyContent="space-between">
+          <TextField
+            id="pypackages"
+            fullWidth
+            label="python packages"
+            onChange={handleFormChange}
+            value={formValue?.pypackages || ''}
+            multiline
+            rows={8}
+            placeholder="one package per line"
+            InputLabelProps={{ shrink: true }}
+            disabled
+          />
+          <TextField
+            id="jspackages"
+            fullWidth
+            label="npm packages"
+            onChange={handleFormChange}
+            value={formValue?.jspackages || ''}
+            multiline
+            rows={8}
+            placeholder="one package per line"
+            InputLabelProps={{ shrink: true }}
+            disabled
+          />
+        </Stack>
         <LoadingButton
-          loading={loading || isLoading}
+          loading={loading}
           variant="contained"
           color="primary"
           onClick={hangleSubmit}

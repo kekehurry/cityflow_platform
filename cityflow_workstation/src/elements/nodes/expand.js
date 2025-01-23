@@ -14,9 +14,7 @@ import theme from '@/theme';
 
 import LimitHandle from './utils/LimitHandle';
 import ErrorBoundary from './utils/ErrorBoundary';
-import Runner from './utils/CustomRunner';
-
-import { mapPackages, preloadModules } from '@/utils/package';
+import IframeComponent from './utils/IframeComponent';
 
 import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
@@ -55,7 +53,6 @@ class ExpandNode extends PureComponent {
       expand: this.props.config?.expand || false,
       error: false,
       warning: false,
-      scope: null,
     };
 
     this.setOutput = this.setOutput.bind(this);
@@ -63,45 +60,12 @@ class ExpandNode extends PureComponent {
     this.warning = this.warning.bind(this);
   }
 
-  init = () => {
-    try {
-      let importScope = {};
-      const props = {
-        input: this.props.input,
-        config: this.props.config,
-        setConfig: this.props.setConfig,
-        setOutput: this.setOutput,
-        loading: this.state.loading,
-        setLoading: (loading) => {
-          this.setState({ loading: loading });
-        },
-      };
-      if (!this.props.config.packages) {
-        this.setState({ scope: { props, import: importScope } });
-      } else {
-        preloadModules().then((preloadedModules) => {
-          this.props.config.packages.forEach((p) => {
-            const moduleName = p && p.trim();
-            if (moduleName in preloadedModules) {
-              importScope[moduleName] = preloadedModules[moduleName];
-              this.setState({ scope: { props, import: importScope } });
-            }
-          });
-        });
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   setOutput = (output) => {
     if (_.isEqual(output, this.state.localOutput)) return;
     this.setState({ loading: false, localOutput: output });
   };
 
-  componentDidMount() {
-    this.init();
-  }
+  componentDidMount() {}
 
   componentDidUpdate(prevProps, prevState) {
     // child module only update the localOutput to prevent infinite loop
@@ -116,14 +80,6 @@ class ExpandNode extends PureComponent {
       } else {
         this.props.setGlobalOutput(null);
       }
-    }
-    if (
-      !(
-        _.isEqual(prevProps.config, this.props.config) &&
-        _.isEqual(prevProps.input, this.props.input)
-      )
-    ) {
-      this.init();
     }
     if (!_.isEqual(prevProps.config.run, this.props.config.run)) {
       this.props.config.run
@@ -185,7 +141,6 @@ class ExpandNode extends PureComponent {
           setLoading: (loading) => {
             this.setState({ loading: loading });
           },
-          mapPackages: mapPackages,
         });
       });
     return (
@@ -254,7 +209,7 @@ class ExpandNode extends PureComponent {
                     sx={{ color: '#FFB300', cursor: 'pointer' }}
                     onClick={() => {
                       this.setState({ loading: false });
-                      setConfig({ ...config, run: !config.run });
+                      setConfig({ ...config, run: false });
                     }}
                   />
                 ) : (
@@ -334,6 +289,7 @@ class ExpandNode extends PureComponent {
               </Stack>
               <Stack>
                 {config?.output &&
+                  config.output.length > 0 &&
                   config.output.map((item, index) => {
                     const color =
                       output && output[item] ? '#4bec13' : '#FFB300';
@@ -368,22 +324,12 @@ class ExpandNode extends PureComponent {
               }}
               className="nowheel nodrag"
             >
-              <ErrorBoundary
-                stop={this.stop}
-                error={this.error}
-                warning={this.warning}
-              >
-                {this.state.scope ? (
-                  <Runner
-                    code={config.code?.interface}
-                    scope={this.state.scope}
-                  />
-                ) : (
-                  <Typography variant="caption">
-                    Initializing module builder ...
-                  </Typography>
-                )}
-              </ErrorBoundary>
+              <IframeComponent
+                config={config}
+                input={input}
+                setOutput={this.setOutput}
+                setConfig={setConfig}
+              />
             </Paper>
           </Card>
           <>

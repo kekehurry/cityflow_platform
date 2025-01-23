@@ -159,6 +159,7 @@ def search_workflows(params,limit=25):
                 WITH w LIMIT {limit}
                 RETURN collect(DISTINCT w) as workflows
             '''
+    print(cypher,params)
     result = query(cypher,params)
     if result:
         workflows = result['workflows']
@@ -196,7 +197,7 @@ def save_workflow(data,user_id):
     source_id = workflow_data.get('source')
     previous_id = workflow_data.get('flowId')
     workflow_data['id'] = workflow_id 
-    workflow_data['author_id'] = user_id
+    workflow_data['authorId'] = user_id
     screenshot = workflow_data.get('screenShot') 
     if screenshot and 'base64' in screenshot:
         screenshot_path = os.path.join(source_folder,f"images/{workflow_id}.png")

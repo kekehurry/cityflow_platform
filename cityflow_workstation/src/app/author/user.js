@@ -37,14 +37,13 @@ const UserPage = () => {
 
   const [displayName, setDisplayName] = useState('');
   const [author, setAuthor] = useLocalStorage('author', null);
-
   const [authorId, setAuthorId] = useState(null);
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [userId, setUserId] = useState(null);
-  const { data, error, isLoading } = useSearchWorkflow({ author_id: authorId });
   const [userFlows, setUserFlows] = useLocalStorage('userFlows', []);
   const basicData = useSearchWorkflow({ tutorial: true });
+  const { data, error, isLoading } = useSearchWorkflow({ authorId });
 
   useEffect(() => {
     initUserId().then((userId) => {
@@ -66,16 +65,14 @@ const UserPage = () => {
   }, [authorId]);
 
   useEffect(() => {
-    if (data) {
-      if (data.length > 0) {
-        const uniqueItems = data?.filter(
-          (item, index, self) =>
-            index === self.findIndex((t) => t.name === item.name)
-        );
-        setItems(uniqueItems);
-      } else {
-        basicData?.data && setItems(basicData.data.slice(0, 1));
-      }
+    if (data && data.length > 0) {
+      const uniqueItems = data?.filter(
+        (item, index, self) =>
+          index === self.findIndex((t) => t.name === item.name)
+      );
+      setItems(uniqueItems);
+    } else {
+      basicData?.data && setItems(basicData.data.slice(0, 1));
     }
     if (isLoading) {
       const length = Math.max(4 - userFlows?.length || 0, 0);
@@ -90,7 +87,7 @@ const UserPage = () => {
         })
       );
     }
-  }, [data, error, isLoading, basicData?.data]);
+  }, [data, error, isLoading, basicData?.data, authorId]);
 
   return (
     <>

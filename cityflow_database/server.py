@@ -70,7 +70,7 @@ def _search_modules():
     params = request.json.get('params', {})
     limit = request.json.get('limit', 25)
     ids = search_modules(params,limit)
-    modules = [get_module_info(id) for id in ids]
+    modules = [get_module(id) for id in ids]
     return jsonify(modules)
 
 

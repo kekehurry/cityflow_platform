@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, SpeedDial, SpeedDialIcon, SpeedDialAction } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import PublishIcon from '@mui/icons-material/Publish';
 
-export default function ControlButtons({ setConfig, config, formValue }) {
+export default function ControlButtons({
+  config,
+  formValue,
+  setConfig,
+  setCodeSubmited,
+}) {
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const dateTime = new Date().toLocaleString('en-US', {
       year: 'numeric',
       month: 'numeric',
@@ -20,6 +25,7 @@ export default function ControlButtons({ setConfig, config, formValue }) {
       ...formValue,
       time: dateTime,
     });
+    setCodeSubmited(true);
   };
 
   const handleSave = () => {

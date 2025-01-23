@@ -14,8 +14,7 @@ import { updateOutput, updateConfig } from '@/store/actions';
 import theme from '@/theme';
 import RemoveIcon from '@mui/icons-material/Remove';
 
-import Runner from './utils/CustomRunner';
-import { preloadModules } from '@/utils/package';
+import IframeComponent from './utils/IframeComponent';
 
 const mapStateToProps = (state, ownProps) => ({
   input: state.nodes.find((node) => node.id === ownProps.id)?.data.input,
@@ -44,42 +43,8 @@ class PinNode extends PureComponent {
       pinHeight: this.props.config.pinHeight,
       pinTop: this.props.config.pinTop,
       pinLeft: this.props.config.pinLeft,
-      scope: null,
     };
   }
-
-  init = () => {
-    try {
-      let importScope = {};
-      const props = {
-        input: this.props.input,
-        config: this.props.config,
-        setConfig: this.props.setConfig,
-        setOutput: this.setOutput,
-        loading: this.state.loading,
-        setLoading: (loading) => {
-          this.setState({ loading: loading });
-        },
-      };
-      if (!this.props.config.packages) {
-        this.setState({ scope: { props, import: importScope } });
-      } else {
-        preloadModules().then((preloadedModules) => {
-          this.props.config?.packages.forEach((p) => {
-            const moduleName = p && p.trim();
-            if (moduleName in preloadedModules) {
-              importScope[moduleName] = preloadedModules[moduleName];
-              this.setState({
-                scope: { props, import: importScope },
-              });
-            }
-          });
-        });
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
 
   setOutput = (output) => {
     this.setState({ localOutput: output });
@@ -109,14 +74,10 @@ class PinNode extends PureComponent {
         this.setLoading(false);
       }
     }
-    if (!_.isEqual(prevProps.input, this.props.input)) {
-      this.init();
-    }
   }
 
   componentDidMount() {
     this.setLoading(true);
-    this.init();
   }
 
   handleResize = (e, direction, ref, d) => {
@@ -202,7 +163,11 @@ class PinNode extends PureComponent {
                   }}
                 />
               ) : null}
-              <Runner code={config?.code?.interface} scope={this.state.scope} />
+              <IframeComponent
+                config={config}
+                input={input}
+                setOutput={this.setOutput}
+              />
             </CardContent>
           </Stack>
         </Resizable>

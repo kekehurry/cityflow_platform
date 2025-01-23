@@ -40,7 +40,6 @@ import theme from '@/theme';
 
 import { useGetWorkflow, useGetModule } from '@/utils/dataset';
 import { killExecutor } from '@/utils/executor';
-import { usePreloadedModules } from '@/utils/package';
 import { setupExecutor } from '@/utils/executor';
 import { getUserFlow } from '@/utils/local';
 import { nanoid } from 'nanoid';
@@ -98,20 +97,17 @@ const FlowStation = (props) => {
   const workflowData = useGetWorkflow(id || null);
   const moduleData = useGetModule(module || null);
 
-  const { modules, isLoading, error } = usePreloadedModules();
-
   const initAndRunALL = () => {
     if (props.state.packages == undefined) return;
     const packages = props.state.packages.split('\n');
     // console.log('Initing environment...');
-    modules &&
-      setupExecutor(props.state.flowId, packages, props.state.image).then(
-        (data) => {
-          // console.log('Environment inited');
-          setMeta({ flowInited: true });
-          runAll();
-        }
-      );
+    setupExecutor(props.state.flowId, packages, props.state.image).then(
+      (data) => {
+        // console.log('Environment inited');
+        setMeta({ flowInited: true });
+        runAll();
+      }
+    );
   };
 
   const initFlow = (flow, instance) => {
@@ -218,7 +214,6 @@ const FlowStation = (props) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const flowData = getUserFlow(id);
-      console.log(flowData);
       setLocalFlowData(flowData);
     }
   }, []);
@@ -244,13 +239,13 @@ const FlowStation = (props) => {
   }, []);
 
   useEffect(() => {
-    if (pinBoard && modules) {
+    if (pinBoard) {
       setMeta({ globalScale: 1 });
       initAndRunALL();
-    } else if (run && modules) {
+    } else if (run) {
       initAndRunALL();
     }
-  }, [run, props.state.packages, pinBoard, modules]);
+  }, [run, props.state.packages, pinBoard]);
 
   return (
     <>
