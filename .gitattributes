@@ -1,0 +1,2 @@
+.github merge=ours
+deploy.sh merge=ours

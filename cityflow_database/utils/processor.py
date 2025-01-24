@@ -301,9 +301,9 @@ def save_workflow(data,user_id):
     # add embeddings
     embeddings = get_embedding(query_list)
     if len(embeddings)>1:
-        set_node('Workflow',workflow_id,{"embeddings":embeddings[0]['embedding']})
+        set_node('Workflow',workflow_id,{"embeddings":embeddings[0]})
         for i, node in enumerate(workflow_data['nodes']):
-            set_node('Module',node,{"embeddings":embeddings[i+1]['embedding']})
+            set_node('Module',node,{"embeddings":embeddings[i+1]})
     return workflow_id
     
 

@@ -6,15 +6,14 @@
 ./cityflow_executor/code
 
 ./cityflow_database/data
+./cityflow_database/source
 ./cityflow_database/notebook
-
 
 
 dev.sh
 deploy.sh
 *.env
 *.env.local
-
 
 .git
 .DS_Store

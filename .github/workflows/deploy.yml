@@ -1,0 +1,38 @@
+name: Deploy to CityFlow Server
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: http://192.168.1.213:3333/kekehurry/checkout@v3
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    - name: Add server to known_hosts
+      run: |
+        if ! ssh-keygen -F 192.168.1.219 > /dev/null; then
+          ssh-keyscan -H 192.168.1.219 >> ~/.ssh/known_hosts
+        fi
+
+    - name: SSH into server
+      run: |
+        ssh kai@192.168.1.219 << 'EOF'
+        cd ~/cityflow_platform
+        git checkout -f
+        git pull origin main
+        docker-compose down
+        docker rmi -f ghcr.io/kekehurry/cityflow_platform:latest
+        docker build -t ghcr.io/kekehurry/cityflow_platform:latest .
+        chmod +x ./deploy.sh
+        ./deploy.sh
+        EOF

@@ -47,7 +47,7 @@ class CodeExecutor:
         "javascript": True,
     }
     def __init__(self, 
-                image: str = "cityflow-runner:latest", 
+                image: str = "ghcr.io/kekehurry/cityflow_runner:latest", 
                 container_name = None,
                 timeout: int = 60,
                 auto_remove: bool = True,
@@ -66,8 +66,8 @@ class CodeExecutor:
         self._auto_remove = auto_remove
         self._bind_dir = os.path.join(os.getenv("EXECUTOR_BIND_DIR", bind_dir),container_name)
         self._work_dir = os.path.join(os.getenv("EXECUTOR_WORK_DIR", work_dir), container_name)
-        self._user = os.getenv("EXECUTOR_USER", "1000:1000")
-        print("docker user",self._user)
+        # self._user = os.getenv("EXECUTOR_USER", "1000:1000")
+        # print("docker user",self._user)
         self._stop_container = stop_container  
         self._mem_limit = os.getenv("EXECUTOR_MEMORY_LIMIT",memory_limit)
         self._last_update_time = time.time()
@@ -203,7 +203,9 @@ class CodeExecutor:
             runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
             command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
             
-            result = self._container.exec_run(command,user=self._user)
+            result = self._container.exec_run(command,
+                                            #   user=self._user
+                                              )
             exit_code = result.exit_code
             output = result.output.decode("utf-8")
             console_outputs.append(output)

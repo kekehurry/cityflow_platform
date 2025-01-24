@@ -129,7 +129,7 @@ def fulltext_query(query_string, limit=20):
     
 
 def semantic_query(query_string, limit=20):
-    vector = get_embedding(query_string)[0]['embedding']
+    vector = get_embedding(query_string)[0]
     cypher =f'''
     CALL db.index.vector.queryNodes($index,10,{vector}) YIELD node, score
     WHERE NOT (labels(node)[0] = 'Module' AND node.custom = "false") 

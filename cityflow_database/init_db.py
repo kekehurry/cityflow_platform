@@ -62,6 +62,14 @@ for file in os.listdir(folder):
 
 print('creating fulltex indexes...')
 
+#drop existing indexes
+cypher = '''
+DROP INDEX fulltextIndex IF EXISTS;
+DROP INDEX moduleVectorIndex IF EXISTS;
+DROP INDEX workflowVectorIndex IF EXISTS;
+'''
+write(cypher)
+
 # create index
 cypher = '''
         CREATE FULLTEXT INDEX fulltextIndex IF NOT EXISTS
@@ -78,7 +86,7 @@ CREATE VECTOR INDEX workflowVectorIndex IF NOT EXISTS
 FOR (n:Workflow) 
 ON n.embeddings
 OPTIONS { indexConfig: {
- `vector.dimensions`: 2048,
+ `vector.dimensions`: 384,
  `vector.similarity_function`: 'cosine'
 }}
 """
@@ -89,7 +97,7 @@ CREATE VECTOR INDEX moduleVectorIndex IF NOT EXISTS
 FOR (n:Module) 
 ON n.embeddings
 OPTIONS { indexConfig: {
- `vector.dimensions`: 2048,
+ `vector.dimensions`: 384,
  `vector.similarity_function`: 'cosine'
 }}
 """

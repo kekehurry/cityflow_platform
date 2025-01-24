@@ -3,3 +3,4 @@ Flask_Cors==4.0.0
 neo4j
 requests
 python-dotenv
+sentence-transformers
