@@ -1,15 +1,5 @@
 #!/bin/bash
 
-#setup env
-if [ -f /.env ]; then
-  echo "Loading environment variables from /.env..."
-  set -a
-  source /.env
-  set +a
-else
-  echo "No .env file found at /.env"
-fi
-
 /startup/docker-entrypoint.sh neo4j &
 
 # Wait for Neo4j to be ready
@@ -20,7 +10,7 @@ done
 
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
-  python3 /cityflow_database/init_db.py
+  cd / && python3 /cityflow_database/init_db.py
 fi
 
 # Start services

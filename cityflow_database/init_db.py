@@ -7,7 +7,7 @@ import os
 
 print('Initializing database...')
 
-source_dir = os.getenv('DATABASE_SOURCE_DIR','/cityflow_database/source')
+source_dir = os.getenv('DATABASE_SOURCE_DIR','./cityflow_database/source')
 for folder in ['files','icons','images']:
     if not os.path.exists(os.path.join(source_dir,folder)): 
         os.makedirs(os.path.join(source_dir,folder))
@@ -36,7 +36,7 @@ def load_flow_data(file,basic=False,showcase=False,user_id=admin_id):
 
 print('Loading workflows...')
 
-folder = '/cityflow_database/json/basic'
+folder = './cityflow_database/json/basic'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
@@ -44,7 +44,7 @@ for file in os.listdir(folder):
         save_workflow(flow,user_id=admin_id)
 
 
-folder = '/cityflow_database/json/tutorial'
+folder = './cityflow_database/json/tutorial'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
@@ -52,7 +52,7 @@ for file in os.listdir(folder):
         flow['tutorial'] = True
         save_workflow(flow,user_id=admin_id)
 
-folder = '/cityflow_database/json/showcase'
+folder = './cityflow_database/json/showcase'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
@@ -64,11 +64,18 @@ print('creating fulltex indexes...')
 
 #drop existing indexes
 cypher = '''
-DROP INDEX fulltextIndex IF EXISTS;
-DROP INDEX moduleVectorIndex IF EXISTS;
-DROP INDEX workflowVectorIndex IF EXISTS;
+DROP INDEX fulltextIndex IF EXISTS
 '''
 write(cypher)
+
+cypher = '''
+DROP INDEX moduleVectorIndex IF EXISTS
+'''
+write(cypher)
+
+cypher = '''
+DROP INDEX workflowVectorIndex IF EXISTS
+'''
 
 # create index
 cypher = '''
