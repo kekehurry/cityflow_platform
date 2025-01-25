@@ -1,15 +1,7 @@
 import { Typography, Stack, Divider } from '@mui/material';
-import { getBeiAn } from '@/utils/local';
 import theme from '@/theme';
-import { useEffect, useState } from 'react';
 
-export default function Footer({ showBeiAn = true }) {
-  const [beiAn, setBeiAn] = useState(null);
-  useEffect(() => {
-    getBeiAn().then((res) => {
-      setBeiAn(res);
-    });
-  }, []);
+export default function Footer() {
   return (
     <>
       <Divider orientation="horizontal" sx={{ width: '100%' }}>
@@ -74,26 +66,6 @@ export default function Footer({ showBeiAn = true }) {
           </a>
         </Stack>
       </Divider>
-      {showBeiAn && beiAn && (
-        <div
-          style={{
-            width: '100%',
-            marginTop: 10,
-            justifyContent: 'center',
-            display: 'flex',
-          }}
-        >
-          <a
-            href="https://beian.miit.gov.cn"
-            style={{
-              color: '#616161',
-              textDecoration: 'none',
-            }}
-          >
-            <Typography variant="h6">{beiAn}</Typography>
-          </a>
-        </div>
-      )}
     </>
   );
 }

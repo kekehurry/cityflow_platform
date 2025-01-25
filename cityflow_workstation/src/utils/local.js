@@ -257,11 +257,3 @@ export const getMapboxToken = async () => {
   );
   return mapboxToken;
 };
-
-// only for server in China
-export const getBeiAn = async () => {
-  const beiAn = await fetch(basePath + '/api/local/getBeiAn').then((res) =>
-    res.json()
-  );
-  return beiAn;
-};
