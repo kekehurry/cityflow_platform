@@ -7,7 +7,7 @@ import os
 
 print('Initializing database...')
 
-source_dir = '/cityflow_database/source' if os.path.exists('/cityflow_database/source') else 'source'
+source_dir = os.getenv('DATABASE_SOURCE_DIR','/cityflow_database/source')
 for folder in ['files','icons','images']:
     if not os.path.exists(os.path.join(source_dir,folder)): 
         os.makedirs(os.path.join(source_dir,folder))
@@ -36,7 +36,7 @@ def load_flow_data(file,basic=False,showcase=False,user_id=admin_id):
 
 print('Loading workflows...')
 
-folder = '/cityflow_database/json/basic' if os.path.exists('/cityflow_database/json/basic') else 'json/basic'
+folder = '/cityflow_database/json/basic'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
@@ -44,7 +44,7 @@ for file in os.listdir(folder):
         save_workflow(flow,user_id=admin_id)
 
 
-folder = '/cityflow_database/json/tutorial' if os.path.exists('/cityflow_database/json/tutorial') else 'json/tutorial'
+folder = '/cityflow_database/json/tutorial'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
@@ -52,7 +52,7 @@ for file in os.listdir(folder):
         flow['tutorial'] = True
         save_workflow(flow,user_id=admin_id)
 
-folder = '/cityflow_database/json/showcase' if os.path.exists('/cityflow_database/json/showcase') else 'json/showcase'
+folder = '/cityflow_database/json/showcase'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
