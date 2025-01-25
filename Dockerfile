@@ -31,6 +31,7 @@ COPY ./.env.production /cityflow_executor/.env
 # Load environment variables from file
 ENV HOSTNAME='0.0.0.0'
 ENV NODE_ENV=production
+ENV EXECUTOR_BIND_DIR=/temp/code
 
 RUN apt-get update && \
     apt-get install -y ca-certificates curl python3 python3-pip && \
