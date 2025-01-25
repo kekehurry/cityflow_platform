@@ -1,5 +1,3 @@
 *.DS_Store
 *.log
 *.env.local
-.env
-dev.sh

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-chown -R neo4j:neo4j /data
-chown -R $(id -u):$(id -g) /cityflow_database/source
-chown -R $(id -u):$(id -g) /cityflow_executor/code
-
 /startup/docker-entrypoint.sh neo4j &
 
 # Wait for Neo4j to be ready
