@@ -66,8 +66,6 @@ class CodeExecutor:
         self._auto_remove = auto_remove
         self._bind_dir = os.path.join(os.getenv("EXECUTOR_BIND_DIR", bind_dir),container_name)
         self._work_dir = os.path.join(os.getenv("EXECUTOR_WORK_DIR", work_dir), container_name)
-        # self._user = os.getenv("EXECUTOR_USER", "1000:1000")
-        # print("docker user",self._user)
         self._stop_container = stop_container  
         self._mem_limit = os.getenv("EXECUTOR_MEMORY_LIMIT",memory_limit)
         self._last_update_time = time.time()
@@ -101,10 +99,7 @@ class CodeExecutor:
                 auto_remove=self._auto_remove,
                 volumes={
                     self._bind_dir: {"bind": "/cityflow_runner/workflow", "mode": "rw"},
-                },
-                network="cityflow",
-                # mem_limit=self._mem_limit,
-                # user=self._user
+                }
             )
         # Start the container if it is not running
         if self._container.status != "running":
