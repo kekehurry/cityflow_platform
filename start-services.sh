@@ -18,9 +18,6 @@ until curl -s http://localhost:7474 > /dev/null; do
     sleep 2
 done
 
-# Install Python dependencies
-pip3 install -r /requirements.txt
-
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
   python3 /cityflow_database/init_db.py
