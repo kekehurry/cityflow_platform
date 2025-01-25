@@ -24,8 +24,7 @@ COPY ./cityflow_database /cityflow_database
 COPY ./cityflow_executor /cityflow_executor
 COPY ./start-services.sh /usr/local/bin/start-services.sh
 COPY ./requirements.txt /requirements.txt
-COPY ./.env.production /cityflow_database/.env
-COPY ./.env.production /cityflow_executor/.env
+COPY ./.env.production /.env /cityflow_database/.env /cityflow_executor/.env
 
 # Load environment variables from file
 ENV HOSTNAME='0.0.0.0'
