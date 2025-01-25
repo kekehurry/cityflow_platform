@@ -27,7 +27,6 @@ COPY ./requirements.txt /requirements.txt
 COPY ./.env.production /.env
 
 # Load environment variables from file
-ENV $(cat /.env | xargs)
 ENV HOSTNAME='0.0.0.0'
 ENV NODE_ENV=production
 
