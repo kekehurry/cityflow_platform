@@ -20,9 +20,9 @@ if [ "$INIT_DATABASE" ]; then
 fi
 
 # Start services
-cd /cityflow_database &&  python3 server.py &
-cd /cityflow_executor && python3 server.py &
-cd /cityflow_workstation && node server.js &
+cd /cityflow_platform/cityflow_database &&  python3 server.py &
+cd /cityflow_platform/cityflow_executor && python3 server.py &
+cd /cityflow_platform/cityflow_workstation && node server.js &
 
 cd /cityflow_platform
 
