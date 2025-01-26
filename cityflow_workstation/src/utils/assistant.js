@@ -1,3 +1,5 @@
+import { getLocalStorage } from './local';
+
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 const parseMessage = (messages) => {
@@ -19,13 +21,15 @@ export default class Assistant {
   constructor(props) {
     this.props = props;
     const { systemPrompt, context } = props;
-
     // Store system prompt and context for later use
     this.systemPrompt = systemPrompt;
     this.context = context;
   }
 
   async chat(inputMessage, messageHistory) {
+    const LLM_BASE_URL = getLocalStorage('LLM_BASE_URL');
+    const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
+    const LLM_MODEL = getLocalStorage('LLM_MODEL');
     const messages = [
       { role: 'system', content: this.systemPrompt },
       ...parseMessage(messageHistory),
@@ -34,11 +38,15 @@ export default class Assistant {
     ];
 
     try {
-      const api = '/api/assistant/chat';
-      const response = await fetch(basePath + api, {
+      const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${LLM_API_KEY}`,
+        },
         body: JSON.stringify({
-          messages,
+          model: LLM_MODEL,
+          messages: messages,
         }),
       });
       const data = await response.json();
@@ -49,6 +57,9 @@ export default class Assistant {
   }
 
   async stream(inputMessage, messageHistory, signal) {
+    const LLM_BASE_URL = getLocalStorage('LLM_BASE_URL');
+    const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
+    const LLM_MODEL = getLocalStorage('LLM_MODEL');
     const messages = [
       { role: 'system', content: this.systemPrompt },
       ...parseMessage(messageHistory),
@@ -56,17 +67,18 @@ export default class Assistant {
     ];
 
     try {
-      const api = '/api/assistant/stream';
-      const response = await fetch(basePath + api, {
+      const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${LLM_API_KEY}`,
         },
         body: JSON.stringify({
-          messages,
+          model: LLM_MODEL,
+          messages: messages,
+          stream: true,
         }),
       });
-
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let output = '';

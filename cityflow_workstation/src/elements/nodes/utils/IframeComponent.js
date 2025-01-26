@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import theme from '@/theme';
 import { nanoid } from 'nanoid';
-import { getMapboxToken } from '@/utils/local';
+import { getLocalStorage } from '@/utils/local';
 
 const generateCSS = (typography) => {
   const cssRules = [];
@@ -44,9 +44,14 @@ const generateCSS = (typography) => {
 const cssString = generateCSS(theme.typography);
 const IframeComponent = ({ config, input, setConfig, setOutput }) => {
   const [html, setHtml] = useState(config.html || null);
-  const [mapboxToken, setMapboxToken] = useState(null);
   const [iframeId, setIframeId] = useState(config.iframeId || nanoid());
   const [iframeConfig, setIframeConfig] = useState(config);
+  const secrets = {
+    MAPBOX_TOKEN: getLocalStorage('MAPBOX_TOKEN'),
+    LLM_API_KEY: getLocalStorage('LLM_API_KEY'),
+    LLM_BASE_URL: getLocalStorage('LLM_BASE_URL'),
+    LLM_MODEL: getLocalStorage('LLM_MODEL'),
+  };
 
   const iframeRef = useRef(null);
 
@@ -72,9 +77,6 @@ const IframeComponent = ({ config, input, setConfig, setOutput }) => {
         ...config,
         iframeId,
       });
-    getMapboxToken().then((token) => {
-      setMapboxToken(token);
-    });
   }, [iframeId, setConfig]);
 
   //   Listen for messages from the iframe
@@ -114,8 +116,8 @@ const IframeComponent = ({ config, input, setConfig, setOutput }) => {
         ${cssString}
     </style>
     <script>
+        const secrets = ${JSON.stringify(secrets)};
         window.iframeId = "${iframeId}";
-        const mapboxToken = "${mapboxToken}";
     </script>
     `;
     if (config?.html) {
@@ -130,7 +132,7 @@ const IframeComponent = ({ config, input, setConfig, setOutput }) => {
     `
       );
     }
-  }, [config?.html, config?.name, config?.author, iframeId, mapboxToken]);
+  }, [config?.html, config?.name, config?.author, iframeId]);
 
   return (
     <iframe

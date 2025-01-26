@@ -21,36 +21,37 @@ const ModuleIcon = (props) => {
 
   const latestPropsRef = useRef(props);
 
-  const handleClick = (manifest) => {
-    getModule(manifest.config.id).then((config) => {
-      const newManifest = { ...manifest };
-      newManifest.id = nanoid();
+  const handleClick = async (manifest) => {
+    const newManifest = { ...manifest };
+    if (manifest.config.custom) {
+      const config = await getModule(manifest.config.id);
       newManifest.config = config;
-      newManifest.config.category = 'custom';
-      newManifest.config.basic = false;
-      newManifest.config.custom = true;
-      newManifest.position = {
-        x: Math.random() * window.innerWidth * 0.3,
-        y: Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.1,
-      };
-      props.setNode(newManifest);
-    });
+    }
+
+    newManifest.id = nanoid();
+    newManifest.config.category = 'custom';
+    newManifest.config.basic = false;
+    newManifest.position = {
+      x: Math.random() * window.innerWidth * 0.3,
+      y: Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.1,
+    };
+    props.setNode(newManifest);
   };
-  const handleDragEnd = (e, manifest) => {
-    getModule(manifest.config.id).then((config) => {
-      const { x, y, zoom } = latestPropsRef.current.viewport;
-      const flowPanel = document.getElementById('FlowPanel');
-      const newX = (e.clientX - flowPanel.offsetWidth - x) / zoom;
-      const newY = (e.clientY - y) / zoom;
-      const newManifest = { ...manifest };
-      newManifest.id = nanoid();
+  const handleDragEnd = async (e, manifest) => {
+    const newManifest = { ...manifest };
+    if (manifest.config.custom) {
+      const config = await getModule(manifest.config.id);
       newManifest.config = config;
-      newManifest.config.category = 'custom';
-      newManifest.config.basic = false;
-      newManifest.config.custom = true;
-      newManifest.position = { x: newX, y: newY };
-      props.setNode(newManifest);
-    });
+    }
+    const { x, y, zoom } = latestPropsRef.current.viewport;
+    const flowPanel = document.getElementById('FlowPanel');
+    const newX = (e.clientX - flowPanel.offsetWidth - x) / zoom;
+    const newY = (e.clientY - y) / zoom;
+    newManifest.id = nanoid();
+    newManifest.config.category = 'custom';
+    newManifest.config.basic = false;
+    newManifest.position = { x: newX, y: newY };
+    props.setNode(newManifest);
   };
 
   // delete user module

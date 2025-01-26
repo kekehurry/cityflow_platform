@@ -15,28 +15,21 @@ FROM neo4j:5.20.0
 
 USER root
 
-WORKDIR /
+WORKDIR /cityflow_platform
 
-COPY --from=build /app/.next/standalone /cityflow_workstation
-COPY --from=build /app/.next/static /cityflow_workstation/.next/static
-COPY --from=build /app/public /cityflow_workstation/public
-COPY ./cityflow_database /cityflow_database
-COPY ./cityflow_executor /cityflow_executor
-COPY ./start-services.sh /usr/local/bin/start-services.sh
-COPY ./requirements.txt /requirements.txt
-COPY ./.env.production /.env
-COPY ./.env.production /cityflow_database/.env
-COPY ./.env.production /cityflow_executor/.env
+COPY --from=build /app/.next/standalone ./cityflow_workstation
+COPY --from=build /app/.next/static ./cityflow_workstation/.next/static
+COPY --from=build /app/public ./cityflow_workstation/public
+COPY ./cityflow_database ./cityflow_database
+COPY ./cityflow_executor ./cityflow_executor
+COPY ./start-services.sh ./start-services.sh
+COPY ./requirements.txt ./requirements.txt
+COPY ./.env.production ./.env
 
 # Load environment variables from file
 ENV HOSTNAME='0.0.0.0'
 ENV NODE_ENV=production
-
-ENV EXECUTOR_BIND_DIR
-ENV LLM_BASE_URL
-ENV LLM_API_KEY
-ENV LLM_MODEL
-ENV MAPBOX_TOKEN
+ENV EXECUTOR_BIND_DIR=$PWD/temp/code
 
 RUN apt-get update && \
     apt-get install -y ca-certificates curl python3 python3-pip && \
@@ -66,4 +59,4 @@ EOF
 
 EXPOSE 3000 
 
-ENTRYPOINT ["/usr/local/bin/start-services.sh"]
+ENTRYPOINT ["/cityflow_platform/start-services.sh"]

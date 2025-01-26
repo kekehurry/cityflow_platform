@@ -1,14 +1,10 @@
 #!/bin/bash
 
 #setup env before start neo4j
-if [ -f /.env ]; then
-  echo "Loading environment variables from /.env..."
-  set -a
-  source /.env
-  set +a
-else
-  echo "No .env file found at /.env"
-fi
+echo "Loading environment variables from /cityflow_platform/.env..."
+set -a
+source /cityflow_platform/.env
+set +a
 
 /startup/docker-entrypoint.sh neo4j &
 
@@ -26,7 +22,9 @@ fi
 # Start services
 cd /cityflow_database &&  python3 server.py &
 cd /cityflow_executor && python3 server.py &
-cd /cityflow_workstation/ && node server.js &
+cd /cityflow_workstation && node server.js &
+
+cd /cityflow_platform
 
 # Wait for any process to exit
 wait -n

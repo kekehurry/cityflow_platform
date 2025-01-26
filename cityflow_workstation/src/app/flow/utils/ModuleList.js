@@ -232,7 +232,7 @@ export const ModuleList = (props) => {
                     const id = nanoid();
                     const newManifest = { ...builderManifest };
                     newManifest.id = id;
-                    newManifest.config = { ...config };
+                    newManifest.config = { ...config, custom: true };
                     return (
                       <ModuleIcon
                         userModules={userModules}

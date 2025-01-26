@@ -164,6 +164,15 @@ export const upload = (rfInstance, initStore) => {
   });
 };
 
+export const getLocalStorage = (key) => {
+  if (typeof localStorage === 'undefined') {
+    return null;
+  }
+  const data = localStorage.getItem('cs_flow') || '{}';
+  const cs_data = JSON.parse(data);
+  return cs_data[key];
+};
+
 export const useLocalStorage = (key, defaultValue) => {
   const [localValue, setLocalValue] = useState(() => {
     if (typeof localStorage === 'undefined') {

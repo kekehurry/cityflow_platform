@@ -6,6 +6,10 @@ import {
   IconButton,
   MenuItem,
   Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import React, { useState, useEffect, useRef } from 'react';
@@ -59,6 +63,14 @@ const FlowSettings = (props) => {
   const [loading, setLoading] = useState(false);
   const [initLog, setInitLog] = useState('');
   const [author, setAuthor] = useLocalStorage('author', null);
+  const [LLM_BASE_URL, setLLMBaseUrl] = useLocalStorage(
+    'LLM_BASE_URL',
+    'https://api.openai.com/v1'
+  );
+  const [LLM_MODEL, setLLMModel] = useLocalStorage('LLM_MODEL', 'gpt-40-mini');
+  const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
+  const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
+
   // set flowInited
   const setFlowInited = (value) => {
     setMeta({ flowInited: value });
@@ -260,32 +272,57 @@ const FlowSettings = (props) => {
         >
           <MenuItem value={defaultRunner}>{defaultRunner}</MenuItem>
         </TextField>
-        <Stack direction="row" spacing={2} justifyContent="space-between">
-          <TextField
-            id="pypackages"
-            fullWidth
-            label="python packages"
-            onChange={handleFormChange}
-            value={formValue?.pypackages || ''}
-            multiline
-            rows={8}
-            placeholder="one package per line"
-            InputLabelProps={{ shrink: true }}
-            disabled
-          />
-          <TextField
-            id="jspackages"
-            fullWidth
-            label="npm packages"
-            onChange={handleFormChange}
-            value={formValue?.jspackages || ''}
-            multiline
-            rows={8}
-            placeholder="one package per line"
-            InputLabelProps={{ shrink: true }}
-            disabled
-          />
-        </Stack>
+        <Accordion
+          sx={{ border: '0px', background: 'none' }}
+          variant="outlined"
+          disableGutters
+        >
+          <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
+            Secrets
+          </AccordionSummary>
+          <AccordionDetails sx={{ m: 0, p: 0 }}>
+            <Stack spacing={2}>
+              <Divider />
+              <TextField
+                fullWidth
+                variant="standard"
+                label="LLM_BASE_URL"
+                id="LLM_BASE_URL"
+                value={LLM_BASE_URL}
+                onChange={(e) => setLLMBaseUrl(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                variant="standard"
+                label="LLM_MODEL"
+                id="LLM_MODEL"
+                value={LLM_MODEL}
+                onChange={(e) => setLLMModel(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                variant="standard"
+                label="LLM_API_KEY"
+                id="LLM_API_KEY"
+                value={LLM_API_KEY}
+                onChange={(e) => setLLLMAPIKey(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                variant="standard"
+                label="MAPBOX_TOEKN"
+                id="MAPBOX_TOEKN"
+                value={MAPBOX_TOKEN}
+                onChange={(e) => setMapboxToken(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <Divider />
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
         <LoadingButton
           loading={loading}
           variant="contained"
