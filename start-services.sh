@@ -25,7 +25,7 @@ fi
 # Start services
 python3 ./cityflow_database/server.py &
 python3 ./cityflow_executor/server.py &
-node ./cityflow_workstationserver.js &
+node ./cityflow_workstation/server.js &
 
 # Wait for any process to exit
 wait -n
