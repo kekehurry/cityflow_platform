@@ -27,6 +27,8 @@ const mapStateToProps = (state, ownProps) => ({
   input: state.nodes.find((node) => node.id === ownProps.id)?.data.input,
   output: state.nodes.find((node) => node.id === ownProps.id)?.data.output,
   config: state.nodes.find((node) => node.id === ownProps.id)?.config,
+  interfaceComponent: state.nodes.find((node) => node.id === ownProps.id)
+    ?.config?.interfaceComponent,
   pinNodes: state.pinNodes,
   flowId: state.flowId,
   flowAuthor: state.author,
@@ -115,6 +117,7 @@ class ExpandNode extends PureComponent {
       config,
       setConfig,
       image,
+      interfaceComponent,
       children,
     } = this.props;
     const margin = 8;
@@ -324,12 +327,16 @@ class ExpandNode extends PureComponent {
               }}
               className="nowheel nodrag"
             >
-              <IframeComponent
-                config={config}
-                input={input}
-                setOutput={this.setOutput}
-                setConfig={setConfig}
-              />
+              {interfaceComponent ? (
+                { interfaceComponent }
+              ) : (
+                <IframeComponent
+                  config={config}
+                  input={input}
+                  setOutput={this.setOutput}
+                  setConfig={setConfig}
+                />
+              )}
             </Paper>
           </Card>
           <>

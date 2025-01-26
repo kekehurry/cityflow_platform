@@ -278,7 +278,7 @@ const FlowSettings = (props) => {
           disableGutters
         >
           <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
-            Secrets
+            Secrets (these secrets only save locally)
           </AccordionSummary>
           <AccordionDetails sx={{ m: 0, p: 0 }}>
             <Stack spacing={2}>
