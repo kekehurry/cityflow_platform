@@ -30,9 +30,10 @@ cp .env.production .env
 
 # dev in linux remove the '' after -i
 # modify the .env file
+echo "EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code" >> .env
+
 sed -i '' "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
 sed -i '' "s|EXECUTOR_WORK_DIR=.*|EXECUTOR_WORK_DIR=${PWD}/cityflow_executor/code|" .env
-sed -i '' "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
 sed -i '' "s|DATABASE_SOURCE_DIR=.*|DATABASE_SOURCE_DIR=${PWD}/cityflow_database/source|" .env
 sed -i '' "s|LOCAL_MODEL_PATH=.*|LOCAL_MODEL_PATH=${PWD}/cityflow_database/models|" .env
 sed -i '' "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env

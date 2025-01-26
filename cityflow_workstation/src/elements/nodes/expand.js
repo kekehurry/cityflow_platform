@@ -8,8 +8,13 @@ import {
   Paper,
 } from '@mui/material';
 import { connect } from 'react-redux';
-import { updateOutput, updateConfig, removeNode } from '@/store/actions';
-import _ from 'lodash';
+import {
+  updateOutput,
+  updateConfig,
+  removeNode,
+  updateZIndex,
+} from '@/store/actions';
+import _, { set } from 'lodash';
 import theme from '@/theme';
 
 import LimitHandle from './utils/LimitHandle';
@@ -33,6 +38,7 @@ const mapStateToProps = (state, ownProps) => ({
   flowId: state.flowId,
   flowAuthor: state.author,
   image: state.image,
+  position: state.nodes.find((node) => node.id === ownProps.id)?.position,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -43,6 +49,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     dispatch(updateOutput(ownProps.id, { ...output }));
   },
   removeNode: () => dispatch(removeNode(ownProps.id)),
+  setIndex: (index) => {
+    dispatch(updateZIndex(ownProps.id, { zIndex: index }));
+  },
 });
 
 class ExpandNode extends PureComponent {
@@ -118,10 +127,10 @@ class ExpandNode extends PureComponent {
       setConfig,
       image,
       interfaceComponent,
+      position,
       children,
     } = this.props;
     const margin = 8;
-
     const mapModule = (children) =>
       React.Children.map(children, (child) => {
         return React.cloneElement(child, {
@@ -133,6 +142,8 @@ class ExpandNode extends PureComponent {
           config,
           setConfig,
           image,
+          position,
+          expand: this.state.expand,
           setOutput: this.setOutput,
           run: config?.run,
           setRun: (run) => {
@@ -150,22 +161,28 @@ class ExpandNode extends PureComponent {
           direction="row"
           justifyContent="space-between"
           spacing={2}
-          sx={{ width: '100%', height: '100%', display: 'flex' }}
+          sx={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            position: 'relative',
+          }}
         >
           <Card
             sx={{
               minWidth: 50,
               minHeight: 50,
-              width: config.width + 4 * margin,
-              height:
-                config.height +
-                6 * margin +
-                Math.max(
-                  config.input?.length || 1,
-                  config.output?.length || 1
-                ) *
-                  16 +
-                20,
+              width: this.state.expand ? 50 : config.width + 4 * margin,
+              height: this.state.expand
+                ? 50
+                : config.height +
+                  6 * margin +
+                  Math.max(
+                    config.input?.length || 1,
+                    config.output?.length || 1
+                  ) *
+                    16 +
+                  20,
               padding: `${margin}px`,
               border: this.state.hover
                 ? `1px solid ${theme.palette.edge.dark}`
@@ -232,6 +249,7 @@ class ExpandNode extends PureComponent {
                   fontSize="5px"
                   onClick={() => {
                     this.setState({ expand: !this.state.expand });
+                    this.props.setIndex({ zIndex: 1000 });
                   }}
                   sx={{
                     cursor: 'pointer',
@@ -337,42 +355,62 @@ class ExpandNode extends PureComponent {
               )}
             </Paper>
           </Card>
-          <>
-            <Card
+          <Card
+            sx={{
+              padding: `${margin}px`,
+              zIndex: 1000, // Ensure it's on top of all elements
+              background: theme.palette.node.main,
+              width: config.expandWidth || 800,
+              height: config.expandHeight || 600,
+              display: this.state.expand ? 'block' : 'none',
+              position: 'fixed', // Make it float
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)', // Adjust position to truly center
+            }}
+            className={this.state.expand ? 'expanded' : ''}
+          >
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div
+                onClick={() => {
+                  this.setState({ expand: !this.state.expand });
+                  this.props.setIndex({ zIndex: 0 });
+                }}
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: this.state.expand ? '#FFB300' : '#5c5d5d',
+                  cursor: 'pointer',
+                  marginBottom: '5px',
+                }}
+              />
+            </div>
+            <Paper
+              variant="outlined"
               sx={{
-                padding: `${margin}px`,
-                zIndex: 1,
-                background: theme.palette.node.main,
-                width: config.expandWidth,
-                height: config.expandHeight,
-                display: this.state.expand ? 'block' : 'none',
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+                // margin: `${margin/2}px`,
+                background: theme.palette.node.container,
+                width: '100%',
+                height: config.expandHeight - 35,
               }}
             >
-              <Paper
-                variant="outlined"
-                sx={{
-                  overflow: 'hidden',
-                  scrollbarWidth: 'none',
-                  // margin: `${margin/2}px`,
-                  background: theme.palette.node.container,
-                  width: '100%',
-                  height: '100%',
-                }}
-              >
-                {process.env.NODE_ENV === 'production' ? (
-                  <ErrorBoundary
-                    stop={this.stop}
-                    error={this.error}
-                    warning={this.warning}
-                  >
-                    {mapModule(children)}
-                  </ErrorBoundary>
-                ) : (
-                  mapModule(children)
-                )}
-              </Paper>
-            </Card>
-            <svg
+              {process.env.NODE_ENV === 'production' ? (
+                <ErrorBoundary
+                  stop={this.stop}
+                  error={this.error}
+                  warning={this.warning}
+                >
+                  {mapModule(children)}
+                </ErrorBoundary>
+              ) : (
+                mapModule(children)
+              )}
+            </Paper>
+          </Card>
+          {/* <svg
               className="nodrag"
               style={{
                 position: 'absolute',
@@ -395,8 +433,7 @@ class ExpandNode extends PureComponent {
                   strokeWidth: 1,
                 }}
               />
-            </svg>
-          </>
+            </svg> */}
         </Stack>
       </>
     );

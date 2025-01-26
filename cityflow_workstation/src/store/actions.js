@@ -39,6 +39,11 @@ export const updateConfig = (id, config) => ({
   payload: { id, config },
 });
 
+export const updateZIndex = (id, zIndex) => ({
+  type: 'UPDATE_ZINDEX',
+  payload: { id, zIndex },
+});
+
 export const runAll = () => ({
   type: 'RUN_ALL',
 });

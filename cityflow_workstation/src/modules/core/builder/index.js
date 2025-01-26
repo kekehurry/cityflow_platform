@@ -10,6 +10,7 @@ import FileUploader from './utils/FileUploader';
 import ControlButtons from './utils/ControlButtons';
 import ConfigTab from './utils/ConfigTab';
 import { initUserId } from '@/utils/local';
+import { useReactFlow } from 'reactflow';
 
 const initCode = {
   interface: `
@@ -51,6 +52,8 @@ export default function ModuleBuilder(props) {
     config,
     setConfig,
     image,
+    position,
+    expand,
     setOutput,
     run,
     setLoading,
@@ -70,6 +73,8 @@ export default function ModuleBuilder(props) {
     output: config.output || ['output'],
     width: config.width || 200,
     height: config.height || 100,
+    expandWidth: config.expandWidth || 800,
+    expandHeight: config.expandHeight || 600,
     port: config.type === 'server' ? config.port || 8080 : null,
     language: config.language || 'javascript',
     description: config.description || 'No description',
@@ -81,6 +86,7 @@ export default function ModuleBuilder(props) {
   const [codeSubmited, setCodeSubmited] = useState(false);
   const [params, setParams] = useState(null);
   const executeResult = useExecuteCode(params || {});
+  const { setCenter, fitBounds } = useReactFlow();
 
   // init
   useEffect(() => {
@@ -96,6 +102,15 @@ export default function ModuleBuilder(props) {
       removeSession(flowId, id);
     };
   }, []);
+
+  // expand
+  useEffect(() => {
+    expand &&
+      setCenter(position.x + 70, position.y + 30, {
+        duration: 1000,
+        zoom: 1.1,
+      });
+  }, [expand]);
 
   // reset
   useEffect(() => {
@@ -188,7 +203,7 @@ export default function ModuleBuilder(props) {
         setFormValue={setFormValue}
         config={config}
         setConfig={setConfig}
-        height={270}
+        height={config.expandHeight - 330}
       />
       <Typography variant="caption">Logs</Typography>
       <TextField
@@ -198,7 +213,7 @@ export default function ModuleBuilder(props) {
         lable="Log"
         fullWidth
         value={log ? JSON.stringify(log) : ''}
-        rows={10}
+        rows={9}
         sx={{ background: theme.palette.node.main }}
       />
     </Box>
@@ -214,18 +229,18 @@ export default function ModuleBuilder(props) {
         setFormValue={setFormValue}
         config={config}
         setConfig={setConfig}
-        height={440}
+        height={config.expandHeight - 170}
       />
     </Box>
   );
   const dependencyTab = (
     <Box hidden={tab !== 2}>
-      <Stack spacing={1} height={520}>
+      <Stack spacing={1} height={config.expandHeight - 100}>
         <Typography variant="caption">Dependencies</Typography>
         <FileUploader
           formValue={formValue}
           setFormValue={setFormValue}
-          height={500}
+          height={config.expandHeight - 110}
         />
       </Stack>
     </Box>
@@ -270,7 +285,7 @@ export default function ModuleBuilder(props) {
               <Box hidden={editor !== index} key={tab}>
                 <MonacoEditor
                   width="100%"
-                  height="600px"
+                  height={config.expandHeight - 50}
                   language={tab === 'interface' ? 'javascript' : 'python'}
                   theme="vs-dark"
                   value={formValue.code[tab]}

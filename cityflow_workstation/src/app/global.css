@@ -30,6 +30,10 @@ html {
     font-style: normal;
 }
 
+.expanded {
+    z-index : 3 !important;
+}
+
 .annotation {
     z-index : 2 !important;
 }

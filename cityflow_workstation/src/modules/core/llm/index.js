@@ -13,11 +13,22 @@ import {
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import LLMInterface from './interface';
-import { json } from 'd3';
+import { useReactFlow } from 'reactflow';
 
 export default function LLM(props) {
-  const { input, config, setConfig, setOutput, run, loading, setLoading } =
-    props;
+  const {
+    input,
+    config,
+    setConfig,
+    setOutput,
+    run,
+    loading,
+    setLoading,
+    position,
+    expand,
+  } = props;
+
+  const { setCenter, fitBounds } = useReactFlow();
 
   const [formValue, setFormValue] = useState({
     systemPrompt:
@@ -59,6 +70,15 @@ export default function LLM(props) {
       })
     );
   };
+
+  // expand
+  useEffect(() => {
+    expand &&
+      setCenter(position.x + 70, position.y + 30, {
+        duration: 1000,
+        zoom: 1,
+      });
+  }, [expand]);
 
   useEffect(() => {
     setConfig({

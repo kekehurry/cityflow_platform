@@ -67,7 +67,7 @@ const FlowSettings = (props) => {
     'LLM_BASE_URL',
     'https://api.openai.com/v1'
   );
-  const [LLM_MODEL, setLLMModel] = useLocalStorage('LLM_MODEL', 'gpt-40-mini');
+  const [LLM_MODEL, setLLMModel] = useLocalStorage('LLM_MODEL', 'gpt-4o-mini');
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
 

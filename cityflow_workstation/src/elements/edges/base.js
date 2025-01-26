@@ -55,7 +55,7 @@ class ButtonEdge extends PureComponent {
           <Box
             sx={{
               position: 'absolute',
-              zIndex: 1,
+              zIndex: 0,
               transform: `translate(-50%, -50%) translate(${labelX}px,${
                 labelY + 1
               }px)`,

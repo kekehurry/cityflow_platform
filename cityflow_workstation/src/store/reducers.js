@@ -120,6 +120,24 @@ const reducer = (state = initState, action) => {
         ),
       };
 
+    case 'UPDATE_ZINDEX':
+      // update the node style
+      return {
+        ...state,
+        nodes: state.nodes.map((node) =>
+          node.id === action.payload.id // update the node
+            ? {
+                ...node, // copy all other properties of the node
+                zIndex: action.payload.zIndex, // update the node config
+                selected: true,
+              }
+            : {
+                ...node,
+                selected: false,
+              }
+        ),
+      };
+
     case 'RUN_ALL':
       // run all the nodes
       return {
