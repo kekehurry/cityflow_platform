@@ -16,7 +16,7 @@ done
 
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
-  cd / && python3 /cityflow_database/init_db.py
+  cd / && python3 /cityflow_platform/cityflow_database/init_db.py
 fi
 
 # Start services
