@@ -46,9 +46,10 @@ RUN apt-get update && \
       tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && \
     apt-get install -y docker-ce docker-ce-cli containerd.io && \
-    pip3 install -r /requirements.txt && \
+    # prepare for init
+    pip3 install -r ./requirements.txt && \
     chmod +x /usr/local/bin/start-services.sh && \
-    ln -s /data /cityflow_database/data
+    ln -s /data ./cityflow_database/data
 
 # Add host.docker.internal support
 COPY <<-"EOF" /etc/docker/daemon.json
