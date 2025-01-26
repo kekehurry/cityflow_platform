@@ -1,10 +1,9 @@
 #!/bin/bash
 
-DATABASE_HOST='localhost'
-EXECUTOR_HOST='localhost'
+DATABASE_HOST='127.0.0.1'
+EXECUTOR_HOST='127.0.0.1'
 PUID=$(id -u)
 PGID=$(id -g)
-INIT_DATABAS=true
 
 if [ "$(docker ps -aq -f name=neo4j)" ]; then
     docker start neo4j
@@ -25,7 +24,9 @@ fi
 
 echo "Environment setup..."
 
-cp .env.product .env
+# Detect OS and set sed command accordingly
+
+cp .env.production .env
 
 # dev in linux remove the '' after -i
 # modify the .env file
@@ -37,6 +38,12 @@ sed -i '' "s|LOCAL_MODEL_PATH=.*|LOCAL_MODEL_PATH=${PWD}/cityflow_database/model
 sed -i '' "s|BOLT_URL=.*|BOLT_URL=bolt://${DATABASE_HOST}:7687|" .env
 sed -i '' "s|DATASET_SERVER=.*|DATASET_SERVER=http://${DATABASE_HOST}:7575|" .env
 sed -i '' "s|EXECUTOR_SERVER=.*|EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
+
+
+if [[ ! " $@ " =~ " --beian " ]]; then
+  sed -i '' "s|BEIAN=.*|BEIAN=|" .env
+fi
+
 
 # copy the .env file to the cityflow_workstation
 echo "copy .env file"
@@ -71,17 +78,10 @@ rm -rf ${PWD}/cityflow_executor/code/* \
 ' \
 SIGINT
 
-# Initialize database
-if [ "${INIT_DATABASE}" ]; then
-  python3 ./cityflow_database/init_db.py
-fi
+cd ${PWD}/cityflow_executor && python server.py | tee executor.log &
 
-python ./cityflow_executor/server.py | tee executor.log &
-
-docker start neo4j && python ./cityflow_database/server.py | tee database.log &
+cd ${PWD}/cityflow_database && docker start neo4j && python server.py | tee database.log &
 
 cd ${PWD}/cityflow_workstation && npm run dev | tee workstation.log &
-
-cd ../
 
 wait

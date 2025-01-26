@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import React, { useEffect, useRef, useState } from 'react';
+import Loading from '@/components/Loading';
 
 const createForceGraph2D = ({
   containerId,
@@ -289,10 +290,11 @@ const ForceGraph2D = ({
     console.log('No graph data');
     return (
       <div ref={containerRef}>
-        <img
+        <Loading />
+        {/* <img
           src="/static/fetching_large.gif"
           style={{ width: '100%', height: '100%' }}
-        />
+        /> */}
       </div>
     );
   }

@@ -1,7 +1,7 @@
 'use client';
 import ReactFlow, { Background } from 'reactflow';
 import React, { use, useEffect, useState } from 'react';
-
+import Loading from '@/components/Loading';
 import {
   onConnect,
   onEdgesChange,
@@ -197,13 +197,14 @@ const FlowStation = (props) => {
       ) : (
         <>
           <Header />
-          <img
+          <Loading dotSize={15} />
+          {/* <img
             src="/static/fetching_2xlarge.gif"
             style={{
               width: '100%',
               height: '100%',
             }}
-          />
+          /> */}
         </>
       )}
     </div>

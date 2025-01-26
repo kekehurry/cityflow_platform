@@ -26,7 +26,7 @@ export default class Assistant {
     this.context = context;
   }
 
-  async chat(inputMessage, messageHistory) {
+  async chat(inputMessage, messageHistory = null) {
     const LLM_BASE_URL = getLocalStorage('LLM_BASE_URL');
     const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
     const LLM_MODEL = getLocalStorage('LLM_MODEL');

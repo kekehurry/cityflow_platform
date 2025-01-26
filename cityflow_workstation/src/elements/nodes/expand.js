@@ -121,10 +121,8 @@ class ExpandNode extends PureComponent {
       children,
     } = this.props;
     const margin = 8;
-    const nodeWidth = 800;
-    const nodeHeight = 600;
 
-    const mapModule = () =>
+    const mapModule = (children) =>
       React.Children.map(children, (child) => {
         return React.cloneElement(child, {
           id,
@@ -327,8 +325,8 @@ class ExpandNode extends PureComponent {
               }}
               className="nowheel nodrag"
             >
-              {interfaceComponent ? (
-                { interfaceComponent }
+              {mapModule(interfaceComponent) ? (
+                mapModule(interfaceComponent)
               ) : (
                 <IframeComponent
                   config={config}
@@ -345,8 +343,8 @@ class ExpandNode extends PureComponent {
                 padding: `${margin}px`,
                 zIndex: 1,
                 background: theme.palette.node.main,
-                width: nodeWidth,
-                height: nodeHeight,
+                width: config.expandWidth,
+                height: config.expandHeight,
                 display: this.state.expand ? 'block' : 'none',
               }}
             >
@@ -367,10 +365,10 @@ class ExpandNode extends PureComponent {
                     error={this.error}
                     warning={this.warning}
                   >
-                    {mapModule()}
+                    {mapModule(children)}
                   </ErrorBoundary>
                 ) : (
-                  mapModule()
+                  mapModule(children)
                 )}
               </Paper>
             </Card>
@@ -387,9 +385,9 @@ class ExpandNode extends PureComponent {
               <polygon
                 points={`${margin},${margin} ${
                   config.width + margin * 6
-                },${margin} ${
-                  config.width + margin * 6
-                },${nodeHeight} ${margin},${config.height - margin}`}
+                },${margin} ${config.width + margin * 6},${
+                  config.expandHeight
+                } ${margin},${config.height - margin}`}
                 style={{
                   fill: 'rgb(128,128,128,0.1)',
                   stroke: 'gray',

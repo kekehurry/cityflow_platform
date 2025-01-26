@@ -7,6 +7,8 @@
     "type": "interface",
     "width": 200,
     "height": 100,
+    "expandWidth": 800,
+    "expandHeight": 600,
     "output": ["output"],
     "run": false,
     "expand": false,
