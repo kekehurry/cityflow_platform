@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DATABASE_HOST='127.0.0.1'
-EXECUTOR_HOST='127.0.0.1'
+DATABASE_HOST='localhost'
+EXECUTOR_HOST='localhost'
 PUID=$(id -u)
 PGID=$(id -g)
 
@@ -76,10 +76,12 @@ rm -rf ${PWD}/cityflow_executor/code/* \
 ' \
 SIGINT
 
-cd ${PWD}/cityflow_executor && python server.py | tee executor.log &
+python ./cityflow_executor/server.py | tee executor.log &
 
-cd ${PWD}/cityflow_database && docker start neo4j && python server.py | tee database.log &
+docker start neo4j && python ./cityflow_database/server.py | tee database.log &
 
 cd ${PWD}/cityflow_workstation && npm run dev | tee workstation.log &
+
+cd ../
 
 wait

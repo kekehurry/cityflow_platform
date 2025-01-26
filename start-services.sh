@@ -14,17 +14,18 @@ until curl -s http://localhost:7474 > /dev/null; do
     sleep 2
 done
 
+# cd workdir
+cd /cityflow_platform
+
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
-  cd / && python3 /cityflow_platform/cityflow_database/init_db.py
+  python3 ./cityflow_database/init_db.py
 fi
 
 # Start services
-cd /cityflow_platform/cityflow_database &&  python3 server.py &
-cd /cityflow_platform/cityflow_executor && python3 server.py &
-cd /cityflow_platform/cityflow_workstation && node server.js &
-
-cd /cityflow_platform
+python3 ./cityflow_database/server.py &
+python3 ./cityflow_executor/server.py &
+node ./cityflow_workstationserver.js &
 
 # Wait for any process to exit
 wait -n

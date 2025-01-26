@@ -309,6 +309,7 @@ const FlowSettings = (props) => {
                 value={LLM_API_KEY}
                 onChange={(e) => setLLLMAPIKey(e.target.value)}
                 InputLabelProps={{ shrink: true }}
+                type="password"
               />
               <TextField
                 fullWidth
@@ -318,6 +319,7 @@ const FlowSettings = (props) => {
                 value={MAPBOX_TOKEN}
                 onChange={(e) => setMapboxToken(e.target.value)}
                 InputLabelProps={{ shrink: true }}
+                type="password"
               />
               <Divider />
             </Stack>
