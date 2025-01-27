@@ -1,0 +1,61 @@
+name: Deploy to CityFlow Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: http://192.168.1.213:3333/kekehurry/checkout@v3
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    - name: Add server to known_hosts
+      run: |
+        if ! ssh-keygen -F 192.168.1.219 > /dev/null; then
+          ssh-keyscan -H 192.168.1.219 >> ~/.ssh/known_hosts
+        fi
+
+    - name: SSH into server
+      run: |
+        ssh kai@192.168.1.219 << 'EOF'
+        cd ~/cityflow_platform
+        # update the code
+        git checkout -f
+        git pull
+        # Remove containers with ancestor ghcr.io/kekehurry/cityflow_runner:latest
+        runner_containers=$(docker ps -a --filter "ancestor=ghcr.io/kekehurry/cityflow_runner:latest" --format "{{.ID}}")
+        if [ -n "$runner_containers" ]; then
+          echo "$runner_containers" | xargs docker rm -f
+        fi
+        # Remove containers with ancestor ghcr.io/kekehurry/cityflow_platform:latest
+        platform_containers=$(docker ps -a --filter "ancestor=ghcr.io/kekehurry/cityflow_platform:latest" --format "{{.ID}}")
+        if [ -n "$platform_containers" ]; then
+          echo "$platform_containers" | xargs docker rm -f
+        fi
+        # build and push the image
+        docker build -t 192.168.1.213:3333/kekehurry/cityflow_platform:latest .
+        docker push 192.168.1.213:3333/kekehurry/cityflow_platform:latest
+        docker tag 192.168.1.213:3333/kekehurry/cityflow_platform:latest ghcr.io/kekehurry/cityflow_platform:latest
+        docker rmi 192.168.1.213:3333/kekehurry/cityflow_platform:latest
+        # Cleanup
+        docker system prune -f
+        # run the container
+        docker run -d \
+          --name cityflow_platform \
+          -p 3000:3000 \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -v /home/kai/temp:/cityflow_platform/cityflow_executor/code \
+          -e EXECUTOR_BIND_DIR=/home/kai/temp \
+          ghcr.io/kekehurry/cityflow_platform:latest
+        EOF
+        echo "SSH command executed successfully."
