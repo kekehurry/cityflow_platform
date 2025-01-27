@@ -35,13 +35,15 @@ const MarkdownHeader = ({ code, sendCode }) => (
       >
         COPY
       </div>
-      <div
-        className="markdown-button"
-        style={buttonStyle}
-        onClick={() => sendCode && sendCode(code)}
-      >
-        SEND
-      </div>
+      {sendCode && (
+        <div
+          className="markdown-button"
+          style={buttonStyle}
+          onClick={() => sendCode && sendCode(code)}
+        >
+          SEND
+        </div>
+      )}
     </div>
   </div>
 );
@@ -170,25 +172,10 @@ export const MessageRight = ({ message, name, avatar }) => {
   );
 };
 
-export const MessageLeft = ({
-  message,
-  formValue,
-  setFormValue,
-  avatar,
-  editorTab,
-}) => {
-  const sendCode = (code) => {
-    setFormValue({
-      ...formValue,
-      code: {
-        ...formValue.code,
-        [editorTab]: code,
-      },
-    });
-  };
+export const MessageLeft = ({ message, name, avatar, sendCode }) => {
   return (
     <MessageNoFrame>
-      <ChatAvatar alt={formValue.title} src={avatar} />
+      <ChatAvatar alt={name} src={avatar} />
       <CustomMarkdown markdown={message} sendCode={sendCode} />
     </MessageNoFrame>
   );

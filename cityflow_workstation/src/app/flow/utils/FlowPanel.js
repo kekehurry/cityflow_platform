@@ -7,6 +7,7 @@ import theme from '@/theme';
 import { keepAlive } from '@/utils/executor';
 import FlowSetting from './FlowSetting';
 import ModuleList from './ModuleList';
+import ChatAssistant from './ChatAssistant';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -18,17 +19,17 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 export const FlowPanel = (props) => {
-  const [tab, setTab] = useState(1);
+  const [tab, setTab] = useState(0);
   // change panel tab
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
   // Set the tab to modulePanel if the flow is inited
   useEffect(() => {
-    if (props.state?.flowInited) {
-      setTab(1);
-    } else {
+    if (!props.state?.flowInited) {
       setTab(0);
+    } else {
+      setTab(1);
     }
   }, [props.state?.flowInited]);
 
@@ -62,7 +63,7 @@ export const FlowPanel = (props) => {
           variant="outlined"
           sx={{
             scrollbarWidth: 'none',
-            minHeight: '150vh',
+            minHeight: '100vh',
             height: 'auto',
             p: 1,
             pl: 2,
@@ -71,6 +72,7 @@ export const FlowPanel = (props) => {
         >
           <FlowSetting tab={tab} />
           <ModuleList tab={tab} />
+          <ChatAssistant tab={tab} />
         </Box>
         <Box
           sx={{
@@ -89,13 +91,22 @@ export const FlowPanel = (props) => {
             centered
             sx={{
               width: '100%',
-              height: 10,
+              height: 5,
               mt: 1,
               pb: 1,
             }}
           >
-            <Tab label="flowSettings" />
-            <Tab label="modulePanel" disabled={!props.state?.flowInited} />
+            <Tab label="Settings" sx={{ fontSize: 12, width: '30%' }} />
+            <Tab
+              label="Modules"
+              sx={{ fontSize: 12, width: '30%' }}
+              disabled={!props.state?.flowInited}
+            />
+            <Tab
+              label="Assistant"
+              sx={{ fontSize: 12, width: '30%' }}
+              disabled={!props.state?.flowInited}
+            />
           </Tabs>
         </Box>
       </Box>

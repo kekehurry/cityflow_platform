@@ -56,7 +56,7 @@ export default class Assistant {
     }
   }
 
-  async stream(inputMessage, messageHistory, signal) {
+  async *stream(inputMessage, messageHistory, signal) {
     const LLM_BASE_URL = getLocalStorage('LLM_BASE_URL');
     const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
     const LLM_MODEL = getLocalStorage('LLM_MODEL');
@@ -78,42 +78,50 @@ export default class Assistant {
           messages: messages,
           stream: true,
         }),
+        signal, // Pass the signal to the fetch request
       });
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
-      let output = '';
 
       while (true) {
+        // Check if the signal is aborted
+        if (signal.aborted) {
+          console.log('Stream aborted');
+          reader.cancel(); // Cancel the reader
+          return; // Exit the generator
+        }
+
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
 
-        // Parse each line of the streamed response
-        chunk.split('\n').forEach((line) => {
+        for (const line of chunk.split('\n')) {
           if (line.startsWith('data:')) {
             const jsonData = line.slice(5).trim();
             if (jsonData === '[DONE]') {
-              // End of the stream
-              return;
+              return; // End of the stream
             }
             if (jsonData) {
               try {
                 const parsed = JSON.parse(jsonData);
                 const content = parsed.choices[0]?.delta?.content;
                 if (content) {
-                  output += content;
+                  yield content; // Stream output to the caller
                 }
               } catch (e) {
-                console.error('Error parsing JSON:', e);
+                console.error('Error parsing stream:', e);
               }
             }
           }
-        });
+        }
       }
-
-      return output;
     } catch (error) {
-      console.error('Error during stream:', error);
+      if (signal.aborted) {
+        console.log('Stream stopped due to abort signal.');
+      } else {
+        console.log('Error during stream:', error);
+      }
     }
   }
 }

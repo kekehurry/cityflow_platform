@@ -213,7 +213,12 @@ const reducer = (state = initState, action) => {
       return {
         ...state,
         nodes: state.nodes.map((node) =>
-          node.id === action.payload.id ? { ...action.payload } : node
+          node.id === action.payload.id // update the node
+            ? {
+                ...node, // copy all other properties of the node
+                ...action.payload.prop, // update the node data
+              }
+            : node
         ),
       };
 

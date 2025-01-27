@@ -13,13 +13,13 @@ import {
   updateConfig,
   removeNode,
   updateZIndex,
+  updateNode,
 } from '@/store/actions';
 import _, { set } from 'lodash';
 import theme from '@/theme';
 
 import LimitHandle from './utils/LimitHandle';
 import ErrorBoundary from './utils/ErrorBoundary';
-import IframeComponent from './utils/IframeComponent';
 
 import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
@@ -33,7 +33,7 @@ const mapStateToProps = (state, ownProps) => ({
   output: state.nodes.find((node) => node.id === ownProps.id)?.data.output,
   config: state.nodes.find((node) => node.id === ownProps.id)?.config,
   interfaceComponent: state.nodes.find((node) => node.id === ownProps.id)
-    ?.config?.interfaceComponent,
+    ?.interfaceComponent,
   pinNodes: state.pinNodes,
   flowId: state.flowId,
   flowAuthor: state.author,
@@ -51,6 +51,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   removeNode: () => dispatch(removeNode(ownProps.id)),
   setIndex: (index) => {
     dispatch(updateZIndex(ownProps.id, { zIndex: index }));
+  },
+  updateInterface: (interfaceComponent) => {
+    dispatch(updateNode(ownProps.id, { interfaceComponent }));
   },
 });
 
@@ -144,6 +147,7 @@ class ExpandNode extends PureComponent {
           image,
           position,
           expand: this.state.expand,
+          updateInterface: this.props.updateInterface,
           setOutput: this.setOutput,
           run: config?.run,
           setRun: (run) => {
@@ -155,6 +159,140 @@ class ExpandNode extends PureComponent {
           },
         });
       });
+
+    const head = (
+      <Box
+        sx={{
+          height: 20,
+          backgroundColor: theme.palette.node.main,
+          pl: `${margin}px`,
+          pr: `${margin}px`,
+          display: 'flex',
+          position: 'relative',
+        }}
+      >
+        <Typography variant="caption" sx={{ flexGrow: 1 }}>
+          {config?.name || 'New Node'}
+        </Typography>
+        <Stack direction="row" spacing={0.5}>
+          {(this.state.error || this.state.warning) && (
+            <ErrorIcon
+              fontSize="5px"
+              sx={{
+                color: this.state.error ? '#FF0000' : '#FFB300',
+                transform: 'scale(0.8)',
+              }}
+            />
+          )}
+          {this.state.loading ? (
+            <CircularProgress
+              size={10}
+              sx={{ color: '#FFB300', cursor: 'pointer' }}
+              onClick={() => {
+                this.setState({ loading: false });
+                setConfig({ ...config, run: false });
+              }}
+            />
+          ) : (
+            <PlayCircleIcon
+              fontSize="5px"
+              onClick={() => {
+                this.setState({ error: false, warning: false });
+                // this.setState({loading:true});
+                setConfig({ ...config, run: !config.run });
+              }}
+              sx={{
+                cursor: 'pointer',
+                color: config.run ? '#4bec13' : '#5c5d5d',
+                transform: 'scale(0.8)',
+              }}
+            />
+          )}
+          <OpenInFullIcon
+            fontSize="5px"
+            onClick={() => {
+              this.setState({ expand: !this.state.expand });
+              this.props.setIndex({ zIndex: 1000 });
+            }}
+            sx={{
+              cursor: 'pointer',
+              color: this.state.expand ? '#FFB300' : '#5c5d5d',
+            }}
+          />
+          <PushPinIcon
+            fontSize="5px"
+            onClick={() => {
+              setConfig({
+                ...config,
+                pin: !config.pin,
+              });
+            }}
+            sx={{
+              cursor: 'pointer',
+              color: config.pin ? '#FFB300' : '#5c5d5d',
+              transform: config.pin
+                ? 'rotate(0deg);scale(0.8)'
+                : 'rotate(45deg);scale(0.8)',
+            }}
+          />
+          <RemoveCircleOutlinedIcon
+            fontSize="5px"
+            onClick={this.handleDelete}
+            sx={{
+              cursor: 'pointer',
+              color: '#5c5d5d',
+              transform: 'scale(0.8)',
+            }}
+          />
+        </Stack>
+      </Box>
+    );
+
+    const handle = (
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        sx={{ paddingTop: 1.5, width: '100%' }}
+      >
+        <Stack>
+          {config?.input &&
+            config.input.map((item) => {
+              const color = input && input[item] ? '#4bec13' : '#FFB300';
+              return (
+                item && (
+                  <LimitHandle
+                    key={item}
+                    nodeId={this.props.id}
+                    name={item}
+                    max={1}
+                    color={color}
+                    type={'target'}
+                  />
+                )
+              );
+            })}
+        </Stack>
+        <Stack>
+          {config?.output &&
+            config.output.length > 0 &&
+            config.output.map((item, index) => {
+              const color = output && output[item] ? '#4bec13' : '#FFB300';
+              return (
+                item && (
+                  <LimitHandle
+                    key={item}
+                    nodeId={this.props.id}
+                    name={item}
+                    max={1}
+                    color={color}
+                    type={'source'}
+                  />
+                )
+              );
+            })}
+        </Stack>
+      </Stack>
+    );
     return (
       <>
         <Stack
@@ -198,135 +336,8 @@ class ExpandNode extends PureComponent {
               this.setState({ hover: false });
             }}
           >
-            <Box
-              sx={{
-                height: 20,
-                backgroundColor: theme.palette.node.main,
-                pl: `${margin}px`,
-                pr: `${margin}px`,
-                display: 'flex',
-                position: 'relative',
-              }}
-            >
-              <Typography variant="caption" sx={{ flexGrow: 1 }}>
-                {config?.name || 'New Node'}
-              </Typography>
-              <Stack direction="row" spacing={0.5}>
-                {(this.state.error || this.state.warning) && (
-                  <ErrorIcon
-                    fontSize="5px"
-                    sx={{
-                      color: this.state.error ? '#FF0000' : '#FFB300',
-                      transform: 'scale(0.8)',
-                    }}
-                  />
-                )}
-                {this.state.loading ? (
-                  <CircularProgress
-                    size={10}
-                    sx={{ color: '#FFB300', cursor: 'pointer' }}
-                    onClick={() => {
-                      this.setState({ loading: false });
-                      setConfig({ ...config, run: false });
-                    }}
-                  />
-                ) : (
-                  <PlayCircleIcon
-                    fontSize="5px"
-                    onClick={() => {
-                      this.setState({ error: false, warning: false });
-                      // this.setState({loading:true});
-                      setConfig({ ...config, run: !config.run });
-                    }}
-                    sx={{
-                      cursor: 'pointer',
-                      color: config.run ? '#4bec13' : '#5c5d5d',
-                      transform: 'scale(0.8)',
-                    }}
-                  />
-                )}
-                <OpenInFullIcon
-                  fontSize="5px"
-                  onClick={() => {
-                    this.setState({ expand: !this.state.expand });
-                    this.props.setIndex({ zIndex: 1000 });
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    color: this.state.expand ? '#FFB300' : '#5c5d5d',
-                  }}
-                />
-                <PushPinIcon
-                  fontSize="5px"
-                  onClick={() => {
-                    setConfig({
-                      ...config,
-                      pin: !config.pin,
-                    });
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    color: config.pin ? '#FFB300' : '#5c5d5d',
-                    transform: config.pin
-                      ? 'rotate(0deg);scale(0.8)'
-                      : 'rotate(45deg);scale(0.8)',
-                  }}
-                />
-                <RemoveCircleOutlinedIcon
-                  fontSize="5px"
-                  onClick={this.handleDelete}
-                  sx={{
-                    cursor: 'pointer',
-                    color: '#5c5d5d',
-                    transform: 'scale(0.8)',
-                  }}
-                />
-              </Stack>
-            </Box>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              sx={{ paddingTop: 1.5, width: '100%' }}
-            >
-              <Stack>
-                {config?.input &&
-                  config.input.map((item) => {
-                    const color = input && input[item] ? '#4bec13' : '#FFB300';
-                    return (
-                      item && (
-                        <LimitHandle
-                          key={item}
-                          nodeId={this.props.id}
-                          name={item}
-                          max={1}
-                          color={color}
-                          type={'target'}
-                        />
-                      )
-                    );
-                  })}
-              </Stack>
-              <Stack>
-                {config?.output &&
-                  config.output.length > 0 &&
-                  config.output.map((item, index) => {
-                    const color =
-                      output && output[item] ? '#4bec13' : '#FFB300';
-                    return (
-                      item && (
-                        <LimitHandle
-                          key={item}
-                          nodeId={this.props.id}
-                          name={item}
-                          max={1}
-                          color={color}
-                          type={'source'}
-                        />
-                      )
-                    );
-                  })}
-              </Stack>
-            </Stack>
+            {head}
+            {handle}
             <Paper
               variant="outlined"
               sx={{
@@ -343,16 +354,7 @@ class ExpandNode extends PureComponent {
               }}
               className="nowheel nodrag"
             >
-              {mapModule(interfaceComponent) ? (
-                mapModule(interfaceComponent)
-              ) : (
-                <IframeComponent
-                  config={config}
-                  input={input}
-                  setOutput={this.setOutput}
-                  setConfig={setConfig}
-                />
-              )}
+              {mapModule(interfaceComponent)}
             </Paper>
           </Card>
           <Card
@@ -370,7 +372,8 @@ class ExpandNode extends PureComponent {
             }}
             className={this.state.expand ? 'expanded' : ''}
           >
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {head}
+            {/* <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <div
                 onClick={() => {
                   this.setState({ expand: !this.state.expand });
@@ -385,7 +388,7 @@ class ExpandNode extends PureComponent {
                   marginBottom: '5px',
                 }}
               />
-            </div>
+            </div> */}
             <Paper
               variant="outlined"
               sx={{
@@ -410,30 +413,6 @@ class ExpandNode extends PureComponent {
               )}
             </Paper>
           </Card>
-          {/* <svg
-              className="nodrag"
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                display: this.state.expand ? 'block' : 'none',
-                zIndex: 0,
-              }}
-            >
-              <polygon
-                points={`${margin},${margin} ${
-                  config.width + margin * 6
-                },${margin} ${config.width + margin * 6},${
-                  config.expandHeight
-                } ${margin},${config.height - margin}`}
-                style={{
-                  fill: 'rgb(128,128,128,0.1)',
-                  stroke: 'gray',
-                  strokeDasharray: '5,5',
-                  strokeWidth: 1,
-                }}
-              />
-            </svg> */}
         </Stack>
       </>
     );

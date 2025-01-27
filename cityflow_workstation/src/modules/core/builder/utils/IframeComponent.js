@@ -42,7 +42,7 @@ const generateCSS = (typography) => {
 };
 
 const cssString = generateCSS(theme.typography);
-const IframeComponent = ({ config, input, setConfig, setOutput }) => {
+const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   const [html, setHtml] = useState(config.html || null);
   const [iframeId, setIframeId] = useState(config.iframeId || nanoid());
   const [iframeConfig, setIframeConfig] = useState(config);
@@ -118,6 +118,14 @@ const IframeComponent = ({ config, input, setConfig, setOutput }) => {
     <script>
         const secrets = ${JSON.stringify(secrets)};
         window.iframeId = "${iframeId}";
+        window.addEventListener('error', function(event) {
+          document.body.innerHTML = \`
+            <div style="text-align:center; height='100%'">
+              <h4>Error running component</h4>
+              <p>\$\{event.message\}</p>
+            </div>
+          \`;
+        });
     </script>
     `;
     if (config?.html) {
@@ -144,6 +152,9 @@ const IframeComponent = ({ config, input, setConfig, setOutput }) => {
         boxSizing: 'border-box',
         width: '100%',
         height: '100%',
+        minHeight: '50px',
+        minWidth: '50px',
+        zoom: zoom || 1,
       }}
     />
   );

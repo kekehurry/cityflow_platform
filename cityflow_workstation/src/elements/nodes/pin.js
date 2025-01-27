@@ -14,7 +14,7 @@ import { updateOutput, updateConfig } from '@/store/actions';
 import theme from '@/theme';
 import RemoveIcon from '@mui/icons-material/Remove';
 
-import IframeComponent from './utils/IframeComponent';
+import IframeComponent from '@/modules/core/builder/utils/IframeComponent';
 
 const mapStateToProps = (state, ownProps) => ({
   input: state.nodes.find((node) => node.id === ownProps.id)?.data.input,

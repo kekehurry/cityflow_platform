@@ -26,6 +26,7 @@ export default function LLM(props) {
     setLoading,
     position,
     expand,
+    updateInterface,
   } = props;
 
   const { setCenter, fitBounds } = useReactFlow();
@@ -81,10 +82,7 @@ export default function LLM(props) {
   }, [expand]);
 
   useEffect(() => {
-    setConfig({
-      ...config,
-      interfaceComponent: <LLMInterface />,
-    });
+    updateInterface(<LLMInterface />);
   }, []);
 
   useEffect(() => {

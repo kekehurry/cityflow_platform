@@ -72,9 +72,9 @@ export const addNode = (data) => ({
   payload: data,
 });
 
-export const updateNode = (node) => ({
+export const updateNode = (id, prop) => ({
   type: 'UPDATE_NODE',
-  payload: node,
+  payload: { id, prop },
 });
 
 export const removeNode = (id) => ({

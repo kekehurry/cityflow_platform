@@ -23,7 +23,7 @@ export default function ConfigTab({
   setFormValue,
   config,
   setConfig,
-  height = 540,
+  height,
 }) {
   const [iconLoading, setIconLoading] = useState(false);
 

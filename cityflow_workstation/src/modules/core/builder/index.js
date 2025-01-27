@@ -5,12 +5,14 @@ import theme from '@/theme';
 import _, { set } from 'lodash';
 
 import { removeSession, useExecuteCode } from '@/utils/executor';
-import ChatBot from './utils/ChatBot';
+import CodeAssistant from './utils/CodeAssistant';
 import FileUploader from './utils/FileUploader';
 import ControlButtons from './utils/ControlButtons';
 import ConfigTab from './utils/ConfigTab';
 import { initUserId } from '@/utils/local';
 import { useReactFlow } from 'reactflow';
+import BuilderInterface from './interface';
+import IframeComponent from './utils/IframeComponent';
 
 const initCode = {
   interface: `
@@ -57,6 +59,7 @@ export default function ModuleBuilder(props) {
     setOutput,
     run,
     setLoading,
+    updateInterface,
   } = props;
   const [log, setLog] = useState(null);
   const [tab, setTab] = useState(0);
@@ -90,12 +93,20 @@ export default function ModuleBuilder(props) {
 
   // init
   useEffect(() => {
+    updateInterface(<BuilderInterface />);
     initUserId().then((userId) => {
       setUserId(userId);
       if (!config.author_id) {
-        setConfig({ ...config, ...initForm, author_id: userId });
+        setConfig({
+          ...config,
+          ...initForm,
+          author_id: userId,
+        });
       } else {
-        setConfig({ ...config, ...initForm });
+        setConfig({
+          ...config,
+          ...initForm,
+        });
       }
     });
     return () => {
@@ -111,6 +122,15 @@ export default function ModuleBuilder(props) {
         zoom: 1.1,
       });
   }, [expand]);
+
+  //html
+  // useEffect(() => {
+  //   config.html &&
+  //     setConfig({
+  //       ...config,
+  //       InterfaceComponent: <BuilderInterface {...props} />,
+  //     });
+  // }, [config.html]);
 
   // reset
   useEffect(() => {
@@ -205,23 +225,71 @@ export default function ModuleBuilder(props) {
         setConfig={setConfig}
         height={config.expandHeight - 330}
       />
-      <Typography variant="caption">Logs</Typography>
-      <TextField
-        id="log"
-        multiline
-        className="nowheel"
-        lable="Log"
-        fullWidth
-        value={log ? JSON.stringify(log) : ''}
-        rows={9}
-        sx={{ background: theme.palette.node.main }}
-      />
+      {formValue.type === 'interface' ? (
+        <>
+          <Typography variant="caption">Preview</Typography>
+          <Box
+            sx={{
+              height: 220,
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`,
+              p: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'auto',
+            }}
+          >
+            <Box
+              sx={{
+                width:
+                  config.width > config.height
+                    ? config.expandWidth * 0.4 - 80
+                    : (200 * config.width) / config.height,
+                height:
+                  config.width > config.height
+                    ? (config.expandWidth * 0.4 - 80) *
+                      (config.height / config.width)
+                    : 200,
+                borderRadius: 1,
+                border: `1px solid ${theme.palette.divider}`,
+              }}
+            >
+              <IframeComponent
+                config={config}
+                input={input}
+                setConfig={setConfig}
+                setOutput={setOutput}
+                zoom={
+                  config.width > config.height
+                    ? (config.expandWidth * 0.4 - 80) / config.width
+                    : 200 / config.height
+                }
+              />
+            </Box>
+          </Box>
+        </>
+      ) : (
+        <>
+          <Typography variant="caption">Logs</Typography>
+          <TextField
+            id="log"
+            multiline
+            className="nowheel"
+            lable="Log"
+            fullWidth
+            value={log ? JSON.stringify(log) : ''}
+            rows={9}
+            sx={{ background: theme.palette.node.main }}
+          />
+        </>
+      )}
     </Box>
   );
 
   const assistantTab = (
     <Box hidden={tab !== 1}>
-      <ChatBot
+      <CodeAssistant
         language={formValue.language || 'javascript'}
         code={formValue.code[editorTabs[editor]]}
         editorTab={editorTabs[editor]}

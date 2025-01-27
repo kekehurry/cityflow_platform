@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Stack,
   IconButton,
@@ -9,25 +8,32 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { MessageLeft, MessageRight } from './MessageBox';
-import Assistant from './CodeAssistant';
+import { MessageLeft, MessageRight } from './utils/MessageBox';
+import Assistant from '@/utils/assistant';
+import { initUserId } from '@/utils/local';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-export default function ChatBot(props) {
-  const { formValue, setFormValue, config, height, editorTab } = props;
+export default function ChatBot({
+  name,
+  assistantIcon,
+  sendCode,
+  systemPrompt,
+  context,
+  height,
+  greeding,
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'AI',
-      message: "Hi, I'm your assistant! How can I help you today?",
+      message: greeding || 'Hi, What can I do for you?',
     },
   ]);
-
   const [inputMessage, setInputMessage] = useState('');
-
   const [controller, setController] = useState(null);
-  const assistant = Assistant({ ...props });
+  const [userId, setUserId] = useState(null);
+
   const handleAbort = () => {
     try {
       controller.abort();
@@ -37,6 +43,15 @@ export default function ChatBot(props) {
       console.log(e);
     }
   };
+
+  const assistant = new Assistant({ systemPrompt, context });
+
+  useEffect(() => {
+    initUserId().then((id) => {
+      setUserId(id);
+    });
+  }, []);
+
   useEffect(() => {
     if (messages.length > 0 && messages[messages.length - 1].role === 'human') {
       setIsLoading(true);
@@ -83,7 +98,7 @@ export default function ChatBot(props) {
   }, [isLoading]);
 
   return (
-    <Stack spacing={1} width="100%">
+    <Stack spacing={1} width="100%" height="100%">
       <Stack
         spacing={1}
         sx={{
@@ -103,16 +118,15 @@ export default function ChatBot(props) {
                 key={index}
                 message={message['message']}
                 name="human"
-                avatar=""
+                avatar={`https://api.multiavatar.com/${userId.slice(0, 4)}.png`}
               />
             ) : (
               <MessageLeft
                 key={index}
                 message={message['message']}
-                formValue={formValue}
-                setFormValue={setFormValue}
-                avatar={config.icon}
-                editorTab={editorTab}
+                name={name}
+                avatar={assistantIcon}
+                sendCode={sendCode}
               />
             );
           })}
@@ -125,6 +139,15 @@ export default function ChatBot(props) {
         size="small"
         value={inputMessage}
         onChange={(e) => setInputMessage(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            setMessages([
+              ...messages,
+              { role: 'human', message: inputMessage },
+            ]);
+            setInputMessage('');
+          }
+        }}
         endAdornment={
           <InputAdornment position="end">
             <Stack direction="row" spacing={1}>
