@@ -1,3 +1,4 @@
 .github/workflows/deploy.yml merge=ours
+.github/workflows/build.yml merge=ours
 .gitignore merge=ours
 dev.sh merge=ours
