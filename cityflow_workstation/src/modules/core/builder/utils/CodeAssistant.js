@@ -38,14 +38,15 @@ Moduel Information:
 Note:
 - Make sure you wrap the code in the code block like \`\`\`javascript \`\`\`.
 - You can only use one file to implement the module. And only export one default function.
+- Ensuring the module fuction returns a valid UI element for the platform to render.
 - Provide example data to run and test the module, because input might be null before user run the whole flow.
 - You don't need to worry about how to use the function, it's already implemented in the platform. If you code structure is correct, the platform will run your code automatically.
 - Global variables and functions you can use:
       const {input,config,setConfig,setOutput} = props;
     - input: input data, e.g. input1 = input['input1']
     - config: module configuration value, e.g. title = config.title
-    - setConfig: the function to set the configuration data, e.g. setConfig({title: title})
-    - setOutput: the function to set the output data, e.g. setOutput({output1: output1})
+    - setConfig: the function setting the configuration for this module, e.g. setConfig({var1: var1})
+    - setOutput: the function setting the output data for the next module, e.g. setOutput({output1: output1})
 
 Example:
 \`\`\`javascript
@@ -80,7 +81,7 @@ export default function ModuleTitle(props){
     - import cityflow.module as cm
     - cm.input: input data, e.g. input1 = cm.input['input1']
     - cm.config: module configuration value, e.g. title = cm.config['title']
-    - cm.ouput: output data, e.g cm.output({'output': title})
+    - cm.ouput: output data for next module, e.g cm.output({'output': title})
 
     Example:
     \`\`\`python
