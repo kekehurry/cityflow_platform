@@ -47,7 +47,6 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y docker-ce docker-ce-cli containerd.io && \
     # prepare for init
-    pip3 install -r ./requirements.txt && \
     chmod +x ./start-services.sh && \
     ln -s /data ./cityflow_database/data
 

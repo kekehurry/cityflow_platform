@@ -4,3 +4,4 @@
 dev.sh
 temp
 .env
+*package-lock.json
