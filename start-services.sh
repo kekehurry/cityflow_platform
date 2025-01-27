@@ -15,11 +15,13 @@ until curl -s http://localhost:7474 > /dev/null; do
 done
 
 # cd workdir
+cd /cityflow_platform 
+pip3 install -r ./requirements.txt && \
 
 
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
-  cd /cityflow_platform && python3 ./cityflow_database/init_db.py
+  python3 ./cityflow_database/init_db.py
 fi
 
 # Start services
