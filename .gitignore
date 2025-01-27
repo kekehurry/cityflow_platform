@@ -1,4 +1,6 @@
 *.DS_Store
 *.log
 *.env.local
+dev.sh
 temp
+.env
