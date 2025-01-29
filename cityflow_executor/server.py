@@ -4,6 +4,9 @@ from executor.executor import CodeExecutor
 from executor.utils import CodeBlock, File
 from executor.manager import ExecutorManage
 from hashlib import md5
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 CORS(app)
@@ -16,13 +19,15 @@ def setup():
     packages = request.json.get('packages')
     image = request.json.get('image')
     container_name = f"csflow-{user_id}-{id}"
-    print(f"Setup Container: {container_name} Image: {image}, Packages: {packages}")
+    # print(f"Setup Container: {container_name} Image: {image}, Packages: {packages}")
+    logging.info(f"Setup Container: {container_name} Image: {image}, Packages: {packages}")
     executor = manager.get_executor(container_name)
     if executor is None:
         executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
         manager.register_excutor(executor)
     else:
-        print(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
+        # print(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
+        logging.info(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
         manager.unregister_excutor(container_name)
         executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
         manager.register_excutor(executor)

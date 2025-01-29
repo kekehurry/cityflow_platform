@@ -8,6 +8,7 @@ import {
   Divider,
   CardContent,
   CircularProgress,
+  Paper,
 } from '@mui/material';
 import { connect } from 'react-redux';
 import { updateOutput, updateConfig } from '@/store/actions';
@@ -89,9 +90,25 @@ class PinNode extends PureComponent {
   };
 
   render() {
-    const { input, output, config, setConfig, targetRef, handleRef, children } =
-      this.props;
+    const {
+      input,
+      output,
+      config,
+      setConfig,
+      targetRef,
+      handleRef,
+      interfaceComponent,
+      children,
+    } = this.props;
     const headerHeight = 40;
+    const mapModule = (children) =>
+      React.Children.map(children, (child) => {
+        return React.cloneElement(child, {
+          input,
+          output,
+          config,
+        });
+      });
     return (
       <Box
         ref={targetRef}
@@ -140,35 +157,20 @@ class PinNode extends PureComponent {
                   this.props.setConfig({ ...config, pin: false });
                 }}
               />
-              {/* {this.state.loading ? ( */}
-
-              {/* ) : null} */}
             </CardContent>
             <Divider />
-            <CardContent
+            <Paper
               variant="outlined"
               sx={{
                 flexGrow: 1,
-                width: config?.width,
-                height: config?.height,
+                width: config?.pinWidth || config?.width,
+                height: config?.pinHeight || config?.height,
+                p: 0,
+                m: 0,
               }}
             >
-              {this.state.loading ? (
-                <CircularProgress
-                  size={10}
-                  sx={{ color: '#FFB300', cursor: 'pointer' }}
-                  onClick={() => {
-                    this.setState({ loading: false });
-                    setConfig({ ...config, run: !config.run });
-                  }}
-                />
-              ) : null}
-              <IframeComponent
-                config={config}
-                input={input}
-                setOutput={this.setOutput}
-              />
-            </CardContent>
+              {mapModule(interfaceComponent)}
+            </Paper>
           </Stack>
         </Resizable>
       </Box>

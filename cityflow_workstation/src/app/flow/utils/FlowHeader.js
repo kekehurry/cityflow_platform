@@ -28,11 +28,12 @@ import AppsIcon from '@mui/icons-material/Apps';
 import HomeIcon from '@mui/icons-material/Home';
 import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { setupExecutor, killExecutor } from '@/utils/executor';
+import { setupExecutor, check } from '@/utils/executor';
 import { saveUserFlow } from '@/utils/local';
 import { saveWorkflow } from '@/utils/dataset';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -62,27 +63,21 @@ const FlowHeader = (props) => {
 
   const initAndRunALL = async () => {
     setMeta({ loading: true });
-    if (!props.state.isAlive) {
+    if (!props.state.isAlive && props.state?.flowId) {
       let logs = '';
       for await (const chunk of await setupExecutor(
-        props.state?.flowId,
-        props.state?.packages,
-        props.state?.image
+        props.state.flowId,
+        props.state?.packages || '',
+        props.state?.image || defaultRunner
       )) {
         logs += chunk;
         setMeta({ logs });
       }
-      setMeta({ isAlive: true, loading: false });
     }
-    runAll();
-  };
-
-  const killContainerAndStopAll = () => {
-    setMeta({ loading: true });
-    killExecutor(props.state.flowId).then(() => {
-      stopAll();
-      setMeta({ loading: false });
+    check(props.state.flowId).then((data) => {
+      setMeta({ isAlive: data?.alive, loading: false });
     });
+    runAll();
   };
 
   const handleClick = (event) => {
@@ -244,7 +239,7 @@ const FlowHeader = (props) => {
               },
             }}
             onClick={() => {
-              globalRun ? killContainerAndStopAll() : initAndRunALL();
+              globalRun && props.state.isAlive ? stopAll() : initAndRunALL();
               setGlobalRun(!globalRun);
             }}
           >
@@ -253,7 +248,7 @@ const FlowHeader = (props) => {
                 color={props.state.isAlive ? 'primary' : 'secondary'}
                 size={30}
               />
-            ) : globalRun ? (
+            ) : globalRun && props.state.isAlive ? (
               <StopCircleOutlinedIcon sx={{ fontSize: 35 }} />
             ) : (
               <PlayCircleIcon sx={{ fontSize: 35 }} />
