@@ -25,12 +25,12 @@ export const FlowPanel = (props) => {
   };
   // Set the tab to modulePanel if the flow is inited
   useEffect(() => {
-    if (!props.state?.isAlive) {
+    if (!props.state?.isAlive || props.state?.loading) {
       setTab(0);
     } else {
       setTab(1);
     }
-  }, [props.state?.isAlive]);
+  }, [props.state?.isAlive, props.state?.loading]);
 
   return (
     <>

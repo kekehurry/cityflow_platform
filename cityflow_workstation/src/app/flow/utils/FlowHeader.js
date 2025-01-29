@@ -57,12 +57,11 @@ const FlowHeader = (props) => {
   const open = Boolean(anchorEl);
 
   const [globalRun, setGlobalRun] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const { runAll, stopAll, setMeta } = props;
 
   const initAndRunALL = async () => {
-    setLoading(true);
+    setMeta({ loading: true });
     if (!props.state.isAlive) {
       let logs = '';
       for await (const chunk of await setupExecutor(
@@ -73,17 +72,16 @@ const FlowHeader = (props) => {
         logs += chunk;
         setMeta({ logs });
       }
-      setMeta({ isAlive: true });
+      setMeta({ isAlive: true, loading: false });
     }
-    setLoading(false);
     runAll();
   };
 
   const killContainerAndStopAll = () => {
-    setLoading(true);
+    setMeta({ loading: true });
     killExecutor(props.state.flowId).then(() => {
       stopAll();
-      setLoading(false);
+      setMeta({ loading: false });
     });
   };
 
@@ -250,7 +248,7 @@ const FlowHeader = (props) => {
               setGlobalRun(!globalRun);
             }}
           >
-            {loading ? (
+            {props.state.loading ? (
               <CircularProgress
                 color={props.state.isAlive ? 'primary' : 'secondary'}
                 size={30}
