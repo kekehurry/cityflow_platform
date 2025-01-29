@@ -44,8 +44,7 @@ export const executeCode = async ({
   config,
   image,
 }) => {
-  if (!config) return 'waiting for init...';
-  const { code, html, icon, ...rest } = config;
+  const { code, icon, ...rest } = config;
   const userId = await initUserId();
   const inputFile = {
     data: JSON.stringify(input),
@@ -112,7 +111,7 @@ export const useExecuteCode = ({
   );
   return {
     data,
-    error,
+    error: config && error,
     isLoading: !data && !error,
   };
 };

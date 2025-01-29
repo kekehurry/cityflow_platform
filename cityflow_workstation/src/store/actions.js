@@ -9,6 +9,7 @@ export const initStore = (state) => {
         ...state,
         flowInited: false,
         logs: '',
+        isAlive: false,
       },
     };
   } else {
@@ -22,6 +23,7 @@ export const initStore = (state) => {
         author: `test_user_${random(1000)}`,
         flowInited: false,
         logs: '',
+        isAlive: false,
       },
     };
   }

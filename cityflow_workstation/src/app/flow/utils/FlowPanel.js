@@ -25,12 +25,12 @@ export const FlowPanel = (props) => {
   };
   // Set the tab to modulePanel if the flow is inited
   useEffect(() => {
-    if (!props.state?.flowInited) {
+    if (!props.state?.isAlive) {
       setTab(0);
     } else {
       setTab(1);
     }
-  }, [props.state?.flowInited]);
+  }, [props.state?.isAlive]);
 
   return (
     <>
@@ -74,6 +74,8 @@ export const FlowPanel = (props) => {
             value={tab}
             onChange={handleTabChange}
             centered
+            textColor={props.state.isAlive ? 'primary' : 'secondary'}
+            indicatorColor={props.state.isAlive ? 'primary' : 'secondary'}
             sx={{
               width: '100%',
               height: 5,
@@ -81,9 +83,28 @@ export const FlowPanel = (props) => {
               pb: 1,
             }}
           >
-            <Tab label="Settings" sx={{ fontSize: 12, width: '30%' }} />
-            <Tab label="Modules" sx={{ fontSize: 12, width: '30%' }} />
-            <Tab label="Assistant" sx={{ fontSize: 12, width: '30%' }} />
+            <Tab
+              label="Settings"
+              sx={{
+                fontSize: 12,
+                width: '30%',
+              }}
+            />
+            <Tab
+              label="Modules"
+              sx={{
+                fontSize: 12,
+                width: '30%',
+              }}
+              disabled={!props.state.isAlive}
+            />
+            <Tab
+              label="Assistant"
+              sx={{
+                fontSize: 12,
+                width: '30%',
+              }}
+            />
           </Tabs>
         </Box>
       </Box>

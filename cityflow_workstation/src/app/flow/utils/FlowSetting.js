@@ -23,7 +23,6 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
 import { useLocalStorage } from '@/utils/local';
 import { initUserId } from '@/utils/local';
-import { flow } from 'lodash';
 
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
@@ -68,12 +67,10 @@ const FlowSettings = (props) => {
   const [author, setAuthor] = useLocalStorage('author', null);
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
-  const [isAlive, setIsAlive] = useState(false);
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
     setMeta(formValue);
-    setMeta({ flowInited: false });
     setAuthor(formValue.author);
     setLoading(true);
     let logs = '';
@@ -85,8 +82,10 @@ const FlowSettings = (props) => {
       logs += chunk;
       setMeta({ logs });
     }
-    setLoading(false);
-    setMeta({ flowInited: true });
+    check(formValue.flowId).then((data) => {
+      setLoading(false);
+      setMeta({ isAlive: data?.alive });
+    });
   };
 
   const handleFormChange = (event) => {
@@ -160,12 +159,10 @@ const FlowSettings = (props) => {
   }, [props.state?.flowId]);
 
   useEffect(() => {
-    if (!(formValue.flowId && props.state?.flowInited)) return;
+    if (!(formValue.flowId && props.state?.isAlive)) return;
     const isAlive = setInterval(() => {
       check(formValue.flowId).then((data) => {
-        if (data.alive) {
-          setIsAlive(true);
-        }
+        setMeta({ isAlive: data?.alive });
       });
     }, 1000);
     return () => {
@@ -173,7 +170,7 @@ const FlowSettings = (props) => {
       clearInterval(isAlive);
       killExecutor(formValue.flowId);
     };
-  }, [formValue.flowId, props.state?.flowInited]);
+  }, [formValue.flowId, props.state?.isAlive]);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -226,7 +223,7 @@ const FlowSettings = (props) => {
             onChange={handleFormChange}
             value={formValue?.description || ''}
             multiline
-            rows={4}
+            rows={6}
             placeholder="breifly describe your workflow"
             InputLabelProps={{ shrink: true }}
           ></TextField>
@@ -279,7 +276,7 @@ const FlowSettings = (props) => {
         <LoadingButton
           loading={loading}
           variant="contained"
-          color={isAlive ? 'primary' : 'secondary'}
+          color={props.state.isAlive ? 'primary' : 'secondary'}
           onClick={hangleSubmit}
         >
           Init Environment
@@ -292,20 +289,9 @@ const FlowSettings = (props) => {
           <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
             Advance Settings
           </AccordionSummary>
-          <AccordionDetails sx={{ m: 0, p: 0, height: '500px' }}>
+          <AccordionDetails sx={{ m: 0, p: 0, height: '600px' }}>
             <Stack spacing={2}>
               <Divider />
-              <TextField
-                id="packages"
-                fullWidth
-                label="Packages"
-                onChange={handleFormChange}
-                value={formValue?.packages}
-                multiline
-                rows={5}
-                placeholder={`#conda,pip or npm packages in json format:\n{ "conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"] }`}
-                InputLabelProps={{ shrink: true }}
-              />
               <Stack direction={'row'}>
                 <InputLabel
                   htmlFor="LLM_API_KEY"
@@ -330,7 +316,7 @@ const FlowSettings = (props) => {
                   }}
                 />
               </Stack>
-              <Stack direction={'row'}>
+              <Stack direction={'row'} sx={{ pb: 2 }}>
                 <InputLabel
                   htmlFor="MAPBOX_TOEKN"
                   size="small"
@@ -354,6 +340,19 @@ const FlowSettings = (props) => {
                   }}
                 />
               </Stack>
+              <Divider />
+              <TextField
+                id="packages"
+                fullWidth
+                label="Packages"
+                onChange={handleFormChange}
+                value={formValue?.packages}
+                multiline
+                rows={5}
+                sx={{ mt: 2 }}
+                placeholder={`#conda,pip or npm packages in json format:\n{ "conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"] }`}
+                InputLabelProps={{ shrink: true }}
+              />
               <TextField
                 id="logs"
                 fullWidth

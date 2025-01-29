@@ -133,6 +133,7 @@ export default function LLMSetting({
             p: 2,
             overflow: 'autho',
             borderRadius: 1,
+            // height: 120,
             border: (theme) => `1px solid ${theme.palette.divider}`,
           }}
         >
@@ -182,7 +183,6 @@ export default function LLMSetting({
               id="frequencyPenalty"
             />
           </Stack>
-
           <Stack direction={'row'} spacing={2}>
             <Typography variant="caption" width="50%">
               presence_penalty
@@ -207,6 +207,7 @@ export default function LLMSetting({
             />
           </Stack>
         </Box>
+        <Box sx={{ height: 20 }}></Box>
       </Stack>
     </Stack>
   );
