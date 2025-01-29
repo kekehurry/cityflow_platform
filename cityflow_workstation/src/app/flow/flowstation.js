@@ -39,7 +39,7 @@ import { useSearchParams } from 'next/navigation';
 import theme from '@/theme';
 
 import { useGetWorkflow, useGetModule } from '@/utils/dataset';
-import { setupExecutor } from '@/utils/executor';
+import { setupExecutor, check } from '@/utils/executor';
 import { getUserFlow } from '@/utils/local';
 import { nanoid } from 'nanoid';
 
@@ -73,6 +73,8 @@ const nodeTypes = {
 };
 const edgeTypes = { base: ButtonEdge, invisible: InvisibleEdge };
 
+const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
+
 const FlowStation = (props) => {
   const {
     nodes,
@@ -96,17 +98,23 @@ const FlowStation = (props) => {
   const workflowData = useGetWorkflow(id || null);
   const moduleData = useGetModule(module || null);
 
-  const initAndRunALL = () => {
-    if (props.state.packages == undefined) return;
-    const packages = props.state.packages.split('\n');
-    // console.log('Initing environment...');
-    setupExecutor(props.state.flowId, packages, props.state.image).then(
-      (data) => {
-        // console.log('Environment inited');
-        setMeta({ flowInited: true });
-        runAll();
+  const initAndRunALL = async () => {
+    setMeta({ loading: true });
+    if (!props.state.isAlive && props.state?.flowId) {
+      let logs = '';
+      for await (const chunk of await setupExecutor(
+        props.state.flowId,
+        props.state?.packages || '',
+        props.state?.image || defaultRunner
+      )) {
+        logs += chunk;
+        setMeta({ logs });
       }
-    );
+    }
+    check(props.state.flowId).then((data) => {
+      setMeta({ isAlive: data?.alive, loading: false });
+    });
+    runAll();
   };
 
   const initFlow = (flow, instance) => {

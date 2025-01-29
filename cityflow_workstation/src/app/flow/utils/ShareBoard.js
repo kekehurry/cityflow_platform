@@ -216,13 +216,13 @@ const ShareBoard = (props) => {
           >
             {name || 'Share'}
           </LoadingButton>
-          <LoadingButton
+          {/* <LoadingButton
             loading={publishing}
             onClick={() => handleShare({ publish: true })}
             color="secondary"
           >
             Publish
-          </LoadingButton>
+          </LoadingButton> */}
         </DialogActions>
       </Dialog>
     </>

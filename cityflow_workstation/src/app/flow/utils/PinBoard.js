@@ -84,40 +84,59 @@ const PinBoard = (props) => {
           transformOrigin: 'bottom right',
         }}
       >
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            setGlobalScale(0.1);
+          }}
+          sx={{
+            position: 'absolute',
+            bottom: '2%',
+            right: '1%',
+            cursor: 'pointer',
+            transform:
+              globalScale === 1
+                ? `scale(40)`
+                : `scale(${1.5 / (globalScale * 0.2)})`,
+            zIndex: 1,
+            transition: 'transform 1s ease-in-out',
+          }}
+        />
         {globalScale === 1 || (
           <>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setGlobalScale(0.1);
-              }}
-              sx={{
-                position: 'absolute',
-                bottom: '2%',
-                right: '1%',
-                cursor: 'pointer',
-                transform: 'scale(1.5)',
-              }}
-            >
-              <SouthEastIcon />
-            </IconButton>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setGlobalScale(1);
-              }}
-              sx={{
-                position: 'absolute',
-                top: '2%',
-                left: '1%',
-                cursor: 'pointer',
-                transform: 'scale(1.5)',
-              }}
-            >
-              <NorthWestIcon />
-            </IconButton>
+            {globalScale < 0.5 && (
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGlobalScale(0.5);
+                }}
+                sx={{
+                  position: 'absolute',
+                  bottom: '50%',
+                  right: '50%',
+                  cursor: 'pointer',
+                  transform: `scale(${1.5 / (globalScale * 0.5)})`,
+                  zIndex: 1,
+                }}
+              />
+            )}
           </>
         )}
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            setGlobalScale(1);
+          }}
+          sx={{
+            position: 'absolute',
+            top: '2%',
+            left: '1%',
+            cursor: 'pointer',
+            transform: `scale(${1.5 / (globalScale * 0.2)})`,
+            zIndex: 1,
+          }}
+        />
+
         {globalScale &&
           pinNodes &&
           pinNodes.length > 0 &&

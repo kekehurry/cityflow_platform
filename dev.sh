@@ -24,6 +24,10 @@ fi
 
 echo "Environment setup..."
 
+cp .env.production .env
+
+echo "EXECUTOR_BIND_DIR=" >> .env
+
 # if dev in linux remove the '' after -i
 sed -i '' "s|EXECUTOR_USER=.*|EXECUTOR_USER=${PUID}:${PGID}|" .env
 sed -i '' "s|EXECUTOR_BIND_DIR=.*|EXECUTOR_BIND_DIR=${PWD}/cityflow_executor/code|" .env
@@ -35,13 +39,3 @@ sed -i '' "s|NEXT_PUBLIC_DATASET_SERVER=.*|NEXT_PUBLIC_DATASET_SERVER=http://${D
 sed -i '' "s|NEXT_PUBLIC_EXECUTOR_SERVER=.*|NEXT_PUBLIC_EXECUTOR_SERVER=http://${EXECUTOR_HOST}:8000|" .env
 
 cp .env "${PWD}/cityflow_workstation/.env.local"
-
-
-# change user to current user
-echo "User setup..."
-
-# change the owner of the cityflow_database and cityflow_executor
-sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/data
-sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_database/source
-sudo chown -R ${PUID}:${PGID} ${PWD}/cityflow_executor/code
-sudo chown -R ${PUID}:${PGID} /var/run/docker.sock

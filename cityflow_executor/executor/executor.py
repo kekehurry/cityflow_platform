@@ -14,7 +14,9 @@ import json
 from dotenv import load_dotenv
 load_dotenv()
 
-dataserver= os.getenv('NEXT_PUBLIC_DATASET_SERVER')
+dataserver= os.getenv('DATASET_SERVER')
+
+logging.basicConfig(level=logging.INFO)
 
 def _wait_for_ready(container: Any, timeout: int = 60, stop_time: float = 0.1) -> None:
     elapsed_time = 0.0
@@ -48,7 +50,7 @@ class CodeExecutor:
         "javascript": True,
     }
     def __init__(self, 
-                image: str = "ghcr.io/kekehurry/cityflow_runner:light", 
+                image: str = "ghcr.io/kekehurry/cityflow_runner:latest", 
                 container_name = None,
                 timeout: int = 60,
                 auto_remove: bool = True,
@@ -58,8 +60,9 @@ class CodeExecutor:
                 packages: dict= '',
                 ):
         self._client = docker.from_env()
-        self._image = image
-        # print(f"Using image {self._image}")
+        self.image = os.getenv("NEXT_PUBLIC_DEFAULT_RUNNER", image)
+        if image:
+            self._image = image
         if container_name is None:
             container_name = f"csflow-{uuid.uuid4()}"
         self._container_name = container_name
@@ -79,7 +82,10 @@ class CodeExecutor:
         
         self._setup_path = os.path.join(self._work_dir, "setup.json")
         with open(self._setup_path, "w") as f:
-            f.write(self._packages)
+            if self._packages:
+                f.write(self._packages)
+            else:
+                f.write("")   
 
         # Check if the image exists
         execute_image = self._client.images.list(name=self._image)
@@ -156,7 +162,6 @@ class CodeExecutor:
                 break
             code = code_block.code
             session_id = code_block.session_id
-            # foldername = f"codeblock_{md5(code.encode()).hexdigest()}"
             foldername = f"codeblock_{session_id}"
             if not os.path.exists(os.path.join(self._work_dir, foldername)):
                 try:
@@ -169,7 +174,6 @@ class CodeExecutor:
             with open(code_path, "w") as fcode:
                 fcode.write(code)
 
-            print("files",code_block.files)
             if code_block.files:
                 for file in code_block.files:
                     try:
@@ -190,7 +194,8 @@ class CodeExecutor:
                             with open(file_path,"w") as f:
                                 f.write(file.data)
                     except Exception as e:
-                            print(e)
+                            # print(e)
+                            logging.error(e)
                             pass
             
             runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
@@ -207,7 +212,6 @@ class CodeExecutor:
             if exit_code != 0:
                 break
             
-        
         final_output = ""
         if os.path.exists(os.path.join(self._work_dir, foldername, "output")):
             with open(os.path.join(self._work_dir, foldername, "output"), "r") as f:
@@ -231,7 +235,6 @@ class CodeExecutor:
         foldername = f"codeblock_{session_id}"
         try:
             if os.path.exists(os.path.join(self._work_dir, foldername)):
-                # print(f"Removing {os.path.join(self._work_dir, foldername)}")
                 shutil.rmtree(os.path.join(self._work_dir, foldername))
         except FileNotFoundError:
             pass

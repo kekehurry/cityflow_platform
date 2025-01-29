@@ -32,7 +32,7 @@ ENV NODE_ENV=production
 ENV EXECUTOR_BIND_DIR=/temp/code
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates curl python3 python3-pip && \
+    apt-get install -y apt-utils ca-certificates curl python3 python3-pip && \
     # install nodejs
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \  
     apt-get install -y nodejs=18.20.0-1nodesource1 && \

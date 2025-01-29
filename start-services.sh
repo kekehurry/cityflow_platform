@@ -1,4 +1,7 @@
 #!/bin/bash
+#pull latest cityflow_runner
+
+docker pull ghcr.io/kekehurry/cityflow_runner:latest
 
 #setup env before start neo4j
 echo "Loading environment variables from /cityflow_platform/.env..."

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const GET = async (req, { params }) => {
   // Get environment variables
-  const datasetServer = process.env.NEXT_PUBLIC_DATASET_SERVER;
+  const datasetServer = process.env.DATASET_SERVER;
   const filePath = params.path.join('/');
   try {
     const response = await fetch(
