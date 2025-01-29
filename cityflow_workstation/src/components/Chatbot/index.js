@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Box,
   Stack,
   IconButton,
   InputAdornment,
@@ -8,31 +9,29 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { MessageLeft, MessageRight } from './utils/MessageBox';
 import Assistant from '@/utils/assistant';
 import { initUserId } from '@/utils/local';
 
+import { MessageLeft, MessageRight } from './utils/MessageBox';
+import MenuIcon from '@mui/icons-material/Menu';
+import theme from '@/theme';
+import LLMSetting from './utils/LLMSetting';
+
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-export default function ChatBot({
-  name,
-  assistantIcon,
-  sendCode,
-  systemPrompt,
-  context,
-  height,
-  greeding,
-}) {
+export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'AI',
-      message: greeding || 'Hi, What can I do for you?',
+      message: llmConfig?.greeding || 'Hi, What can I do for you?',
     },
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [controller, setController] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const [assistant, setAssistant] = useState(new Assistant(llmConfig));
 
   const handleAbort = () => {
     try {
@@ -43,8 +42,6 @@ export default function ChatBot({
       console.log(e);
     }
   };
-
-  const assistant = new Assistant({ systemPrompt, context });
 
   useEffect(() => {
     initUserId().then((id) => {
@@ -77,12 +74,8 @@ export default function ChatBot({
           }
           setIsLoading(false);
         } catch (e) {
-          if (e.name === 'AbortError') {
-            console.log('Aborted');
-          } else {
-            setIsLoading(false);
-            setMessages([...messages, { role: 'AI', message: e }]);
-          }
+          setIsLoading(false);
+          setMessages([...messages, { role: 'AI', message: e }]);
         }
       };
       readStream();
@@ -98,90 +91,124 @@ export default function ChatBot({
   }, [isLoading]);
 
   return (
-    <Stack spacing={1} width="100%" height="100%">
-      <Stack
-        spacing={1}
+    <Stack spacing={1} width="100%" height={height} overflow={'auto'}>
+      <Box
         sx={{
-          overflowY: 'auto',
-          height: height,
-          p: 0,
-          m: 0,
-          userSelect: 'text',
-          cursor: 'auto',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          position: 'absolute',
+          right: 20,
+          width: 30,
+          height: 30,
+          zIndex: 1,
         }}
-        className="nowheel"
       >
-        {messages &&
-          messages.map((message, index) => {
-            return message['role'] === 'human' ? (
-              <MessageRight
-                key={index}
-                message={message['message']}
-                name="human"
-                avatar={`https://api.multiavatar.com/${userId.slice(0, 4)}.png`}
-              />
-            ) : (
-              <MessageLeft
-                key={index}
-                message={message['message']}
-                name={name}
-                avatar={assistantIcon}
-                sendCode={sendCode}
-              />
-            );
-          })}
-      </Stack>
-      <OutlinedInput
-        placeholder="Chat with Miya..."
-        multiline
-        rows={3}
-        width="100%"
-        size="small"
-        value={inputMessage}
-        onChange={(e) => setInputMessage(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            setMessages([
-              ...messages,
-              { role: 'human', message: inputMessage },
-            ]);
-            setInputMessage('');
-          }
-        }}
-        endAdornment={
-          <InputAdornment position="end">
-            <Stack direction="row" spacing={1}>
-              {isLoading ? (
-                <IconButton size="small" onClick={handleAbort}>
-                  <StopCircleIcon />
-                </IconButton>
-              ) : (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setMessages([
-                      ...messages,
-                      { role: 'human', message: inputMessage },
-                    ]);
-                    setInputMessage('');
-                  }}
-                >
-                  <SendIcon />
-                </IconButton>
-              )}
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setMessages([messages[0]]);
-                  setInputMessage('');
-                }}
-              >
-                <AddCircleIcon />
-              </IconButton>
-            </Stack>
-          </InputAdornment>
-        }
-      />
+        <IconButton
+          sx={{ height: '100%', width: '100%', p: 0 }}
+          onClick={() => setShowConfig(!showConfig)}
+        >
+          <MenuIcon
+            sx={{ color: theme.palette.text.secondary, width: 15, height: 15 }}
+          />
+        </IconButton>
+      </Box>
+      {showConfig ? (
+        <LLMSetting
+          setAssistant={setAssistant}
+          llmConfig={llmConfig}
+          setLLMConfig={setLLMConfig}
+          setShowConfig={setShowConfig}
+        />
+      ) : (
+        <>
+          <Stack
+            spacing={1}
+            sx={{
+              overflowY: 'auto',
+              height: '100%',
+              p: 0,
+              m: 0,
+              userSelect: 'text',
+              cursor: 'auto',
+            }}
+            className="nowheel"
+          >
+            {messages &&
+              messages.map((message, index) => {
+                return message['role'] === 'human' ? (
+                  <MessageRight
+                    key={index}
+                    message={message['message']}
+                    name="human"
+                    avatar={`https://api.multiavatar.com/${userId.slice(
+                      0,
+                      4
+                    )}.png`}
+                  />
+                ) : (
+                  <MessageLeft
+                    key={index}
+                    message={message['message']}
+                    name={llmConfig?.name}
+                    avatar={llmConfig?.assistantIcon}
+                    sendCode={sendCode}
+                  />
+                );
+              })}
+          </Stack>
+          <OutlinedInput
+            placeholder="Chat with Miya..."
+            multiline
+            rows={3}
+            width="100%"
+            size="small"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                setMessages([
+                  ...messages,
+                  { role: 'human', message: inputMessage },
+                ]);
+                setInputMessage('');
+              }
+            }}
+            endAdornment={
+              <InputAdornment position="end">
+                <Stack direction="row" spacing={1}>
+                  {isLoading ? (
+                    <IconButton size="small" onClick={handleAbort}>
+                      <StopCircleIcon />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setMessages([
+                          ...messages,
+                          { role: 'human', message: inputMessage },
+                        ]);
+                        setInputMessage('');
+                      }}
+                    >
+                      <SendIcon />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setMessages([messages[0]]);
+                      setInputMessage('');
+                    }}
+                  >
+                    <AddCircleIcon />
+                  </IconButton>
+                </Stack>
+              </InputAdornment>
+            }
+          />
+        </>
+      )}
     </Stack>
   );
 }

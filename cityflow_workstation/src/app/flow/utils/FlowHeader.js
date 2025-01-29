@@ -59,25 +59,29 @@ const FlowHeader = (props) => {
   const [globalRun, setGlobalRun] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { runAll, stopAll } = props;
+  const { runAll, stopAll, setMeta } = props;
 
-  const initAndRunALL = () => {
-    const packages = props.state.packages.split('\n');
+  const initAndRunALL = async () => {
     setLoading(true);
-    setupExecutor(props.state.flowId, packages, props.state?.image).then(
-      (data) => {
-        props.setMeta({ flowInited: true });
-        runAll();
-        setLoading(false);
-      }
-    );
+    let logs = '';
+    for await (const chunk of await setupExecutor(
+      props.state?.flowId,
+      props.state?.packages,
+      props.state?.image
+    )) {
+      logs += chunk;
+      setMeta({ logs });
+    }
+    setLoading(false);
+    setMeta({ flowInited: true });
+    runAll();
   };
 
   const killContainerAndStopAll = () => {
     setLoading(true);
     killExecutor(props.state.flowId).then(() => {
       stopAll();
-      props.setMeta({ flowInited: false });
+      setMeta({ flowInited: false });
       setLoading(false);
     });
   };

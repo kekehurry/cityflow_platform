@@ -397,7 +397,7 @@ class ExpandNode extends PureComponent {
                 // margin: `${margin/2}px`,
                 background: theme.palette.node.container,
                 width: '100%',
-                height: config.expandHeight - 35,
+                height: config.expandHeight || 600 - 35,
               }}
             >
               {process.env.NODE_ENV === 'production' ? (

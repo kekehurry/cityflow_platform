@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Cityflow Platform",
+      "type": "shell",
+      "dependsOn": [
+        "Start Cityflow Database",
+        "Start Cityflow Executor",
+        "Start Cityflow Workstation"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+      // "runOptions": {
+      //   "runOn": "folderOpen"
+      // }
+    },
+    {
+      "label": "Init Environment",
+      "type": "shell",
+      "command": "./dev.sh",
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Start Cityflow Database",
+      "type": "shell",
+      "dependsOn": ["Init Environment"],
+      "command": "cd cityflow_database && docker start neo4j && python server.py",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Start Cityflow Executor",
+      "type": "shell",
+      "dependsOn": ["Init Environment"],
+      "command": "cd cityflow_executor && python server.py",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Start Cityflow Workstation",
+      "type": "shell",
+      "dependsOn": ["Init Environment"],
+      "command": "cd cityflow_workstation && npm run dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    }
+  ]
+}

@@ -4,7 +4,6 @@ import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 
 import theme from '@/theme';
-import { keepAlive } from '@/utils/executor';
 import FlowSetting from './FlowSetting';
 import ModuleList from './ModuleList';
 import ChatAssistant from './ChatAssistant';
@@ -32,20 +31,6 @@ export const FlowPanel = (props) => {
       setTab(1);
     }
   }, [props.state?.flowInited]);
-
-  // Keep the flow container alive
-  useEffect(() => {
-    let interval;
-    if (props.state?.flowInited) {
-      interval = setInterval(
-        () => keepAlive(props.state?.flowId, props.state?.image),
-        1000 * 30
-      );
-    }
-    return () => {
-      interval && clearInterval(interval);
-    };
-  }, [props.state.flowId, props.state.flowInited]);
 
   return (
     <>
@@ -97,16 +82,8 @@ export const FlowPanel = (props) => {
             }}
           >
             <Tab label="Settings" sx={{ fontSize: 12, width: '30%' }} />
-            <Tab
-              label="Modules"
-              sx={{ fontSize: 12, width: '30%' }}
-              disabled={!props.state?.flowInited}
-            />
-            <Tab
-              label="Assistant"
-              sx={{ fontSize: 12, width: '30%' }}
-              disabled={!props.state?.flowInited}
-            />
+            <Tab label="Modules" sx={{ fontSize: 12, width: '30%' }} />
+            <Tab label="Assistant" sx={{ fontSize: 12, width: '30%' }} />
           </Tabs>
         </Box>
       </Box>

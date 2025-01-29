@@ -1,18 +1,12 @@
 import { initUserId } from './local';
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 import useSWR from 'swr';
 
-const defaultRunner =
-  process.env.NEXT_PUBLIC_DEFAULT_RUNNER ||
-  'ghcr.io/kekehurry/cityflow_runner:latest';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const executorServer =
+  process.env.NEXT_PUBLIC_EXECUTOR_SERVER || 'http://localhost:8000';
 
-export const setupExecutor = async (
-  flowId,
-  packages,
-  image,
-  language = 'python'
-) => {
-  const api = '/api/executor/setup';
+export async function* setupExecutor(flowId, packages, image) {
+  const api = `${executorServer}/setup`;
   const userId = await initUserId();
   const res = await fetch(basePath + api, {
     method: 'POST',
@@ -23,16 +17,22 @@ export const setupExecutor = async (
       flowId,
       userId,
       packages,
-      image: defaultRunner,
-      language,
+      image,
     }),
   }).catch((err) => {
     console.error(err);
   });
   if (res && res.ok) {
-    return await res.json();
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      yield chunk;
+    }
   }
-};
+}
 
 export const executeCode = async ({
   flowId,
@@ -44,7 +44,8 @@ export const executeCode = async ({
   config,
   image,
 }) => {
-  const { code, icon, ...rest } = config;
+  if (!config) return 'waiting for init...';
+  const { code, html, icon, ...rest } = config;
   const userId = await initUserId();
   const inputFile = {
     data: JSON.stringify(input),
@@ -54,7 +55,7 @@ export const executeCode = async ({
     data: JSON.stringify(rest),
     path: 'config',
   };
-  const api = '/api/executor/execute';
+  const api = `${executorServer}/execute`;
   const res = await fetch(api, {
     method: 'POST',
     headers: {
@@ -64,7 +65,7 @@ export const executeCode = async ({
       flowId,
       userId,
       sessionId,
-      image: defaultRunner,
+      image,
       codeBlocks: [
         {
           files: [...(files || []), inputFile, configFile],
@@ -94,7 +95,7 @@ export const useExecuteCode = ({
 }) => {
   const { data, error } = useSWR(
     [
-      '/api/executor/execute',
+      `${executorServer}/execute`,
       { flowId, sessionId, moduleCode, files, language, input, config, image },
     ],
     () =>
@@ -106,7 +107,7 @@ export const useExecuteCode = ({
         language,
         input,
         config,
-        image: defaultRunner,
+        image,
       })
   );
   return {
@@ -118,7 +119,7 @@ export const useExecuteCode = ({
 
 export const removeSession = async (flowId, sessionId) => {
   const userId = await initUserId();
-  const api = 'api/executor/removeSession';
+  const api = `${executorServer}/remove_session`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -137,8 +138,8 @@ export const removeSession = async (flowId, sessionId) => {
   }
 };
 
-export const killExecutor = async (flowId, image) => {
-  const api = '/api/executor/kill';
+export const killExecutor = async (flowId) => {
+  const api = `${executorServer}/kill`;
   const userId = await initUserId();
   const res = await fetch(basePath + api, {
     method: 'POST',
@@ -148,7 +149,6 @@ export const killExecutor = async (flowId, image) => {
     body: JSON.stringify({
       flowId,
       userId,
-      image: defaultRunner,
     }),
   }).catch((err) => {
     console.error(err);
@@ -158,8 +158,8 @@ export const killExecutor = async (flowId, image) => {
   }
 };
 
-export const keepAlive = async (flowId) => {
-  const api = '/api/executor/keepAlive';
+export const check = async (flowId) => {
+  const api = `${executorServer}/check`;
   const userId = await initUserId();
   const res = await fetch(basePath + api, {
     method: 'POST',
@@ -177,3 +177,30 @@ export const keepAlive = async (flowId) => {
     return await res.json();
   }
 };
+
+export async function* getExecutorLogs(flowId) {
+  const api = `${executorServer}/logs`;
+  const userId = await initUserId();
+  const res = await fetch(basePath + api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      flowId,
+      userId,
+    }),
+  }).catch((err) => {
+    console.error(err);
+  });
+  if (res && res.ok) {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      yield chunk; // Stream output to the caller
+    }
+  }
+}

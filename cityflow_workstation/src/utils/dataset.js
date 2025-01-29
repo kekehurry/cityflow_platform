@@ -1,11 +1,12 @@
 import useSWR from 'swr';
 import { initUserId } from './local';
-import user from '@/app/author/user';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const datasetServer =
+  process.env.NEXT_PUBLIC_DATASET_SERVER || 'http://localhost:7575';
 
 export const checkNode = async (nodeId) => {
-  const api = '/api/dataset/checkNode';
+  const api = `${datasetServer}/check_node`;
   return fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -24,7 +25,7 @@ export const checkNode = async (nodeId) => {
 };
 
 export const saveWorkflow = async (flowData) => {
-  const api = '/api/dataset/saveWorkflow';
+  const api = `${datasetServer}/save_workflow`;
   const userId = await initUserId();
   return fetch(basePath + api, {
     method: 'POST',
@@ -50,7 +51,7 @@ export const saveWorkflow = async (flowData) => {
 };
 
 export const searchWorkflow = async (params, limit = 25) => {
-  const api = '/api/dataset/searchWorkflow';
+  const api = `${datasetServer}/search_workflow`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -67,7 +68,7 @@ export const searchWorkflow = async (params, limit = 25) => {
 
 export const useSearchWorkflow = (params, limit = 25) => {
   const { data, error } = useSWR(
-    ['/api/dataset/searchWorkflow', params, limit],
+    [`${datasetServer}/search_workflow`, params, limit],
     () => searchWorkflow(params, limit)
   );
 
@@ -80,7 +81,7 @@ export const useSearchWorkflow = (params, limit = 25) => {
 
 export const getWorkflow = async (flowId) => {
   if (!flowId) return;
-  const api = '/api/dataset/getWorkflow';
+  const api = `${datasetServer}/get_workflow`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -96,8 +97,9 @@ export const getWorkflow = async (flowId) => {
 };
 
 export const useGetWorkflow = (flowId) => {
-  const { data, error } = useSWR(['/api/dataset/getWorkflow', flowId], () =>
-    getWorkflow(flowId)
+  const { data, error } = useSWR(
+    [`${datasetServer}/get_workflow`, flowId],
+    () => getWorkflow(flowId)
   );
   return {
     data,
@@ -107,7 +109,7 @@ export const useGetWorkflow = (flowId) => {
 };
 
 export const getModule = async (moduleId) => {
-  const api = '/api/dataset/getModule';
+  const api = `${datasetServer}/get_module`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -123,8 +125,9 @@ export const getModule = async (moduleId) => {
 };
 
 export const useGetModule = (moduleId) => {
-  const { data, error } = useSWR(['/api/dataset/getModule', moduleId], () =>
-    getModule(moduleId)
+  const { data, error } = useSWR(
+    [`${datasetServer}/get_module`, moduleId],
+    () => getModule(moduleId)
   );
   return {
     data,
@@ -134,7 +137,7 @@ export const useGetModule = (moduleId) => {
 };
 
 export const searchModule = async (params, limit = 100) => {
-  const api = '/api/dataset/searchModule';
+  const api = `${datasetServer}/search_module`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -151,7 +154,7 @@ export const searchModule = async (params, limit = 100) => {
 
 export const useSearchModule = (params, limit = 100) => {
   const { data, error } = useSWR(
-    ['/api/dataset/searchModule', params, limit],
+    [`${datasetServer}/search_module`, params, limit],
     () => searchModule(params, limit)
   );
 
@@ -163,7 +166,7 @@ export const useSearchModule = (params, limit = 100) => {
 };
 
 export const getAuthor = async (authorId) => {
-  const api = '/api/dataset/getAuthor';
+  const api = `${datasetServer}/get_author`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -179,8 +182,9 @@ export const getAuthor = async (authorId) => {
 };
 
 export const useGetAuthor = (authorId) => {
-  const { data, error } = useSWR(['/api/dataset/getAuthor', authorId], () =>
-    getAuthor(authorId)
+  const { data, error } = useSWR(
+    [`${datasetServer}/get_author`, authorId],
+    () => getAuthor(authorId)
   );
 
   return {
@@ -191,7 +195,7 @@ export const useGetAuthor = (authorId) => {
 };
 
 export const deleteWorkflow = async (flowId) => {
-  const api = '/api/dataset/deleteWorkflow';
+  const api = `${datasetServer}/delete_workflow`;
   const userId = await initUserId();
   return fetch(basePath + api, {
     method: 'POST',
@@ -206,7 +210,7 @@ export const deleteWorkflow = async (flowId) => {
 
 //Search
 export const fullTextSearch = async (query, limit = 25) => {
-  const api = '/api/dataset/fulltextSearch';
+  const api = `${datasetServer}/fulltext_search`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -223,7 +227,7 @@ export const fullTextSearch = async (query, limit = 25) => {
 
 export const useFullTextSearch = (query, limit = 25) => {
   const { data, error } = useSWR(
-    ['/api/dataset/fulltextSearch', query, limit],
+    [`${datasetServer}/fulltext_search`, query, limit],
     () => fullTextSearch(query, limit)
   );
 
@@ -235,7 +239,7 @@ export const useFullTextSearch = (query, limit = 25) => {
 };
 
 export const semanticSearch = async (query, limit = 5) => {
-  const api = '/api/dataset/semanticSearch';
+  const api = `${datasetServer}/semantic_search`;
   const res = await fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -252,7 +256,7 @@ export const semanticSearch = async (query, limit = 5) => {
 
 export const useSemanticSearch = (query, limit = 5) => {
   const { data, error } = useSWR(
-    ['/api/dataset/semanticSearch', query, limit],
+    [`${datasetServer}/semantic_search`, query, limit],
     () => semanticSearch(query, limit)
   );
 
@@ -264,7 +268,7 @@ export const useSemanticSearch = (query, limit = 5) => {
 };
 
 export const getGraphOverview = async () => {
-  const api = '/api/dataset/getGraphOverview';
+  const api = `${datasetServer}/get_graph_overview`;
   const res = await fetch(basePath + api).catch((error) => {
     console.error('Error:', error);
   });

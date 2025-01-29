@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,Response
 from flask_cors import CORS
 from executor.executor import CodeExecutor
 from executor.utils import CodeBlock, File
@@ -14,57 +14,34 @@ def setup():
     id = request.json.get('flowId')
     user_id = request.json.get('userId')
     packages = request.json.get('packages')
-    language = request.json.get('language')
     image = request.json.get('image')
     container_name = f"csflow-{user_id}-{id}"
-    print(f"Setup Container: {container_name} Image: {image}, Language: {language}, Packages: {packages}")
+    print(f"Setup Container: {container_name} Image: {image}, Packages: {packages}")
     executor = manager.get_executor(container_name)
     if executor is None:
-        executor = CodeExecutor(image=image,container_name=container_name)
+        executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
         manager.register_excutor(executor)
-    elif image != executor._container.image.tags[0]:
-        print(f"Restarting container {container_name} with new image {image}")
+    else:
+        print(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
         manager.unregister_excutor(container_name)
-        executor = CodeExecutor(image=image,container_name=container_name)
+        executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
         manager.register_excutor(executor)
-    code_result = executor.setup(packages=packages, lang=language)
-    print(f"Finished Setup Container: {container_name}, Console: {code_result.console}")
-    return jsonify({
-        'container_name': executor._container_name,
-        'exit_code': code_result.exit_code, 
-        'console': code_result.console,
-        'output': code_result.output,
-    })
+    return Response(executor.run('./install.sh'), mimetype='text/plain')
 
-@app.route('/is_alive', methods=['POST'])
+@app.route('/check', methods=['POST'])
 def is_alive():
     id = request.json.get('flowId')
     user_id = request.json.get('userId')
     container_name = f"csflow-{user_id}-{id}"
-    print(f"Update Container: {container_name}")
+    # print(f"Update Container: {container_name}")
     executor = manager.get_executor(container_name)
     if executor:
-        return jsonify({"alive":executor.check()})
+        alive = executor.check()
+        if alive:
+            manager.keep_alive(executor._container_name)
+        return jsonify({"alive":alive})
     else:
         return jsonify({"alive":False})
-
-@app.route('/keep_alive', methods=['POST'])
-def keep_alive():
-    id = request.json.get('flowId')
-    user_id = request.json.get('userId')
-    container_name = f"csflow-{user_id}-{id}"
-    print(f"Update Container: {container_name}")
-    executor = manager.get_executor(container_name)
-    if executor is None:
-        executor = CodeExecutor(container_name=container_name)
-        manager.register_excutor(executor)
-        manager.keep_alive(executor._container_name)
-    else:
-        manager.keep_alive(executor._container_name)
-    return jsonify({
-        'container_name': executor._container_name,
-        'last_update': executor._last_update_time
-    })
 
 @app.route('/execute', methods=['POST'])
 def execute():
@@ -73,7 +50,7 @@ def execute():
     session_id = request.json.get('sessionId')
     image = request.json.get('image')
     container_name = f"csflow-{user_id}-{id}"
-    print(f"Execute Container: {container_name}, Session ID: {session_id}")
+    # print(f"Execute Container: {container_name}, Session ID: {session_id}")
     code_blocks = request.json.get('codeBlocks')
     if code_blocks is None:
         return jsonify({'error': 'No code blocks provided.'}), 400
@@ -107,7 +84,7 @@ def remove_ssesion():
     user_id = request.json.get('userId')
     session_id = request.json.get('sessionId')
     container_name = f"csflow-{user_id}-{id}"
-    print(f"Remove Container: {container_name}, Session ID: {session_id}")
+    # print(f"Remove Container: {container_name}, Session ID: {session_id}")
     executor = manager.get_executor(container_name)
     if executor:
         executor.remove_session(session_id)
@@ -127,7 +104,7 @@ def kill_executor():
     id = request.json.get('flowId')
     user_id = request.json.get('userId')
     container_name = f"csflow-{user_id}-{id}"
-    print(f"Kill Container: {container_name}")
+    # print(f"Kill Container: {container_name}")
     executor = manager.get_executor(container_name)
     if executor:
         manager.unregister_excutor(container_name)
@@ -142,6 +119,17 @@ def kill_executor():
             'exit_code': 1,
             'output': 'Container not found.'
         })
+
+@app.route('/logs', methods=['POST'])
+def get_logs():
+    id = request.json.get('flowId')
+    user_id = request.json.get('userId')
+    container_name = f"csflow-{user_id}-{id}"
+    executor = manager.get_executor(container_name)
+    if executor:
+        return Response(executor.get_logs(), mimetype='text/plain')
+    else:
+        return "Executor not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

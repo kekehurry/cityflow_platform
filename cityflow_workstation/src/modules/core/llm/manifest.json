@@ -10,7 +10,7 @@
     "width": 100,
     "height": 80,
     "expandWidth": 300,
-    "expandHeight": 400,
+    "expandHeight": 380,
     "input": ["input"],
     "output": ["output"],
     "run": false,

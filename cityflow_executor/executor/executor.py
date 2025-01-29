@@ -10,10 +10,11 @@ import os
 import shutil
 import base64
 import requests
+import json
 from dotenv import load_dotenv
 load_dotenv()
 
-dataserver= os.getenv('DATASET_SERVER')
+dataserver= os.getenv('NEXT_PUBLIC_DATASET_SERVER')
 
 def _wait_for_ready(container: Any, timeout: int = 60, stop_time: float = 0.1) -> None:
     elapsed_time = 0.0
@@ -47,18 +48,18 @@ class CodeExecutor:
         "javascript": True,
     }
     def __init__(self, 
-                image: str = "ghcr.io/kekehurry/cityflow_runner:latest", 
+                image: str = "ghcr.io/kekehurry/cityflow_runner:light", 
                 container_name = None,
                 timeout: int = 60,
                 auto_remove: bool = True,
                 bind_dir =None,
                 work_dir = "code",
                 stop_container: bool = True,
-                memory_limit = "1024m"
+                packages: dict= '',
                 ):
         self._client = docker.from_env()
         self._image = image
-        print(f"Using image {self._image}")
+        # print(f"Using image {self._image}")
         if container_name is None:
             container_name = f"csflow-{uuid.uuid4()}"
         self._container_name = container_name
@@ -67,7 +68,7 @@ class CodeExecutor:
         self._bind_dir = os.path.join(os.getenv("EXECUTOR_BIND_DIR", bind_dir),container_name)
         self._work_dir = os.path.join(os.getenv("EXECUTOR_WORK_DIR", work_dir), container_name)
         self._stop_container = stop_container  
-        self._mem_limit = os.getenv("EXECUTOR_MEMORY_LIMIT",memory_limit)
+        self._packages = packages
         self._last_update_time = time.time()
 
         if not os.path.exists(self._work_dir):
@@ -75,17 +76,21 @@ class CodeExecutor:
                 os.makedirs(self._work_dir)
             except FileExistsError:
                 pass
-            
-        # Check if the image exists
-        try:
-            self._client.images.get(image)
-        except ImageNotFound:
-            logging.info(f"Pulling image {image}...")
-            # Let the docker exception escape if this fails.
-            self._client.images.pull(image)
-        self.start()
+        
+        self._setup_path = os.path.join(self._work_dir, "setup.json")
+        with open(self._setup_path, "w") as f:
+            f.write(self._packages)
 
-    def start(self) -> None:
+        # Check if the image exists
+        execute_image = self._client.images.list(name=self._image)
+        if not execute_image:
+            try:
+                self._client.images.pull(image)
+            except Exception as e:
+                self._image = "ghcr.io/kekehurry/cityflow_runner:light"
+        self.init()
+
+    def init(self) -> None:
         """(Experimental) Restart the code executor."""
         # Start a container from the image, read to exec commands later
         try:
@@ -94,20 +99,19 @@ class CodeExecutor:
             self._container = self._client.containers.create(
                 self._image,
                 name=self._container_name,
-                entrypoint="/bin/sh",
-                tty=True,
+                entrypoint="sleep infinity",
+                # tty=True,
                 auto_remove=self._auto_remove,
                 volumes={
-                    self._bind_dir: {"bind": "/cityflow_runner/workflow", "mode": "rw"},
+                    self._bind_dir: {"bind": "/cityflow_runner/workflow", "mode": "rw"}
                 }
             )
         # Start the container if it is not running
         if self._container.status != "running":
             self._container.start()
-            _wait_for_ready(self._container)
         else:
             self._container.restart()
-            _wait_for_ready(self._container)
+        return
 
     def stop(self) -> None:
         """(Experimental) Stop the code executor."""
@@ -128,23 +132,17 @@ class CodeExecutor:
             return False
         except Exception:
             return False
+    
+    def run(self,command) -> str: # type: ignore
+        try:
+            container = self._client.containers.get(self._container_name)
+            results = container.exec_run(f"/bin/bash -c '{command}'",stream=True,tty=True)   
+            for line in results.output:
+                logs = line.decode("utf-8")
+                yield logs
+        except Exception as e:
+            yield str(e)
 
-    def setup(self, packages: List[str], lang:str) -> None:
-        """Set up the code executor."""
-        console_outputs = []
-        last_exit_code = 0
-        for package in packages:
-            if package:
-                pm = _pm(lang)
-                result = self._container.exec_run([_pm(lang), "install", package])
-                exit_code = result.exit_code
-                output = result.output.decode("utf-8")
-                console_outputs.append(output)
-                last_exit_code = exit_code
-            if last_exit_code != 0:
-                break
-        self._last_update_time = time.time()
-        return CodeResult(exit_code=last_exit_code, console="".join(console_outputs), output="")
 
     def execute(self, code_blocks: List[str]) -> List[str]:
         """Execute the code blocks."""
@@ -171,6 +169,7 @@ class CodeExecutor:
             with open(code_path, "w") as fcode:
                 fcode.write(code)
 
+            print("files",code_block.files)
             if code_block.files:
                 for file in code_block.files:
                     try:
@@ -198,14 +197,12 @@ class CodeExecutor:
             runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
             command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
             
-            result = self._container.exec_run(command,
-                                            #   user=self._user
-                                              )
+            result = self._container.exec_run(command)
             exit_code = result.exit_code
             output = result.output.decode("utf-8")
             console_outputs.append(output)
             if exit_code == 124:
-                output += "\n" + "Timeout"
+                console_outputs.append("Execution timeout\n")
             last_exit_code = exit_code
             if exit_code != 0:
                 break
@@ -227,14 +224,14 @@ class CodeExecutor:
                 rendered_html = f.read()
         
         self._last_update_time = time.time()
-        return CodeResult(exit_code=last_exit_code, console="".join(console_outputs), output=final_output, config=final_config, html=rendered_html)
+        return CodeResult(exit_code=last_exit_code, console="\n".join(console_outputs), output=final_output, config=final_config, html=rendered_html)
 
     def remove_session(self, session_id: str) -> None:
         """Remove the session."""
         foldername = f"codeblock_{session_id}"
         try:
             if os.path.exists(os.path.join(self._work_dir, foldername)):
-                print(f"Removing {os.path.join(self._work_dir, foldername)}")
+                # print(f"Removing {os.path.join(self._work_dir, foldername)}")
                 shutil.rmtree(os.path.join(self._work_dir, foldername))
         except FileNotFoundError:
             pass

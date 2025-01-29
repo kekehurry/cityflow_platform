@@ -216,15 +216,17 @@ export default function ModuleBuilder(props) {
 
   const configTab = (
     <Box hidden={tab !== 0}>
-      <ConfigTab
-        language={formValue.language || 'javascript'}
-        code={formValue.code[editorTabs[editor]]}
-        formValue={formValue}
-        setFormValue={setFormValue}
-        config={config}
-        setConfig={setConfig}
-        height={config.expandHeight - 330}
-      />
+      {config.expandHeight && (
+        <ConfigTab
+          language={formValue.language || 'javascript'}
+          code={formValue.code[editorTabs[editor]]}
+          formValue={formValue}
+          setFormValue={setFormValue}
+          config={config}
+          setConfig={setConfig}
+          height={config.expandHeight - 330}
+        />
+      )}
       {formValue.type === 'interface' ? (
         <>
           <Typography variant="caption">Preview</Typography>
@@ -263,7 +265,7 @@ export default function ModuleBuilder(props) {
                 zoom={
                   config.width > config.height
                     ? (config.expandWidth * 0.4 - 80) / config.width
-                    : 200 / config.height
+                    : 200 / (config.height || 600)
                 }
               />
             </Box>
@@ -278,7 +280,7 @@ export default function ModuleBuilder(props) {
             className="nowheel"
             lable="Log"
             fullWidth
-            value={log ? JSON.stringify(log) : ''}
+            value={log || ''}
             rows={9}
             sx={{ background: theme.palette.node.main }}
           />
@@ -289,27 +291,33 @@ export default function ModuleBuilder(props) {
 
   const assistantTab = (
     <Box hidden={tab !== 1}>
-      <CodeAssistant
-        language={formValue.language || 'javascript'}
-        code={formValue.code[editorTabs[editor]]}
-        editorTab={editorTabs[editor]}
-        formValue={formValue}
-        setFormValue={setFormValue}
-        config={config}
-        setConfig={setConfig}
-        height={config.expandHeight - 170}
-      />
+      {config.expandHeight && (
+        <CodeAssistant
+          language={formValue.language || 'javascript'}
+          code={formValue.code[editorTabs[editor]]}
+          editorTab={editorTabs[editor]}
+          formValue={formValue}
+          setFormValue={setFormValue}
+          config={config}
+          setConfig={setConfig}
+          height={config.expandHeight - 100}
+        />
+      )}
     </Box>
   );
   const dependencyTab = (
     <Box hidden={tab !== 2}>
-      <Stack spacing={1} height={config.expandHeight - 100}>
-        <Typography variant="caption">Dependencies</Typography>
-        <FileUploader
-          formValue={formValue}
-          setFormValue={setFormValue}
-          height={config.expandHeight - 110}
-        />
+      <Stack spacing={1} height={config.expandHeigh || 600 - 100}>
+        {config.expandHeight && (
+          <>
+            <Typography variant="caption">Dependencies</Typography>
+            <FileUploader
+              formValue={formValue}
+              setFormValue={setFormValue}
+              height={config.expandHeight - 110}
+            />
+          </>
+        )}
       </Stack>
     </Box>
   );
@@ -349,22 +357,23 @@ export default function ModuleBuilder(props) {
               setConfig={setConfig}
               setCodeSubmited={setCodeSubmited}
             />
-            {editorTabs.map((tab, index) => (
-              <Box hidden={editor !== index} key={tab}>
-                <MonacoEditor
-                  width="100%"
-                  height={config.expandHeight - 50}
-                  language={tab === 'interface' ? 'javascript' : 'python'}
-                  theme="vs-dark"
-                  value={formValue.code[tab]}
-                  onChange={(value) => handleCodeChange(value, tab)}
-                  options={{
-                    minimap: { enabled: false },
-                    wordWrap: 'on',
-                  }}
-                />
-              </Box>
-            ))}
+            {config.expandHeight &&
+              editorTabs.map((tab, index) => (
+                <Box hidden={editor !== index} key={tab}>
+                  <MonacoEditor
+                    width="100%"
+                    height={config.expandHeight - 50}
+                    language={tab === 'interface' ? 'javascript' : 'python'}
+                    theme="vs-dark"
+                    value={formValue.code[tab]}
+                    onChange={(value) => handleCodeChange(value, tab)}
+                    options={{
+                      minimap: { enabled: false },
+                      wordWrap: 'on',
+                    }}
+                  />
+                </Box>
+              ))}
           </Box>
         </Box>
         <Box sx={{ width: '40%' }}>
