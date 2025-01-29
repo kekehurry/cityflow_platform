@@ -5,4 +5,5 @@ pydantic
 neo4j
 requests
 python-dotenv
-sentence-transformers
+onnxruntime
+transformers
