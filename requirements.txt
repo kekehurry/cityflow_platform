@@ -1,5 +1,5 @@
-Flask
-Flask_Cors
+flask
+flask_cors
 docker
 pydantic
 neo4j
