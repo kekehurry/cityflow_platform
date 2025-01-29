@@ -2,8 +2,7 @@ import useSWR from 'swr';
 import { initUserId } from './local';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const datasetServer =
-  process.env.NEXT_PUBLIC_DATASET_SERVER || 'http://localhost:7575';
+const datasetServer = '/api/dataset';
 
 export const checkNode = async (nodeId) => {
   const api = `${datasetServer}/check_node`;

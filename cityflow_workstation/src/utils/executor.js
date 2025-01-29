@@ -2,8 +2,7 @@ import { initUserId } from './local';
 import useSWR from 'swr';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const executorServer =
-  process.env.NEXT_PUBLIC_EXECUTOR_SERVER || 'http://localhost:8000';
+const executorServer = '/api/executor';
 
 export async function* setupExecutor(flowId, packages, image) {
   const api = `${executorServer}/setup`;
@@ -176,30 +175,3 @@ export const check = async (flowId) => {
     return await res.json();
   }
 };
-
-export async function* getExecutorLogs(flowId) {
-  const api = `${executorServer}/logs`;
-  const userId = await initUserId();
-  const res = await fetch(basePath + api, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      flowId,
-      userId,
-    }),
-  }).catch((err) => {
-    console.error(err);
-  });
-  if (res && res.ok) {
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      yield chunk; // Stream output to the caller
-    }
-  }
-}

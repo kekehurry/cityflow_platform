@@ -4,8 +4,11 @@ import threading
 import time
 import os
 import docker
+import logging
 from dotenv import load_dotenv
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
 
 class ExecutorManage:
     def __init__(self, check_interval=1, idle_time=5, max_last_minute=20):
@@ -22,7 +25,7 @@ class ExecutorManage:
     def register_excutor(self, excutor:CodeExecutor):
         container_name = excutor._container_name
         self._container_registry[container_name] = excutor
-        print(f"Container {container_name} has been registered.")
+        logging.info(f"Container {container_name} has been registered.")
 
     def unregister_excutor(self, container_name: str):
         if container_name in self._container_registry:
@@ -32,7 +35,7 @@ class ExecutorManage:
                     excutor.stop()
                     excutor.remove()
                     del self._container_registry[container_name]
-                    print(f"Container {container_name} has been removed.")
+                    logging.info(f"Container {container_name} has been removed.")
             except Exception as e:
                 pass
     
@@ -40,7 +43,6 @@ class ExecutorManage:
         if container_name in self._container_registry:
             excutor = self._container_registry[container_name]
             if excutor.check():
-                # print(f"Get container {container_name}")
                 return self._container_registry[container_name]
         return None
 
@@ -48,10 +50,9 @@ class ExecutorManage:
         if container_name in self._container_registry:
             excutor = self._container_registry[container_name]
             excutor._last_update_time = time.time()
-            # print(f"Container {container_name} has been updated.")
     
     def _auto_remove(self):
-        print("Start monitoring process.")
+        logging.info("Start monitoring process.")
         while True:
             containers = self._client.containers.list(all=True)
             for container in containers:

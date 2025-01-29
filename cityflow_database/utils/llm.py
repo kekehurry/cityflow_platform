@@ -71,12 +71,12 @@ load_dotenv()
 
 # Define local model path
 LOCAL_MODEL_PATH = os.getenv('LOCAL_MODEL_PATH', './models')
-MODEL_NAME = os.getenv('EMBEDDING_MODEL', 'sentence-transformers/all-MiniLM-L6-v2')
 
 # Load ONNX model
 onnx_path = os.path.join(LOCAL_MODEL_PATH, 'minilm.onnx')
+tokenizer_path = os.path.join(LOCAL_MODEL_PATH, 'tokenizer')
 onnx_model = ort.InferenceSession(onnx_path)
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 
 def get_embedding(text):
     try:
