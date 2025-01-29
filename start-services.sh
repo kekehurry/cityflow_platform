@@ -16,8 +16,6 @@ done
 
 # cd workdir
 cd /cityflow_platform 
-pip3 install -r ./requirements.txt && \
-
 
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
