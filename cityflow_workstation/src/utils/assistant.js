@@ -19,67 +19,92 @@ const parseMessage = (messages) => {
 
 export default class Assistant {
   constructor(props) {
+    if (!props) return;
     this.props = props;
-    const { systemPrompt, context } = props;
-    // Store system prompt and context for later use
-    this.systemPrompt = systemPrompt;
-    this.context = context;
   }
 
   async chat(inputMessage, messageHistory = null) {
-    const LLM_BASE_URL = getLocalStorage('LLM_BASE_URL');
     const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
-    const LLM_MODEL = getLocalStorage('LLM_MODEL');
     const messages = [
-      { role: 'system', content: this.systemPrompt },
+      {
+        role: 'system',
+        content: this.props.systemPrompt || 'you are a helpful assistant',
+      },
+      { role: 'user', content: this.props.context || '' },
       ...parseMessage(messageHistory),
-      { role: 'user', content: this.context },
-      { role: 'user', content: inputMessage },
+      { role: 'user', content: inputMessage || '' },
     ];
 
     try {
-      const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
+      const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${LLM_API_KEY}`,
         },
         body: JSON.stringify({
-          model: LLM_MODEL,
+          model: this.props.model || 'gpt-4o-mini',
           messages: messages,
+          response_format: this.props.responseFormat
+            ? {
+                type: this.props.responseFormat,
+              }
+            : { type: 'text' },
+          max_tokens: this.props.maxTokens || 4096,
+          temperature: this.props.temperature || 0.8,
+          presence_penalty: this.props.presencePenalty || 0.0,
+          frequency_penalty: this.props.frequencyPenalty || 0.0,
         }),
       });
+      if (!response.ok) {
+        throw new Error(response.status);
+      }
       const data = await response.json();
       return data.choices[0].message.content;
     } catch (error) {
-      console.error('Error during chat:', error);
+      return error;
     }
   }
 
   async *stream(inputMessage, messageHistory, signal) {
-    const LLM_BASE_URL = getLocalStorage('LLM_BASE_URL');
     const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
-    const LLM_MODEL = getLocalStorage('LLM_MODEL');
     const messages = [
-      { role: 'system', content: this.systemPrompt },
+      {
+        role: 'system',
+        content: this.props.systemPrompt || 'you are a helpful assistant',
+      },
+      { role: 'user', content: this.props.context || '' },
       ...parseMessage(messageHistory),
-      { role: 'user', content: inputMessage },
+      { role: 'user', content: inputMessage || '' },
     ];
 
     try {
-      const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
+      const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${LLM_API_KEY}`,
         },
         body: JSON.stringify({
-          model: LLM_MODEL,
+          model: this.props.model || 'gpt-4o-mini',
           messages: messages,
+          response_format: this.props.responseFormat
+            ? {
+                type: this.props.responseFormat,
+              }
+            : { type: 'text' },
+          max_tokens: this.props.maxTokens || 4096,
+          temperature: this.props.temperature || 0.8,
+          presence_penalty: this.props.presencePenalty || 0.0,
+          frequency_penalty: this.props.frequencyPenalty || 0.0,
           stream: true,
         }),
-        signal, // Pass the signal to the fetch request
+        signal,
       });
+
+      if (!response.ok) {
+        throw new Error(response.status);
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
@@ -87,7 +112,6 @@ export default class Assistant {
       while (true) {
         // Check if the signal is aborted
         if (signal.aborted) {
-          console.log('Stream aborted');
           reader.cancel(); // Cancel the reader
           return; // Exit the generator
         }
@@ -110,18 +134,14 @@ export default class Assistant {
                   yield content; // Stream output to the caller
                 }
               } catch (e) {
-                console.error('Error parsing stream:', e);
+                yield e;
               }
             }
           }
         }
       }
     } catch (error) {
-      if (signal.aborted) {
-        console.log('Stream stopped due to abort signal.');
-      } else {
-        console.log('Error during stream:', error);
-      }
+      yield error;
     }
   }
 }

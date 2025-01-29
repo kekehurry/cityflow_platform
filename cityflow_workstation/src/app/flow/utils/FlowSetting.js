@@ -10,12 +10,15 @@ import {
   AccordionSummary,
   AccordionDetails,
   Divider,
+  Input,
+  InputLabel,
+  FormControl,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { setupExecutor } from '@/utils/executor';
+import { setupExecutor, check, killExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
 import { useLocalStorage } from '@/utils/local';
@@ -61,38 +64,28 @@ const FlowSettings = (props) => {
   const [formValue, setFormValue] = useState({});
   const latestPropsRef = useRef(props);
   const [loading, setLoading] = useState(false);
-  const [initLog, setInitLog] = useState('');
   const [author, setAuthor] = useLocalStorage('author', null);
-  const [LLM_BASE_URL, setLLMBaseUrl] = useLocalStorage(
-    'LLM_BASE_URL',
-    'https://api.openai.com/v1'
-  );
-  const [LLM_MODEL, setLLMModel] = useLocalStorage('LLM_MODEL', 'gpt-4o-mini');
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
 
-  // set flowInited
-  const setFlowInited = (value) => {
-    setMeta({ flowInited: value });
-  };
-
   // sumbit workflow settings
-  const hangleSubmit = () => {
+  const hangleSubmit = async () => {
     setMeta(formValue);
-    setFlowInited(false);
     setAuthor(formValue.author);
     setLoading(true);
-    const packages = formValue.packages.split('\n');
-    setInitLog('initing environment...');
-    setupExecutor(formValue.flowId, packages, formValue.image)
-      .then((data) => {
-        setInitLog(data?.console);
-        setFlowInited(true);
-      })
-      .finally(() => {
-        setLoading(false);
-        setInitLog('');
-      });
+    let logs = '';
+    for await (const chunk of await setupExecutor(
+      formValue.flowId,
+      formValue.packages,
+      formValue.image
+    )) {
+      logs += chunk;
+      setMeta({ logs });
+    }
+    check(formValue.flowId).then((data) => {
+      setLoading(false);
+      setMeta({ isAlive: data?.alive });
+    });
   };
 
   const handleFormChange = (event) => {
@@ -149,6 +142,7 @@ const FlowSettings = (props) => {
   };
 
   useEffect(() => {
+    if (!props.state?.flowId) return;
     initUserId().then((userId) => {
       author || setAuthor(`user_${userId.slice(0, 4)}`);
     });
@@ -158,11 +152,25 @@ const FlowSettings = (props) => {
       description: props.state?.description || '',
       tag: props.state?.tag || '',
       city: props.state?.city || '',
-      author: author,
-      image: props.state?.image,
+      author: author || '',
+      image: props.state?.image || defaultRunner,
       packages: props.state?.packages || '',
     });
   }, [props.state?.flowId]);
+
+  useEffect(() => {
+    if (!(formValue.flowId && props.state?.isAlive)) return;
+    const isAlive = setInterval(() => {
+      check(formValue.flowId).then((data) => {
+        setMeta({ isAlive: data?.alive });
+      });
+    }, 1000);
+    return () => {
+      console.log('CLEAN UP');
+      clearInterval(isAlive);
+      killExecutor(formValue.flowId);
+    };
+  }, [formValue.flowId, props.state?.isAlive]);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -215,7 +223,7 @@ const FlowSettings = (props) => {
             onChange={handleFormChange}
             value={formValue?.description || ''}
             multiline
-            rows={4}
+            rows={6}
             placeholder="breifly describe your workflow"
             InputLabelProps={{ shrink: true }}
           ></TextField>
@@ -258,82 +266,106 @@ const FlowSettings = (props) => {
           </Tooltip>
         </Box>
         <TextField
-          select
           id="image"
           fullWidth
           label="image"
-          value={defaultRunner}
-          onChange={(e) => {
-            handleFormChange({
-              target: { id: 'image', value: e.target.value },
-            });
-          }}
+          value={formValue?.image || ''}
+          onChange={handleFormChange}
           InputLabelProps={{ shrink: true }}
+        />
+        <LoadingButton
+          loading={loading}
+          variant="contained"
+          color={props.state.isAlive ? 'primary' : 'secondary'}
+          onClick={hangleSubmit}
         >
-          <MenuItem value={defaultRunner}>{defaultRunner}</MenuItem>
-        </TextField>
+          Init Environment
+        </LoadingButton>
         <Accordion
           sx={{ border: '0px', background: 'none' }}
           variant="outlined"
           disableGutters
         >
           <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
-            Secrets (these secrets only save locally)
+            Advance Settings
           </AccordionSummary>
-          <AccordionDetails sx={{ m: 0, p: 0 }}>
+          <AccordionDetails sx={{ m: 0, p: 0, height: '600px' }}>
             <Stack spacing={2}>
               <Divider />
+              <Stack direction={'row'}>
+                <InputLabel
+                  htmlFor="LLM_API_KEY"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  LLM_API_KEY
+                </InputLabel>
+                <Input
+                  type="password"
+                  id="LLM_API_KEY"
+                  value={LLM_API_KEY || ''}
+                  onChange={(e) => setLLLMAPIKey(e.target.value)}
+                  fullWidth
+                  inputProps={{
+                    style: {
+                      background: 'none',
+                      color: '#616161',
+                      border: 'none',
+                      borderBottom: '1px solid #616161',
+                    },
+                  }}
+                />
+              </Stack>
+              <Stack direction={'row'} sx={{ pb: 2 }}>
+                <InputLabel
+                  htmlFor="MAPBOX_TOEKN"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  MAPBOX_TOKEN
+                </InputLabel>
+                <Input
+                  type="password"
+                  id="MAPBOX_TOEKN"
+                  value={MAPBOX_TOKEN || ''}
+                  onChange={(e) => setMapboxToken(e.target.value)}
+                  fullWidth
+                  inputProps={{
+                    style: {
+                      background: 'none',
+                      color: '#616161',
+                      border: 'none',
+                      borderBottom: '1px solid #616161',
+                    },
+                  }}
+                />
+              </Stack>
+              <Divider />
               <TextField
+                id="packages"
                 fullWidth
-                variant="standard"
-                label="LLM_BASE_URL"
-                id="LLM_BASE_URL"
-                value={LLM_BASE_URL}
-                onChange={(e) => setLLMBaseUrl(e.target.value)}
+                label="Packages"
+                onChange={handleFormChange}
+                value={formValue?.packages}
+                multiline
+                rows={5}
+                sx={{ mt: 2 }}
+                placeholder={`#conda,pip or npm packages in json format:\n{ "conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"] }`}
                 InputLabelProps={{ shrink: true }}
               />
               <TextField
+                id="logs"
                 fullWidth
-                variant="standard"
-                label="LLM_MODEL"
-                id="LLM_MODEL"
-                value={LLM_MODEL}
-                onChange={(e) => setLLMModel(e.target.value)}
+                label="logs"
+                multiline
+                value={props.state.logs || ''}
                 InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                fullWidth
-                variant="standard"
-                label="LLM_API_KEY"
-                id="LLM_API_KEY"
-                value={LLM_API_KEY}
-                onChange={(e) => setLLLMAPIKey(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                type="password"
-              />
-              <TextField
-                fullWidth
-                variant="standard"
-                label="MAPBOX_TOEKN"
-                id="MAPBOX_TOEKN"
-                value={MAPBOX_TOKEN}
-                onChange={(e) => setMapboxToken(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                type="password"
+                rows={5}
               />
               <Divider />
             </Stack>
           </AccordionDetails>
         </Accordion>
-        <LoadingButton
-          loading={loading}
-          variant="contained"
-          color="primary"
-          onClick={hangleSubmit}
-        >
-          Init Environment
-        </LoadingButton>
-        <Typography variant="caption">{initLog}</Typography>
       </Stack>
     </Box>
   );

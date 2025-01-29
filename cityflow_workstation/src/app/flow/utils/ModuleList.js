@@ -102,13 +102,23 @@ export const ModuleList = (props) => {
     const params = { basic: true };
     searchModule(params).then((moduleList) => {
       if (!moduleList) return;
-      const modules = moduleList.map((config) => {
-        let module = { ...config };
-        module.custom = true;
-        module.expand = false;
-        module.run = false;
-        return module;
-      });
+      const modules = moduleList
+        .map((config) => {
+          let module = { ...config };
+          module.custom = true;
+          module.expand = false;
+          module.run = false;
+          return module;
+        })
+        .sort((a, b) => {
+          if (a.category === 'input/output' && b.category !== 'input/output') {
+            return -1;
+          }
+          if (a.category !== 'input/output' && b.category === 'input/output') {
+            return 1;
+          }
+          return 0;
+        });
       setBasicModules(modules);
     });
   }, []);
@@ -154,7 +164,7 @@ export const ModuleList = (props) => {
   }, [userModules, basicModules]);
 
   return (
-    <Box id="ModulePanel" hidden={tab !== 1}>
+    <Box id="ModulePanel" hidden={tab !== 1} height={'150vh'} overflow={'auto'}>
       <Stack direction="row" spacing={1} sx={{ pb: 2 }}>
         <SearchBar
           builderManifest={builderManifest}
@@ -217,6 +227,7 @@ export const ModuleList = (props) => {
               sx={{ border: '0px', background: 'none' }}
               variant="outlined"
               disableGutters
+              defaultExpanded
             >
               <AccordionSummary
                 sx={{ height: 10, minHeight: 30, m: 0, paddingLeft: 1 }}
