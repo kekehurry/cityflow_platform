@@ -21,7 +21,7 @@ import { connect } from 'react-redux';
 import { setupExecutor, check, killExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
-import { useLocalStorage } from '@/utils/local';
+import { useLocalStorage, getLocalStorage } from '@/utils/local';
 import { initUserId } from '@/utils/local';
 
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
@@ -29,27 +29,28 @@ const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 const mapStateToProps = (state, ownProps) => ({
   state: state,
   flowCodes: {
-    ...state,
-    data: null,
+    name: state.name,
+    description: state.description,
+    city: state.city,
+    author: state.author,
+    tag: state.tag,
     nodes: state.nodes.map((node) => {
       return {
-        ...node,
-        icon: null,
-        data: {
-          ...node.data,
-          input: null,
-          output: null,
-        },
+        id: node.id,
         config: {
-          ...node.config,
-          files: [],
-          scope: {},
-          run: false,
+          name: node.config?.name || '',
+          author: node.config?.author || '',
+          type: node.config?.type || '',
+          category: node.config?.category || '',
+          description: node.config?.description || '',
+          input: node.config?.input || '',
+          output: node.config?.output || '',
+          code: node.config?.code || '',
+          language: node.config?.language || '',
         },
       };
     }),
     edges: [...state.edges],
-    screenShot: null,
   },
   viewport: state.viewport,
 });
@@ -67,12 +68,12 @@ const FlowSettings = (props) => {
   const [author, setAuthor] = useLocalStorage('author', null);
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
+  const localLLMConfig = getLocalStorage('LLM_CONFIG');
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
-    setMeta(formValue);
+    setMeta({ ...formValue, loading: true });
     setAuthor(formValue.author);
-    setLoading(true);
     let logs = '';
     for await (const chunk of await setupExecutor(
       formValue.flowId,
@@ -83,8 +84,7 @@ const FlowSettings = (props) => {
       setMeta({ logs });
     }
     check(formValue.flowId).then((data) => {
-      setLoading(false);
-      setMeta({ isAlive: data?.alive });
+      setMeta({ loading: false });
     });
   };
 
@@ -99,7 +99,9 @@ const FlowSettings = (props) => {
   const explainWorkflow = () => {
     const systemPrompt = `You are a helpful assistant who can help human explain a worflow consisting of a series of nodes and edges. Each node is a code block, and the edges indicate the data flow between the code blocks. Your task is to provide a brief description of the workflow in one sentence based on the code and the description of nodes.`;
     const context = `workflow: ${JSON.stringify(props.flowCodes)}`;
+    console.log(props.flowCodes);
     const assistant = new Assistant({
+      ...localLLMConfig,
       systemPrompt,
       context,
     });
@@ -123,6 +125,7 @@ const FlowSettings = (props) => {
     **No explanation or other information needed.**`;
     const context = `workflow: ${JSON.stringify(props.flowCodes)}`;
     const assistant = new Assistant({
+      ...localLLMConfig,
       systemPrompt,
       context,
     });
@@ -159,18 +162,17 @@ const FlowSettings = (props) => {
   }, [props.state?.flowId]);
 
   useEffect(() => {
-    if (!(formValue.flowId && props.state?.isAlive)) return;
+    if (!formValue.flowId) return;
     const isAlive = setInterval(() => {
       check(formValue.flowId).then((data) => {
         setMeta({ isAlive: data?.alive });
       });
     }, 1000);
     return () => {
-      console.log('CLEAN UP');
       clearInterval(isAlive);
       killExecutor(formValue.flowId);
     };
-  }, [formValue.flowId, props.state?.isAlive]);
+  }, [formValue.flowId]);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -274,7 +276,7 @@ const FlowSettings = (props) => {
           InputLabelProps={{ shrink: true }}
         />
         <LoadingButton
-          loading={loading}
+          loading={props.state.loading || loading}
           variant="contained"
           color={props.state.isAlive ? 'primary' : 'secondary'}
           onClick={hangleSubmit}

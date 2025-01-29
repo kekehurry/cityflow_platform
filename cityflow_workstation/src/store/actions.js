@@ -10,6 +10,7 @@ export const initStore = (state) => {
         flowInited: false,
         logs: '',
         isAlive: false,
+        loading: false,
       },
     };
   } else {
@@ -24,6 +25,7 @@ export const initStore = (state) => {
         flowInited: false,
         logs: '',
         isAlive: false,
+        loading: false,
       },
     };
   }
