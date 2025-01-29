@@ -39,7 +39,6 @@ import { useSearchParams } from 'next/navigation';
 import theme from '@/theme';
 
 import { useGetWorkflow, useGetModule } from '@/utils/dataset';
-import { killExecutor } from '@/utils/executor';
 import { setupExecutor } from '@/utils/executor';
 import { getUserFlow } from '@/utils/local';
 import { nanoid } from 'nanoid';
@@ -235,7 +234,6 @@ const FlowStation = (props) => {
     // initialize the store when the component is unmounted
     return () => {
       initStore(null);
-      killExecutor(props.state.flowId);
     };
   }, []);
 

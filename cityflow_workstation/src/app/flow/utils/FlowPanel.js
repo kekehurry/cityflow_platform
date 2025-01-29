@@ -4,7 +4,6 @@ import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 
 import theme from '@/theme';
-import { keepAlive } from '@/utils/executor';
 import FlowSetting from './FlowSetting';
 import ModuleList from './ModuleList';
 import ChatAssistant from './ChatAssistant';
@@ -26,26 +25,12 @@ export const FlowPanel = (props) => {
   };
   // Set the tab to modulePanel if the flow is inited
   useEffect(() => {
-    if (!props.state?.flowInited) {
+    if (!props.state?.isAlive) {
       setTab(0);
     } else {
       setTab(1);
     }
-  }, [props.state?.flowInited]);
-
-  // Keep the flow container alive
-  useEffect(() => {
-    let interval;
-    if (props.state?.flowInited) {
-      interval = setInterval(
-        () => keepAlive(props.state?.flowId, props.state?.image),
-        1000 * 30
-      );
-    }
-    return () => {
-      interval && clearInterval(interval);
-    };
-  }, [props.state.flowId, props.state.flowInited]);
+  }, [props.state?.isAlive]);
 
   return (
     <>
@@ -89,6 +74,8 @@ export const FlowPanel = (props) => {
             value={tab}
             onChange={handleTabChange}
             centered
+            textColor={props.state.isAlive ? 'primary' : 'secondary'}
+            indicatorColor={props.state.isAlive ? 'primary' : 'secondary'}
             sx={{
               width: '100%',
               height: 5,
@@ -96,16 +83,27 @@ export const FlowPanel = (props) => {
               pb: 1,
             }}
           >
-            <Tab label="Settings" sx={{ fontSize: 12, width: '30%' }} />
+            <Tab
+              label="Settings"
+              sx={{
+                fontSize: 12,
+                width: '30%',
+              }}
+            />
             <Tab
               label="Modules"
-              sx={{ fontSize: 12, width: '30%' }}
-              disabled={!props.state?.flowInited}
+              sx={{
+                fontSize: 12,
+                width: '30%',
+              }}
+              disabled={!props.state.isAlive}
             />
             <Tab
               label="Assistant"
-              sx={{ fontSize: 12, width: '30%' }}
-              disabled={!props.state?.flowInited}
+              sx={{
+                fontSize: 12,
+                width: '30%',
+              }}
             />
           </Tabs>
         </Box>

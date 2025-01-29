@@ -11,6 +11,7 @@ fi
 
 # Pull the latest cityflow_runner image
 docker pull ghcr.io/kekehurry/cityflow_runner:latest
+docker pull ghcr.io/kekehurry/cityflow_platform:latest
 
 # create cityflow_platform directory
 mkdir -p cityflow_platform

@@ -8,6 +8,8 @@ export const initStore = (state) => {
       payload: {
         ...state,
         flowInited: false,
+        logs: '',
+        isAlive: false,
       },
     };
   } else {
@@ -20,6 +22,8 @@ export const initStore = (state) => {
         flowId: 'temp' + nanoid(),
         author: `test_user_${random(1000)}`,
         flowInited: false,
+        logs: '',
+        isAlive: false,
       },
     };
   }

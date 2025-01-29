@@ -167,7 +167,7 @@ export const MessageRight = ({ message, name, avatar }) => {
           <CustomMarkdown markdown={message} />
         </MessageContent>
       </MessageGreen>
-      <ChatAvatar alt={name} src={avatar} />
+      <ChatAvatar alt={name} src={avatar || ''} />
     </MessageRowRight>
   );
 };
@@ -175,7 +175,7 @@ export const MessageRight = ({ message, name, avatar }) => {
 export const MessageLeft = ({ message, name, avatar, sendCode }) => {
   return (
     <MessageNoFrame>
-      <ChatAvatar alt={name} src={avatar} />
+      <ChatAvatar alt={name} src={avatar || ''} />
       <CustomMarkdown markdown={message} sendCode={sendCode} />
     </MessageNoFrame>
   );

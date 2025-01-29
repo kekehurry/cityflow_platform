@@ -59,25 +59,30 @@ const FlowHeader = (props) => {
   const [globalRun, setGlobalRun] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { runAll, stopAll } = props;
+  const { runAll, stopAll, setMeta } = props;
 
-  const initAndRunALL = () => {
-    const packages = props.state.packages.split('\n');
+  const initAndRunALL = async () => {
     setLoading(true);
-    setupExecutor(props.state.flowId, packages, props.state?.image).then(
-      (data) => {
-        props.setMeta({ flowInited: true });
-        runAll();
-        setLoading(false);
+    if (!props.state.isAlive) {
+      let logs = '';
+      for await (const chunk of await setupExecutor(
+        props.state?.flowId,
+        props.state?.packages,
+        props.state?.image
+      )) {
+        logs += chunk;
+        setMeta({ logs });
       }
-    );
+      setMeta({ isAlive: true });
+    }
+    setLoading(false);
+    runAll();
   };
 
   const killContainerAndStopAll = () => {
     setLoading(true);
     killExecutor(props.state.flowId).then(() => {
       stopAll();
-      props.setMeta({ flowInited: false });
       setLoading(false);
     });
   };
@@ -232,10 +237,12 @@ const FlowHeader = (props) => {
             </Link>
           </Typography>
           <IconButton
-            color="secondary"
+            color={props.state.isAlive ? 'primary' : 'secondary'}
             sx={{
               '&:hover': {
-                color: theme.palette.secondary.dark,
+                color: props.state.isAlive
+                  ? theme.palette.primary.dark
+                  : theme.palette.secondary.dark,
               },
             }}
             onClick={() => {
@@ -244,7 +251,10 @@ const FlowHeader = (props) => {
             }}
           >
             {loading ? (
-              <CircularProgress color="secondary" size={30} />
+              <CircularProgress
+                color={props.state.isAlive ? 'primary' : 'secondary'}
+                size={30}
+              />
             ) : globalRun ? (
               <StopCircleOutlinedIcon sx={{ fontSize: 35 }} />
             ) : (
@@ -253,7 +263,7 @@ const FlowHeader = (props) => {
           </IconButton>
           <Button
             variant="contained"
-            color="secondary"
+            color={props.state.isAlive ? 'primary' : 'secondary'}
             onClick={() => {
               setDialogOpen(true);
               setDialogName('Share');

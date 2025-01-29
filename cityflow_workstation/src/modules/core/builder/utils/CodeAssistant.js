@@ -1,4 +1,5 @@
 import ChatBot from '@/components/Chatbot';
+import { getLocalStorage } from '@/utils/local';
 
 export default function CodeAssistant(props) {
   const {
@@ -22,9 +23,14 @@ export default function CodeAssistant(props) {
     });
   };
 
-  const systemPrompt =
-    language === 'javascript'
-      ? `
+  const localLLMConfig = getLocalStorage('LLM_CONFIG');
+
+  const llmConfig = {
+    ...localLLMConfig,
+    systemPrompt:
+      config.llmConfig?.model ||
+      (language === 'javascript'
+        ? `
 You are a helpful assistant for CityFlow Platform, who can help human create a module using javascript. 
 
 Moduel Information:
@@ -63,7 +69,7 @@ export default function ModuleTitle(props){
 }
 \`\`\
 `
-      : `
+        : `
     You are a helpful assistant for CityFlow Platform, who can help human create a module using python.
 
     Moduel Information:
@@ -95,19 +101,22 @@ export default function ModuleTitle(props){
     #Set the output
     cm.output = main(input_data)
     \`\`\`
-    `;
-  const context = `Current code: ${code}`;
-  const greeding = `Hi, I'm code assistant! How can I help you today?`;
+    `),
+    context: `Current code: ${code}`,
+    greeding: `Hi, I'm code assistant! How can I help you today?`,
+    model: config.llmConfig?.model || localLLMConfig?.model || 'gpt-4o-mini',
+  };
+
+  const setLLMConfig = (newConfig) => {
+    setConfig({ ...config, llmConfig: newConfig });
+  };
 
   return (
     <ChatBot
-      name={config.title}
-      assistantIcon={config.icon}
-      systemPrompt={systemPrompt}
-      context={context}
+      llmConfig={llmConfig}
+      setLLMConfig={setLLMConfig}
       height={height}
       sendCode={sendCode}
-      greeding={greeding}
     />
   );
 }
