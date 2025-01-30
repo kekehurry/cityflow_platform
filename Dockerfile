@@ -29,7 +29,6 @@ COPY ./.env.production ./.env
 # Load environment variables from file
 ENV HOSTNAME='0.0.0.0'
 ENV NODE_ENV=production
-ENV EXECUTOR_BIND_DIR=/cityflow_platform/cityflow_executor/code
 
 RUN apt-get update && \
     apt-get install -y apt-utils ca-certificates curl python3 python3-pip && \
@@ -52,5 +51,7 @@ RUN apt-get update && \
     ln -s /data ./cityflow_database/data
 
 EXPOSE 3000 
+
+VOLUME /cityflow_platform/cityflow_executor/code
 
 ENTRYPOINT ["sh", "-c", "./start-services.sh"]
