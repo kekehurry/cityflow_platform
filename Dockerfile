@@ -29,7 +29,7 @@ COPY ./.env.production ./.env
 # Load environment variables from file
 ENV HOSTNAME='0.0.0.0'
 ENV NODE_ENV=production
-ENV EXECUTOR_BIND_DIR=/temp/code
+ENV EXECUTOR_BIND_DIR=/cityflow_platform/cityflow_executor/code
 
 RUN apt-get update && \
     apt-get install -y apt-utils ca-certificates curl python3 python3-pip && \
@@ -51,13 +51,6 @@ RUN apt-get update && \
     pip3 install -r ./requirements.txt && \
     ln -s /data ./cityflow_database/data
 
-# Add host.docker.internal support
-COPY <<-"EOF" /etc/docker/daemon.json
-{
-    "add-hosts": ["host.docker.internal:host-gateway"]
-}
-EOF
-
 EXPOSE 3000 
 
-ENTRYPOINT ["/cityflow_platform/start-services.sh"]
+ENTRYPOINT ["sh", "-c", "./start-services.sh"]

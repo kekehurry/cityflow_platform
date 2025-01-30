@@ -5,6 +5,7 @@ from executor.utils import CodeBlock, File
 from executor.manager import ExecutorManage
 from hashlib import md5
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 
@@ -137,7 +138,11 @@ def get_logs():
         return "Executor not found", 404
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    env = os.getenv('NODE_ENV', 'dev')
+    debug = True
+    if env == 'production':
+        debug = False
+    app.run(debug=debug, host='0.0.0.0', port=8000)
 
 
 

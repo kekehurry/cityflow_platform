@@ -119,5 +119,9 @@ def _get_source_file(path):
     return send_from_directory(os.getenv('DATABASE_SOURCE_DIR'), path)
     
 if __name__ == '__main__':
-    app.run(debug=True, port=7575, host='0.0.0.0')
+    env = os.getenv('NODE_ENV', 'dev')
+    debug = True
+    if env == 'production':
+        debug = False
+    app.run(debug=debug, port=7575, host='0.0.0.0')
 
