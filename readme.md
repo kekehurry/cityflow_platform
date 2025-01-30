@@ -3,7 +3,7 @@
 
 CityFlow is a low-code, AI-enhanced platform designed to help urban analysts, city planners, and researchers develop, evaluate, and visualize urban solutions with minimal coding effort. By integrating an AI-powered module builder and a collaborative case-based system, CityFlow enables users to create custom workflows, generate code through natural language inputs, and access a growing repository of urban design knowledge. With built-in AI search capabilities, the platform fosters collaboration, making it easier to discover, share, and refine innovative approaches to urban planning and problem-solving.
 
-**Demo website**
+**[Demo website](https://cityflow.media.mit.edu/)**
 
 ## Key Features
 
@@ -27,12 +27,7 @@ CityFlow integrates AI-powered search engines into urban workflows, creating a p
 ## Quick Start with Docker 🐳
 
 ```
-docker run -d \
-    --name cityflow_platform \
-    -p 3000:3000 \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v ${PWD}/temp:/cityflow_platform/cityflow_executor/code \
-    ghcr.io/kekehurry/cityflow_platform:latest
+docker run -d --name cityflow_platform -p 3000:3000 -v //var/run/docker.sock:/var/run/docker.sock -v ${PWD}/temp:/cityflow_platform/cityflow_executor/code ghcr.io/kekehurry/cityflow_platform:latest
 ```
 
 Cityflow plaform relies on [cityflow_runner](https://github.com/kekehurry/cityflow_runner.git) to execute python and react modules. The docker container will automatically pull the latest cityflow_runner image. You can also pull it manually before the init process:
