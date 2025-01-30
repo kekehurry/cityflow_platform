@@ -7,4 +7,3 @@ temp
 *package-lock.json
 
 .github/workflows/deploy.yml
-dev.sh
