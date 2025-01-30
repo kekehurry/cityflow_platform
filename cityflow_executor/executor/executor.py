@@ -68,7 +68,11 @@ class CodeExecutor:
         self._container_name = container_name
         self._timeout =  int(os.getenv("EXECUTOR_TIMEOUT",timeout))
         self._auto_remove = auto_remove
-        self._bind_dir = os.path.join(os.getenv("EXECUTOR_BIND_DIR", bind_dir),container_name)
+        bind_dir = self.get_bind_dir()
+        if bind_dir:
+            self._bind_dir = os.path.join(bind_dir,container_name)
+        else:
+            self._bind_dir = os.path.join(os.getenv("EXECUTOR_BIND_DIR", bind_dir),container_name)
         self._work_dir = os.path.join(os.getenv("EXECUTOR_WORK_DIR", work_dir), container_name)
         self._stop_container = stop_container  
         self._packages = packages
@@ -238,3 +242,21 @@ class CodeExecutor:
                 shutil.rmtree(os.path.join(self._work_dir, foldername))
         except FileNotFoundError:
             pass
+
+    def get_bind_dir(self) -> str:
+        containers = self._client.containers.list(all=True)
+        target_container = None
+        for container in containers:
+            if any('cityflow_platform' in tag for tag in container.image.tags):
+                target_container = container
+                break
+        if target_container:
+            # Get the container's bind mounts
+            bind_mounts = target_container.attrs['HostConfig']['Binds']
+
+            # Find the bind folder for /cityflow_platform/cityflow_executor/code
+            for bind in bind_mounts:
+                host_path, container_path = bind.split(':')
+                if container_path == os.getenv("EXECUTOR_WORK_DIR"):
+                    return host_path
+        return None
