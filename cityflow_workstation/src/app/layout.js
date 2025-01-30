@@ -23,7 +23,10 @@ const RootLayout = ({ children }) => {
           property="og:description"
           content="CityFlow is a versatile tool that allows users to design, evaluate, and visualize urban solutions through an llm-integrated, case-based system. Leveraging Python and JavaScript modules, CityFlow empowers urban analysts, city planners, and researchers to address real-world city challenges by creating customized workflows for urban problem-solving."
         />
-        <meta property="og:image" content="/home.png" />
+        <meta
+          property="og:image"
+          content="https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/main/cityflow_workstation/public/static/home.png"
+        />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content="http://cityflow.media.mit.edu/" />
@@ -35,7 +38,10 @@ const RootLayout = ({ children }) => {
           name="twitter:description"
           content="CityFlow is a versatile tool that allows users to design, evaluate, and visualize urban solutions through an llm-integrated, case-based system. Leveraging Python and JavaScript modules, CityFlow empowers urban analysts, city planners, and researchers to address real-world city challenges by creating customized workflows for urban problem-solving."
         />
-        <meta name="twitter:image" content="/home.png" />
+        <meta
+          name="twitter:image"
+          content="https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/main/cityflow_workstation/public/static/home.png"
+        />
 
         {/* Canonical Link */}
         <link rel="canonical" href="http://cityflow.media.mit.edu/" />
