@@ -35,7 +35,7 @@ docker run -d \
     ghcr.io/kekehurry/cityflow_platform:latest
 ```
 
-Cityflow plaform relies on ![cityflow_runner](https://github.com/kekehurry/cityflow_runner.git) to execute python and react modules. The docker container will automatically pull the latest cityflow_runner image. You can also pull it manually before the init process:
+Cityflow plaform relies on [cityflow_runner](https://github.com/kekehurry/cityflow_runner.git) to execute python and react modules. The docker container will automatically pull the latest cityflow_runner image. You can also pull it manually before the init process:
 
 ```
 docker pull ghcr.io/kekehurry/cityflow_runner:latest
