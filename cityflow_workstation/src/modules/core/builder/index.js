@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Stack, TextField, Tabs, Tab, Typography } from '@mui/material';
+import {
+  Box,
+  Stack,
+  TextField,
+  Tabs,
+  Tab,
+  Typography,
+  Button,
+} from '@mui/material';
 import MonacoEditor from '@monaco-editor/react';
 import theme from '@/theme';
 import _, { set } from 'lodash';
@@ -15,8 +23,9 @@ import BuilderInterface from './interface';
 import IframeComponent from './utils/IframeComponent';
 
 const initCode = {
-  interface: `
-//import packages
+  interface: [
+    `//entrypoint.js
+
 import {useState} from 'react';
 
 // main function
@@ -29,9 +38,11 @@ export default function CustomUI(props){
     </div>)
 }
 `,
-  module: `
-# import packages
-import cityflow.module as cm;
+  ],
+  module: [
+    `#entrypoint.py
+
+import cityflow.module as cm
 
 # main function
 def main():
@@ -43,6 +54,7 @@ def main():
 cm.output = main()
 print(cm.output)
 `,
+  ],
 };
 
 export default function ModuleBuilder(props) {
@@ -57,15 +69,30 @@ export default function ModuleBuilder(props) {
     position,
     expand,
     setOutput,
-    run,
     setLoading,
     updateInterface,
   } = props;
   const [log, setLog] = useState(null);
   const [tab, setTab] = useState(0);
   const [editor, setEditor] = useState(0);
-  const [editorTabs, setEditorTabs] = useState(['interface', 'module']);
 
+  const getFileName = (code) => {
+    const filename = code
+      .trim()
+      .split('\n')[0]
+      .replace(/^(#|\/\/)\s*/, '')
+      .trim();
+    if (filename.lastIndexOf('.') !== -1) {
+      return filename.substring(0, filename.lastIndexOf('.'));
+    } else {
+      return filename;
+    }
+  };
+  const [editorTabs, setEditorTabs] = useState(
+    config?.code && Array.isArray(config.code)
+      ? config.code.map((item, id) => getFileName(item))
+      : ['entrypoint']
+  );
   const initForm = {
     type: config.type || 'interface',
     author: config.author || 'Anonymous',
@@ -81,7 +108,7 @@ export default function ModuleBuilder(props) {
     port: config.type === 'server' ? config.port || 8080 : null,
     language: config.language || 'javascript',
     description: config.description || 'No description',
-    code: config.code || initCode,
+    code: config?.code || initCode[config.type],
     files: config.files || [],
   };
   const [userId, setUserId] = useState(null);
@@ -89,7 +116,7 @@ export default function ModuleBuilder(props) {
   const [codeSubmited, setCodeSubmited] = useState(false);
   const [params, setParams] = useState(null);
   const executeResult = useExecuteCode(params || {});
-  const { setCenter, fitBounds } = useReactFlow();
+  const { setCenter } = useReactFlow();
 
   // init
   useEffect(() => {
@@ -123,26 +150,25 @@ export default function ModuleBuilder(props) {
       });
   }, [expand]);
 
-  //html
-  // useEffect(() => {
-  //   config.html &&
-  //     setConfig({
-  //       ...config,
-  //       InterfaceComponent: <BuilderInterface {...props} />,
-  //     });
-  // }, [config.html]);
-
   // reset
   useEffect(() => {
     let language;
     if (formValue.type === 'interface') {
-      setEditorTabs(['interface']);
       language = 'javascript';
     } else {
-      setEditorTabs(['module']);
       language = 'python';
     }
-    setFormValue({ ...initForm, language: language, type: formValue.type });
+    setFormValue({
+      ...initForm,
+      language: language,
+      type: formValue.type,
+      code:
+        config?.code &&
+        config.code != initCode['interface'] &&
+        config.code != initCode['module']
+          ? config.code
+          : initCode[formValue.type],
+    });
     setConfig({
       ...config,
       ...initForm,
@@ -158,16 +184,20 @@ export default function ModuleBuilder(props) {
 
   useEffect(() => {
     if (codeSubmited || (formValue.language == 'python' && config.run)) {
-      setLog(null);
+      const newConfig = {
+        ...config,
+        ...formValue,
+        code: formValue.code,
+      };
+      setConfig(newConfig);
       setParams({
         sessionId: id,
         flowId: flowId,
         userName: flowAuthor,
-        moduleCode: formValue.code[formValue.type],
         files: formValue.files,
         language: formValue.language,
         input: input,
-        config: config,
+        config: newConfig,
         image: image,
       });
     }
@@ -175,6 +205,7 @@ export default function ModuleBuilder(props) {
 
   useEffect(() => {
     if (executeResult?.isLoading) {
+      setLog(null);
       setLoading(true);
     } else {
       setLoading(false);
@@ -199,19 +230,45 @@ export default function ModuleBuilder(props) {
     setTab(newValue);
   };
 
-  const handleEditorChange = (event, newValue) => {
-    setEditor(newValue);
+  const handleTabDelete = (index) => {
+    if (editorTabs.length > 1 && index !== 0) {
+      setEditorTabs(editorTabs.filter((item, id) => id !== index));
+      setEditor(index - 1);
+      setFormValue({
+        ...formValue,
+        code: formValue.code.filter((item, id) => id !== index),
+      });
+    } else {
+      setEditor(0);
+    }
   };
 
-  const handleCodeChange = (value, key) => {
+  const handleEditorChange = (event, newValue) => {
+    if (newValue === editorTabs.length) {
+      let newTabName = `new${editorTabs.length}`;
+      if (editorTabs.includes(newTabName)) {
+        newTabName = `new${newTabName}`;
+      }
+      setEditorTabs([...editorTabs, newTabName]);
+      setEditor(newValue);
+    } else {
+      setEditor(newValue);
+    }
+  };
+
+  const handleCodeChange = (index, value) => {
+    let newCode = formValue.code;
+    let tabs = [...editorTabs];
+    newCode[index] = value;
     setFormValue({
       ...formValue,
       author_id: userId,
-      code: {
-        ...formValue.code,
-        [key]: value,
-      },
+      code: newCode,
     });
+    const filename = index === 0 ? 'entrypoint' : getFileName(value);
+    tabs[index] = filename;
+    setEditor(index);
+    setEditorTabs(tabs);
   };
 
   const configTab = (
@@ -219,7 +276,7 @@ export default function ModuleBuilder(props) {
       {config.expandHeight && (
         <ConfigTab
           language={formValue.language || 'javascript'}
-          code={formValue.code[editorTabs[editor]]}
+          code={formValue.code}
           formValue={formValue}
           setFormValue={setFormValue}
           config={config}
@@ -294,7 +351,7 @@ export default function ModuleBuilder(props) {
       {config.expandHeight && (
         <CodeAssistant
           language={formValue.language || 'javascript'}
-          code={formValue.code[editorTabs[editor]]}
+          code={formValue.code}
           editorTab={editorTabs[editor]}
           formValue={formValue}
           setFormValue={setFormValue}
@@ -346,9 +403,26 @@ export default function ModuleBuilder(props) {
                   backgroundColor: editor === index ? '#212121' : null,
                 }}
                 id={index}
+                onDoubleClick={() => handleTabDelete(index)}
                 disableRipple
               />
             ))}
+            {editorTabs.length < 5 && (
+              <Tab
+                key={'+'}
+                label={'+'}
+                sx={{
+                  fontSize: 14,
+                  minHeight: 10,
+                  height: 10,
+                  backgroundColor: 'none',
+                  borderLeft: '1px solid #212121',
+                  borderRight: '1px solid #212121',
+                }}
+                id={editorTabs.length}
+                disableRipple
+              />
+            )}
           </Tabs>
           <Box style={{ height: '600px' }} className="nowheel nodrag">
             <ControlButtons
@@ -357,23 +431,22 @@ export default function ModuleBuilder(props) {
               setConfig={setConfig}
               setCodeSubmited={setCodeSubmited}
             />
-            {config.expandHeight &&
-              editorTabs.map((tab, index) => (
-                <Box hidden={editor !== index} key={tab}>
-                  <MonacoEditor
-                    width="100%"
-                    height={config.expandHeight - 50}
-                    language={tab === 'interface' ? 'javascript' : 'python'}
-                    theme="vs-dark"
-                    value={formValue.code[tab]}
-                    onChange={(value) => handleCodeChange(value, tab)}
-                    options={{
-                      minimap: { enabled: false },
-                      wordWrap: 'on',
-                    }}
-                  />
-                </Box>
-              ))}
+            {config.expandHeight && (
+              <Box key={editor}>
+                <MonacoEditor
+                  width="100%"
+                  height={config.expandHeight - 50}
+                  language={formValue.language}
+                  theme="vs-dark"
+                  value={formValue.code[editor]}
+                  onChange={(value) => handleCodeChange(editor, value)}
+                  options={{
+                    minimap: { enabled: false },
+                    wordWrap: 'on',
+                  }}
+                />
+              </Box>
+            )}
           </Box>
         </Box>
         <Box sx={{ width: '40%' }}>

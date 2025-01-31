@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { initUserId } from './local';
 import useSWR from 'swr';
 
@@ -36,7 +37,6 @@ export async function* setupExecutor(flowId, packages, image) {
 export const executeCode = async ({
   flowId,
   sessionId,
-  moduleCode,
   files,
   language,
   input,
@@ -47,11 +47,11 @@ export const executeCode = async ({
   const userId = await initUserId();
   const inputFile = {
     data: JSON.stringify(input),
-    path: 'input',
+    path: 'input.json',
   };
   const configFile = {
     data: JSON.stringify(rest),
-    path: 'config',
+    path: 'config.json',
   };
   const api = `${executorServer}/execute`;
   const res = await fetch(api, {
@@ -64,17 +64,12 @@ export const executeCode = async ({
       userId,
       sessionId,
       image,
-      codeBlocks: [
-        {
-          files: [...(files || []), inputFile, configFile],
-          // code: inputCode + moduleCode + outputCode,
-          code: moduleCode,
-          language: language,
-        },
-      ],
+      codeBlock: {
+        files: [...(files || []), inputFile, configFile],
+        code: code,
+        language: language,
+      },
     }),
-  }).catch((err) => {
-    console.error(err);
   });
   if (res && res.ok) {
     return await res.json();
@@ -84,34 +79,46 @@ export const executeCode = async ({
 export const useExecuteCode = ({
   flowId,
   sessionId,
-  moduleCode,
   files,
   language,
   input,
   config,
   image,
 }) => {
-  const { data, error } = useSWR(
-    [
-      `${executorServer}/execute`,
-      { flowId, sessionId, moduleCode, files, language, input, config, image },
-    ],
-    () =>
-      executeCode({
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const execute = async () => {
+    setIsLoading(true);
+    try {
+      const result = await executeCode({
         flowId,
         sessionId,
-        moduleCode,
         files,
         language,
         input,
         config,
         image,
-      })
-  );
+      });
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err);
+      setData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    execute();
+  }, [flowId, sessionId, files, language, input, config, image]);
+
   return {
     data,
     error: config && error,
-    isLoading: !data && !error,
+    isLoading,
   };
 };
 

@@ -44,6 +44,14 @@ def _pm(lang: str) -> str:
     else:
         raise ValueError(f"Unsupported language {lang}")
     
+def _suffix(lang: str) -> str:
+    if lang == "python":
+        return "py"
+    elif lang == "javascript":
+        return "js"
+    else:
+        raise ValueError(f"Unsupported language {lang}")
+    
 class CodeExecutor: 
     DEFAULT_EXECUTION_POLICY: ClassVar[Dict[str, bool]] = {
         "python": True,
@@ -154,76 +162,80 @@ class CodeExecutor:
             yield str(e)
 
 
-    def execute(self, code_blocks: List[str]) -> List[str]:
+    def execute(self, code_block) -> CodeResult:
         """Execute the code blocks."""
         console_outputs = []
         last_exit_code = 0
-        for code_block in code_blocks:
-            lang = code_block.language.lower()
-            if lang not in self.DEFAULT_EXECUTION_POLICY:
-                console_outputs.append(f"Unsupported language {lang}\n")
-                last_exit_code = 1
-                break
-            code = code_block.code
-            session_id = code_block.session_id
-            foldername = f"codeblock_{session_id}"
-            if not os.path.exists(os.path.join(self._work_dir, foldername)):
-                try:
-                    os.makedirs(os.path.join(self._work_dir, foldername))
-                except FileExistsError:
-                    pass
+        lang = code_block.language.lower()
+        if lang not in self.DEFAULT_EXECUTION_POLICY:
+            console_outputs.append(f"Unsupported language {lang}\n")
+            last_exit_code = 1
 
-            filename = f"entrypoint"
+        session_id = code_block.session_id
+        foldername = f"codeblock_{session_id}"
+        if not os.path.exists(os.path.join(self._work_dir, foldername)):
+            try:
+                os.makedirs(os.path.join(self._work_dir, foldername))
+            except FileExistsError:
+                pass
+        
+        for idx, code in enumerate(code_block.code):
+            if idx == 0:
+                filename = f'entrypoint.{_suffix(lang)}'
+            else:
+                filename = code.strip().split("\n")[0].replace("#", "").replace("//", "").strip()
+                filename = filename.rsplit('.', 1)[0]
+                if not filename:
+                    filename = f"new{idx}"
+                filename = f"{filename}.{_suffix(lang)}"
             code_path = os.path.join(self._work_dir, foldername, filename)
             with open(code_path, "w") as fcode:
                 fcode.write(code)
 
-            if code_block.files:
-                for file in code_block.files:
-                    try:
-                        file_path = os.path.join(self._work_dir, foldername, file.path)
-                        if file.path not in ['input','output','entrypoint','config']:
-                            if 'base64' in file.data:
-                                with open(file_path, "wb") as f:
-                                    base64_data = file.data.split(",")[1]
-                                    binary_data = base64.b64decode(base64_data)
-                                    f.write(binary_data)
-                            else:
-                                file_data = requests.get(dataserver+file.data)
-                                if file_data:
-                                    with open(file_path, "wb") as f:
-                                        f.write(file_data.content)
-                            
+        if code_block.files:
+            for file in code_block.files:
+                try:
+                    file_path = os.path.join(self._work_dir, foldername, file.path)
+                    if file.path not in ['input.json','output.json','config.json']:
+                        if 'base64' in file.data:
+                            with open(file_path, "wb") as f:
+                                base64_data = file.data.split(",")[1]
+                                binary_data = base64.b64decode(base64_data)
+                                f.write(binary_data)
                         else:
-                            with open(file_path,"w") as f:
-                                f.write(file.data)
-                    except Exception as e:
-                            # print(e)
-                            logging.error(e)
-                            pass
-            
-            runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
-            runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
-            command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
-            
-            result = self._container.exec_run(command)
-            exit_code = result.exit_code
-            output = result.output.decode("utf-8")
-            console_outputs.append(output)
-            if exit_code == 124:
-                console_outputs.append("Execution timeout\n")
-            last_exit_code = exit_code
-            if exit_code != 0:
-                break
+                            file_data = requests.get(dataserver+file.data)
+                            if file_data:
+                                with open(file_path, "wb") as f:
+                                    f.write(file_data.content)
+                        
+                    else:
+                        with open(file_path,"w") as f:
+                            f.write(file.data)
+                except Exception as e:
+                        # print(e)
+                        logging.error(e)
+                        pass
+        
+        runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
+        runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
+        command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
+        
+        result = self._container.exec_run(command)
+        exit_code = result.exit_code
+        output = result.output.decode("utf-8")
+        console_outputs.append(output)
+        if exit_code == 124:
+            console_outputs.append("Execution timeout\n")
+        last_exit_code = exit_code
             
         final_output = ""
-        if os.path.exists(os.path.join(self._work_dir, foldername, "output")):
-            with open(os.path.join(self._work_dir, foldername, "output"), "r") as f:
+        if os.path.exists(os.path.join(self._work_dir, foldername, "output.json")):
+            with open(os.path.join(self._work_dir, foldername, "output.json"), "r") as f:
                 final_output = f.read()
 
         final_config = ""
-        if os.path.exists(os.path.join(self._work_dir, foldername, "config")):
-            with open(os.path.join(self._work_dir, foldername, "config"), "r") as f:
+        if os.path.exists(os.path.join(self._work_dir, foldername, "config.json")):
+            with open(os.path.join(self._work_dir, foldername, "config.json"), "r") as f:
                 final_config = f.read()
 
         rendered_html = ""

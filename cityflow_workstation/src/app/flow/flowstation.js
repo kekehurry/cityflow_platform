@@ -32,7 +32,7 @@ import PinNode from '@/elements/nodes/pin';
 import ButtonEdge from '@/elements/edges/base';
 import InvisibleEdge from '@/elements/edges/invisible';
 import wrapper from '@/elements/nodes/wrapper';
-import { debounce } from 'lodash';
+import { debounce, set } from 'lodash';
 
 import 'reactflow/dist/style.css';
 import { useSearchParams } from 'next/navigation';
@@ -111,10 +111,14 @@ const FlowStation = (props) => {
         setMeta({ logs });
       }
     }
-    check(props.state.flowId).then((data) => {
-      setMeta({ isAlive: data?.alive, loading: false });
-    });
-    runAll();
+    while (true) {
+      const data = await check(props.state.flowId);
+      if (data?.alive) {
+        runAll();
+        setMeta({ loading: false });
+        break;
+      }
+    }
   };
 
   const initFlow = (flow, instance) => {
@@ -130,6 +134,13 @@ const FlowStation = (props) => {
     instance.setViewport(flow.viewport);
     instance.setNodes(flow.nodes);
     instance.setEdges(flow.edges);
+
+    setTimeout(() => {
+      if (pinBoard) {
+        initAndRunALL();
+        setMeta({ globalScale: 1 });
+      }
+    }, 1000);
   };
 
   const precoessModule = (moduleData) => {
@@ -205,13 +216,6 @@ const FlowStation = (props) => {
         <>
           <Header />
           <Loading dotSize={15} />
-          {/* <img
-            src="/static/fetching_2xlarge.gif"
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
-          /> */}
         </>
       )}
     </div>
@@ -228,12 +232,14 @@ const FlowStation = (props) => {
 
   useEffect(() => {
     if (workflowData?.data) {
+      console.log('workflowData', workflowData.data);
       setInitData(workflowData.data);
     }
     if (moduleData?.data) {
       setInitData(precoessModule(moduleData.data));
     }
     if (localFlowData) {
+      console.log('localFlowData', localFlowData);
       setInitData(localFlowData);
     }
   }, [workflowData?.data, moduleData?.data, localFlowData]);
@@ -246,13 +252,8 @@ const FlowStation = (props) => {
   }, []);
 
   useEffect(() => {
-    if (pinBoard) {
-      setMeta({ globalScale: 1 });
-      initAndRunALL();
-    } else if (run) {
-      initAndRunALL();
-    }
-  }, [run, props.state.packages, pinBoard]);
+    run && initAndRunALL();
+  }, [run]);
 
   return (
     <>

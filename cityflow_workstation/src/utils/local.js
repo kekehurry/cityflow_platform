@@ -86,7 +86,6 @@ export const getFlowData = async ({ rfInstance, state }) => {
           },
           config: {
             ...node.config,
-            scope: {},
             run: false,
           },
         };
@@ -257,12 +256,4 @@ export const deleteUserFlow = async (id) => {
   userFlows = userFlows.filter((item) => item.id !== id);
   cs_data['userFlows'] = userFlows;
   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
-};
-
-// only for server in China
-export const getMapboxToken = async () => {
-  const mapboxToken = await fetch(basePath + '/api/local/getMapboxToken').then(
-    (res) => res.json()
-  );
-  return mapboxToken;
 };

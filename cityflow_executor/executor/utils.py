@@ -10,7 +10,7 @@ class File(BaseModel):
 class CodeBlock(BaseModel):
     """(Experimental) A class that represents a code block."""
     session_id: str = Field(description="The id of the code block.")
-    code: str = Field(description="The code to execute.")
+    code: list = Field(description="The codes to execute.")
     language: str = Field(description="The language of the code.")
     files: Optional[List[File]] = Field(
         default=None,

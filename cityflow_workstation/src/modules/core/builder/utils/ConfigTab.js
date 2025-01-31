@@ -39,6 +39,7 @@ export default function ConfigTab({
   };
 
   const handleFormChange = (event) => {
+    console.log(event.target.value);
     const { id, value } = event.target;
     setFormValue({
       ...formValue,
@@ -46,7 +47,7 @@ export default function ConfigTab({
         id === 'input' || id === 'output'
           ? value.split(',')
           : id === 'width' || id === 'height' || id === 'port'
-          ? parseInt(value)
+          ? value && parseInt(value)
           : value,
     });
   };
@@ -164,7 +165,7 @@ export default function ConfigTab({
             id="name"
             fullWidth
             onChange={handleFormChange}
-            value={formValue.name || 'Custom Module'}
+            value={formValue.name || ''}
             size="small"
             InputProps={{ style: { fontSize: 8 } }}
           />

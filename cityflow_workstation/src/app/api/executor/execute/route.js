@@ -11,13 +11,13 @@ export const POST = async (req) => {
   const executorServer = process.env.EXECUTOR_SERVER;
   try {
     // Parse the request body
-    const { flowId, userId, sessionId, image, codeBlocks } = await req.json();
+    const { flowId, userId, sessionId, image, codeBlock } = await req.json();
 
     // Make a POST request to the dataset server
     const response = await fetch(`${executorServer}/execute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ flowId, userId, sessionId, image, codeBlocks }),
+      body: JSON.stringify({ flowId, userId, sessionId, image, codeBlock }),
     });
 
     if (response.ok) {
