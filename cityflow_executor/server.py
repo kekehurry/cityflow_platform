@@ -57,24 +57,21 @@ def execute():
     image = request.json.get('image')
     container_name = f"csflow-{user_id}-{id}"
     # print(f"Execute Container: {container_name}, Session ID: {session_id}")
-    code_blocks = request.json.get('codeBlocks')
-    if code_blocks is None:
+    code_block = request.json.get('codeBlock')
+    if code_block is None:
         return jsonify({'error': 'No code blocks provided.'}), 400
     executor = manager.get_executor(container_name)
     if executor is None:
         executor = CodeExecutor(container_name=container_name,image=image)
         manager.register_excutor(executor)
     
-    exeucte_blocks = []
-    for code_block in code_blocks:
-        code_block = CodeBlock(
-            session_id = session_id,
-            code=code_block["code"],
-            language=code_block["language"],
-            files=[File(path=file["path"], data=file["data"]) for file in code_block["files"]] if "files" in code_block else None
-        )
-        exeucte_blocks.append(code_block)
-    code_result= executor.execute(exeucte_blocks)
+    exeucte_block = CodeBlock(
+        session_id = session_id,
+        code=code_block["code"],
+        language=code_block["language"],
+        files=[File(path=file["path"], data=file["data"]) for file in code_block["files"]] if "files" in code_block else None
+    )
+    code_result= executor.execute(exeucte_block)
     return jsonify({
         'container_name': executor._container_name,
         'exit_code': code_result.exit_code, 

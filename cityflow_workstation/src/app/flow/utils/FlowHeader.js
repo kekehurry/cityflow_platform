@@ -74,10 +74,14 @@ const FlowHeader = (props) => {
         setMeta({ logs });
       }
     }
-    check(props.state.flowId).then((data) => {
-      setMeta({ isAlive: data?.alive, loading: false });
-    });
-    runAll();
+    while (true) {
+      const data = await check(props.state.flowId);
+      if (data?.alive) {
+        runAll();
+        setMeta({ loading: false });
+        break;
+      }
+    }
   };
 
   const handleClick = (event) => {
@@ -89,13 +93,13 @@ const FlowHeader = (props) => {
   const rfInstance = useReactFlow();
 
   const actions = [
-    {
-      icon: <SaveIcon />,
-      name: 'Save',
-      onClick: () => {
-        saveUserFlow({ rfInstance, state: props.state });
-      },
-    },
+    // {
+    //   icon: <SaveIcon />,
+    //   name: 'Save',
+    //   onClick: () => {
+    //     saveUserFlow({ rfInstance, state: props.state });
+    //   },
+    // },
     {
       icon: <DownloadIcon />,
       name: 'Download',

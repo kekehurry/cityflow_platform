@@ -16,6 +16,7 @@ import theme from '@/theme';
 import RemoveIcon from '@mui/icons-material/Remove';
 
 import IframeComponent from '@/modules/core/builder/utils/IframeComponent';
+import Loading from '@/components/Loading';
 
 const mapStateToProps = (state, ownProps) => ({
   input: state.nodes.find((node) => node.id === ownProps.id)?.data.input,
@@ -64,16 +65,12 @@ class PinNode extends PureComponent {
         Object.keys(this.state.localOutput).length > 0
       ) {
         this.props.setGlobalOutput(this.state.localOutput);
-        this.setLoading(false);
       } else {
         this.props.setGlobalOutput(null);
       }
     }
-    if (this.props.input && Object.keys(this.props.input).length > 0) {
-      const key = Object.keys(this.props.input)[0];
-      if (this.props.input[key]) {
-        this.setLoading(false);
-      }
+    if (this.props.config?.html) {
+      this.setLoading(false);
     }
   }
 
@@ -102,11 +99,29 @@ class PinNode extends PureComponent {
     } = this.props;
     const headerHeight = 40;
     const mapModule = (children) =>
+      React.isValidElement(children) &&
       React.Children.map(children, (child) => {
         return React.cloneElement(child, {
+          // id,
+          // flowId,
+          // flowAuthor,
           input,
           output,
           config,
+          // setConfig,
+          // image,
+          // position,
+          // expand: this.state.expand,
+          // updateInterface: this.props.updateInterface,
+          setOutput: this.setOutput,
+          // run: config?.run,
+          // setRun: (run) => {
+          //   setConfig({ ...config, run: run });
+          // },
+          // loading: this.state.loading,
+          // setLoading: (loading) => {
+          //   this.setState({ loading: loading });
+          // },
         });
       });
     return (
@@ -169,7 +184,11 @@ class PinNode extends PureComponent {
                 m: 0,
               }}
             >
-              {mapModule(interfaceComponent)}
+              {this.state.loading ? (
+                <Loading dotSize={10} />
+              ) : (
+                mapModule(interfaceComponent)
+              )}
             </Paper>
           </Stack>
         </Resizable>

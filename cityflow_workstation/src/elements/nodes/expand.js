@@ -135,6 +135,7 @@ class ExpandNode extends PureComponent {
     } = this.props;
     const margin = 8;
     const mapModule = (children) =>
+      React.isValidElement(children) &&
       React.Children.map(children, (child) => {
         return React.cloneElement(child, {
           id,
@@ -354,7 +355,7 @@ class ExpandNode extends PureComponent {
               }}
               className="nowheel nodrag"
             >
-              {mapModule(interfaceComponent)}
+              {interfaceComponent && mapModule(interfaceComponent)}
             </Paper>
           </Card>
           <Card
@@ -373,28 +374,11 @@ class ExpandNode extends PureComponent {
             className={this.state.expand ? 'expanded' : ''}
           >
             {head}
-            {/* <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <div
-                onClick={() => {
-                  this.setState({ expand: !this.state.expand });
-                  this.props.setIndex({ zIndex: 0 });
-                }}
-                style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: this.state.expand ? '#FFB300' : '#5c5d5d',
-                  cursor: 'pointer',
-                  marginBottom: '5px',
-                }}
-              />
-            </div> */}
             <Paper
               variant="outlined"
               sx={{
                 overflow: 'hidden',
                 scrollbarWidth: 'none',
-                // margin: `${margin/2}px`,
                 background: theme.palette.node.container,
                 width: '100%',
                 height: config.expandHeight || 600 - 35,
