@@ -3,7 +3,7 @@
   "module": "text",
   "version": "0.0.1",
   "config": {
-    "title": "Text",
+    "name": "Text",
     "discription": "this module is useful for adding text to the workspace",
     "author": "Kai Hu",
     "width": 300,

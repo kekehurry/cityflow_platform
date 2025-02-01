@@ -352,7 +352,7 @@ export default function ModuleBuilder(props) {
         <CodeAssistant
           language={formValue.language || 'javascript'}
           code={formValue.code}
-          editorTab={editorTabs[editor]}
+          editor={editor}
           formValue={formValue}
           setFormValue={setFormValue}
           config={config}

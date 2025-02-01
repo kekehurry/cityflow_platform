@@ -3,7 +3,7 @@
   "module": "arrow",
   "version": "0.0.1",
   "config": {
-    "title": "Arrow",
+    "name": "Arrow",
     "discription": "this module is useful for drawing an arrow",
     "author": "Kai Hu",
     "width": 100,
