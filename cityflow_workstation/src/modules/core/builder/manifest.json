@@ -3,7 +3,7 @@
   "module": "builder",
   "version": "0.0.1",
   "config": {
-    "title": "Module Builder",
+    "name": "Module Builder",
     "type": "interface",
     "width": 200,
     "height": 100,
