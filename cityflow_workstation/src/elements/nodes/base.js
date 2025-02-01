@@ -141,7 +141,7 @@ class BaseNode extends PureComponent {
             }}
           >
             <Typography variant="caption" sx={{ flexGrow: 1 }}>
-              {config?.title || 'New Node'}
+              {config?.name || 'New Node'}
             </Typography>
             <Stack direction="row" spacing={0.5}>
               {(this.state.error || this.state.warning) && (

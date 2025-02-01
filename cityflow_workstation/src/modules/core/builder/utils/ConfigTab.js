@@ -39,7 +39,6 @@ export default function ConfigTab({
   };
 
   const handleFormChange = (event) => {
-    console.log(event.target.value);
     const { id, value } = event.target;
     setFormValue({
       ...formValue,

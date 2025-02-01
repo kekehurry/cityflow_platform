@@ -3,7 +3,7 @@
   "module": "shape",
   "version": "0.0.1",
   "config": {
-    "title": "Shape",
+    "name": "Shape",
     "discription": "this module is useful for drawing an rectangle/triangle/circle",
     "author": "Kai Hu",
     "width": 100,

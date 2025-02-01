@@ -201,7 +201,7 @@ export const ModuleList = (props) => {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ m: 0, p: 1, border: '0px' }}>
-                <ImageList cols={3} rowHeight={5}>
+                <ImageList cols={4} rowHeight={5}>
                   {coreModulesList.map((manifest) => {
                     return (
                       <ModuleIcon
@@ -225,7 +225,7 @@ export const ModuleList = (props) => {
               sx={{ border: '0px', background: 'none' }}
               variant="outlined"
               disableGutters
-              // defaultExpanded
+              defaultExpanded
             >
               <AccordionSummary
                 sx={{ height: 10, minHeight: 30, m: 0, paddingLeft: 1 }}
@@ -235,7 +235,7 @@ export const ModuleList = (props) => {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ m: 0, p: 1, border: '0px' }}>
-                <ImageList cols={3} rowHeight={5}>
+                <ImageList cols={4} rowHeight={5}>
                   {customModules.map((config) => {
                     if (!builderManifest) return null;
                     const id = nanoid();

@@ -5,7 +5,7 @@ export default function CodeAssistant(props) {
   const {
     language,
     code,
-    editorTab,
+    editor,
     formValue,
     setFormValue,
     config,
@@ -14,12 +14,13 @@ export default function CodeAssistant(props) {
   } = props;
 
   const sendCode = (code) => {
+    const newCode =
+      editor < formValue.code.length
+        ? formValue.code.map((item, index) => (index === editor ? code : item))
+        : [...formValue.code, code];
     setFormValue({
       ...formValue,
-      code: {
-        ...formValue.code,
-        [editorTab]: code,
-      },
+      code: newCode,
     });
   };
 
@@ -44,6 +45,7 @@ Moduel Information:
 Note:
 - Make sure you wrap the code in the code block like \`\`\`javascript \`\`\`.
 - You can only use one file to implement the module. And only export one default function.
+- The first line must be the filename, e.g. //entrypoint.js
 - Ensuring the module fuction returns a valid UI element for the platform to render.
 - Provide example data to run and test the module, because input might be null before user run the whole flow.
 - You don't need to worry about how to use the function, it's already implemented in the platform. If you code structure is correct, the platform will run your code automatically.
@@ -56,7 +58,8 @@ Note:
 
 Example:
 \`\`\`javascript
-//import packages
+//entrypoint.js
+
 import {useState} from 'react';
 
 // main function
@@ -80,6 +83,7 @@ export default function ModuleTitle(props){
 
     Note:
     - You can only use one file to implement the module. 
+    - The fist line must be the filename, e.g. #entrypoint.py
     - Focus on the code logic, and construct the output. You don't need to worry about how to use the function, it's already implemented in the platform. If you code structure is correct, the platform will run your code automatically.
     - When you write the code, make sure you wrap the python code in the python code block like \`\`\`python \`\`\`**.
 
@@ -91,6 +95,8 @@ export default function ModuleTitle(props){
 
     Example:
     \`\`\`python
+    #entrypoint.py
+
     import cityflow.module as cm
 
     def main():
@@ -105,6 +111,8 @@ export default function ModuleTitle(props){
     context: `Current code: ${code}`,
     greeding: `Hi, I'm code assistant! How can I help you today?`,
     model: config.llmConfig?.model || localLLMConfig?.model || 'gpt-4o-mini',
+    assistantIcon:
+      config?.icon || localLLMConfig?.code || '/static/cflogo_black.png',
   };
 
   const setLLMConfig = (newConfig) => {

@@ -20,14 +20,17 @@ const ModuleIcon = (props) => {
   const { manifest, edit, userModules, setUserModules } = props;
   const [newManifest, setNewManifest] = useState({
     ...manifest,
-    id: nanoid(),
+    id: null,
   });
-  const { data, error, isLoading } = useGetModule(manifest.config?.id);
+  const { data, error, isLoading } = useGetModule(newManifest.config?.id);
 
   const latestPropsRef = useRef(props);
 
   const handleClick = (manifest) => {
     const node = { ...manifest };
+    if (!node.config?.custom) {
+      node.id = nanoid();
+    }
     node.config.category = 'custom';
     node.config.basic = false;
     node.position = {
@@ -42,6 +45,9 @@ const ModuleIcon = (props) => {
     const flowPanel = document.getElementById('FlowPanel');
     const newX = (e.clientX - flowPanel.offsetWidth - x) / zoom;
     const newY = (e.clientY - y) / zoom;
+    if (!node.config?.custom) {
+      node.id = nanoid();
+    }
     node.config.category = 'custom';
     node.config.basic = false;
     node.position = { x: newX, y: newY };
@@ -62,27 +68,26 @@ const ModuleIcon = (props) => {
   }, [props]);
 
   useEffect(() => {
-    if (!data) return;
-    setNewManifest({ ...newManifest, config: data });
-  }, [data]);
+    if (isLoading) return;
+    setNewManifest({
+      ...newManifest,
+      config: data ? data : newManifest.config,
+      id: nanoid(),
+    });
+  }, [isLoading]);
 
   useEffect(() => {
-    if (newManifest.module == 'builder' && !newManifest.config?.code) return;
-    const draggableElement = document.getElementsByClassName(
-      `${newManifest.id}`
-    )[0];
+    const draggableElement = document.getElementById(newManifest.id);
     if (draggableElement) {
       draggableElement.addEventListener('dragend', (e) =>
         handleDragEnd(e, newManifest)
       );
-    }
-    return () => {
-      if (draggableElement) {
+      return () => {
         draggableElement.removeEventListener('dragend', (e) =>
           handleDragEnd(e, newManifest)
         );
-      }
-    };
+      };
+    }
   }, [newManifest]);
 
   return (
@@ -105,27 +110,40 @@ const ModuleIcon = (props) => {
         key={newManifest.id}
         onClick={() => handleClick(newManifest)}
         direction="column"
-        alignItems="center"
         spacing={1}
         sx={{
+          display: 'flex',
           p: 1,
+          width: 65,
+          height: 65,
           borderRadius: 2,
           cursor: 'pointer',
           '&:hover': {
             backgroundColor: theme.palette.action.hover,
           },
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <Avatar
-          id={`${newManifest.id}`}
-          className={`${newManifest.id}`}
+          id={newManifest.id}
           alt={newManifest.config.name}
           variant="rounded"
           src={newManifest.config.icon}
           sx={{ width: 30, height: 30 }}
-          onDragEnd={(e) => handleDragEnd(e, newManifest)}
+          onDragEnd={(e) => !newManifest.id && handleDragEnd(e, newManifest)}
         />
-        <Typography variant="caption" sx={{ userSelect: 'none' }}>
+        <Typography
+          variant="caption"
+          sx={{
+            userSelect: 'none',
+            fontSize: 8,
+            textAlign: 'center',
+            width: 65,
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {newManifest.config.name}
         </Typography>
       </Stack>

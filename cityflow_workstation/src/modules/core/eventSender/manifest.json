@@ -1,0 +1,16 @@
+{
+  "type": "base",
+  "module": "eventSender",
+  "version": "0.0.1",
+  "config": {
+    "discription": "this module is useful to listen to a custom event",
+    "author": "Kai Hu",
+    "name": "Event Sender",
+    "width": 200,
+    "height": 60,
+    "input": ["message"],
+    "run": false,
+    "icon": "send.png"
+  },
+  "entrypoint": "index.js"
+}
