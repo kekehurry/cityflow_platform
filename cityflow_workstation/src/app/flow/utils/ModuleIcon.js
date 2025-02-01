@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import theme from '@/theme';
 import { addNode } from '@/store/actions';
 import { nanoid } from 'nanoid';
-import { useRef, useEffect, useState } from 'react';
-import { getModule } from '@/utils/dataset';
+import { useRef, useEffect, useState, memo } from 'react';
+import { useGetModule } from '@/utils/dataset';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -18,40 +18,34 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 const ModuleIcon = (props) => {
   const { manifest, edit, userModules, setUserModules } = props;
+  const [newManifest, setNewManifest] = useState({
+    ...manifest,
+    id: nanoid(),
+  });
+  const { data, error, isLoading } = useGetModule(manifest.config?.id);
 
   const latestPropsRef = useRef(props);
 
-  const handleClick = async (manifest) => {
-    const newManifest = { ...manifest };
-    if (manifest.config.custom) {
-      const config = await getModule(manifest.config.id);
-      newManifest.config = config;
-    }
-
-    newManifest.id = nanoid();
-    newManifest.config.category = 'custom';
-    newManifest.config.basic = false;
-    newManifest.position = {
+  const handleClick = (manifest) => {
+    const node = { ...manifest };
+    node.config.category = 'custom';
+    node.config.basic = false;
+    node.position = {
       x: Math.random() * window.innerWidth * 0.3,
       y: Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.1,
     };
-    props.setNode(newManifest);
+    props.setNode(node);
   };
-  const handleDragEnd = async (e, manifest) => {
-    const newManifest = { ...manifest };
-    if (manifest.config.custom) {
-      const config = await getModule(manifest.config.id);
-      newManifest.config = config;
-    }
+  const handleDragEnd = (e, manifest) => {
+    const node = { ...manifest };
     const { x, y, zoom } = latestPropsRef.current.viewport;
     const flowPanel = document.getElementById('FlowPanel');
     const newX = (e.clientX - flowPanel.offsetWidth - x) / zoom;
     const newY = (e.clientY - y) / zoom;
-    newManifest.id = nanoid();
-    newManifest.config.category = 'custom';
-    newManifest.config.basic = false;
-    newManifest.position = { x: newX, y: newY };
-    props.setNode(newManifest);
+    node.config.category = 'custom';
+    node.config.basic = false;
+    node.position = { x: newX, y: newY };
+    props.setNode(node);
   };
 
   // delete user module
@@ -67,13 +61,35 @@ const ModuleIcon = (props) => {
     latestPropsRef.current = props;
   }, [props]);
 
+  useEffect(() => {
+    if (!data) return;
+    setNewManifest({ ...newManifest, config: data });
+  }, [data]);
+
+  useEffect(() => {
+    if (newManifest.module == 'builder' && !newManifest.config?.code) return;
+    const draggableElement = document.getElementsByClassName(
+      `${newManifest.id}`
+    )[0];
+    if (draggableElement) {
+      draggableElement.addEventListener('dragend', (e) =>
+        handleDragEnd(e, newManifest)
+      );
+    }
+    return () => {
+      if (draggableElement) {
+        draggableElement.removeEventListener('dragend', (e) =>
+          handleDragEnd(e, newManifest)
+        );
+      }
+    };
+  }, [newManifest]);
+
   return (
     <Box position="relative">
-      {edit && manifest.config.custom && !manifest.config.basic && (
+      {edit && newManifest.config.custom && !newManifest.config.basic && (
         <IconButton
-          onClick={() => {
-            handleDelete(manifest);
-          }}
+          onClick={() => handleDelete(newManifest)}
           size="small"
           sx={{
             position: 'absolute',
@@ -86,9 +102,8 @@ const ModuleIcon = (props) => {
         </IconButton>
       )}
       <Stack
-        key={manifest.id}
-        onDragEnd={(e) => handleDragEnd(e, manifest)}
-        onClick={() => handleClick(manifest)}
+        key={newManifest.id}
+        onClick={() => handleClick(newManifest)}
         direction="column"
         alignItems="center"
         spacing={1}
@@ -102,17 +117,20 @@ const ModuleIcon = (props) => {
         }}
       >
         <Avatar
-          alt={manifest.config.name || manifest.config.title}
+          id={`${newManifest.id}`}
+          className={`${newManifest.id}`}
+          alt={newManifest.config.name}
           variant="rounded"
-          src={manifest.config.icon}
+          src={newManifest.config.icon}
           sx={{ width: 30, height: 30 }}
+          onDragEnd={(e) => handleDragEnd(e, newManifest)}
         />
         <Typography variant="caption" sx={{ userSelect: 'none' }}>
-          {manifest.config.name || manifest.config.title}
+          {newManifest.config.name}
         </Typography>
       </Stack>
     </Box>
   );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModuleIcon);
+export default memo(connect(mapStateToProps, mapDispatchToProps)(ModuleIcon));

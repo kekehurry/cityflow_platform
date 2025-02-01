@@ -45,6 +45,7 @@ export default function ControlButtons({
       time: dateTime,
       custom: true,
       basic: false,
+      local: true,
     };
     window.dispatchEvent(
       new CustomEvent('localModulesChange', { detail: newManifest })

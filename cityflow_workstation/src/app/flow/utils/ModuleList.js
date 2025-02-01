@@ -9,7 +9,7 @@ import {
   AccordionDetails,
   IconButton,
 } from '@mui/material';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { nanoid } from 'nanoid';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
@@ -61,7 +61,6 @@ export const ModuleList = (props) => {
   const [basicModules, setBasicModules] = useState([]);
   const [coreModules, setCoreModules] = useState({});
   const [groupedModules, setGroupedModules] = useState({});
-  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -157,7 +156,6 @@ export const ModuleList = (props) => {
     setGroupedModules({ ...groupedModules });
 
     window.addEventListener('localModulesChange', updateModules);
-
     return () => {
       window.removeEventListener('localModulesChange', updateModules);
     };
@@ -227,7 +225,7 @@ export const ModuleList = (props) => {
               sx={{ border: '0px', background: 'none' }}
               variant="outlined"
               disableGutters
-              defaultExpanded
+              // defaultExpanded
             >
               <AccordionSummary
                 sx={{ height: 10, minHeight: 30, m: 0, paddingLeft: 1 }}
@@ -265,4 +263,4 @@ export const ModuleList = (props) => {
   );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModuleList);
+export default memo(connect(mapStateToProps, mapDispatchToProps)(ModuleList));
