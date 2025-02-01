@@ -84,26 +84,22 @@ const PinBoard = (props) => {
           transformOrigin: 'bottom right',
         }}
       >
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            setGlobalScale(0.1);
-          }}
-          sx={{
-            position: 'absolute',
-            bottom: '2%',
-            right: '1%',
-            cursor: 'pointer',
-            transform:
-              globalScale === 1
-                ? `scale(40)`
-                : `scale(${1.5 / (globalScale * 0.2)})`,
-            zIndex: 1,
-            transition: 'transform 1s ease-in-out',
-          }}
-        />
         {globalScale === 1 || (
           <>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                setGlobalScale(1);
+              }}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                cursor: 'pointer',
+                transform: `scale(${1.5 / (globalScale * 0.2)})`,
+                zIndex: 1,
+              }}
+            />
             {globalScale < 0.5 && (
               <IconButton
                 onClick={(e) => {
@@ -125,18 +121,18 @@ const PinBoard = (props) => {
         <IconButton
           onClick={(e) => {
             e.stopPropagation();
-            setGlobalScale(1);
+            setGlobalScale(0.1);
           }}
           sx={{
             position: 'absolute',
-            top: '2%',
-            left: '1%',
+            bottom: 0,
+            right: 0,
             cursor: 'pointer',
             transform: `scale(${1.5 / (globalScale * 0.2)})`,
             zIndex: 1,
+            transition: 'transform 1s ease-in-out',
           }}
         />
-
         {globalScale &&
           pinNodes &&
           pinNodes.length > 0 &&
