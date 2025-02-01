@@ -44,7 +44,7 @@ const generateCSS = (typography) => {
 const cssString = generateCSS(theme.typography);
 const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   const [html, setHtml] = useState(config.html || null);
-  const [iframeId, setIframeId] = useState(config.iframeId || nanoid());
+  const [iframeId, setIframeId] = useState(nanoid());
   const [iframeConfig, setIframeConfig] = useState(config);
   const secrets = {
     MAPBOX_TOKEN: getLocalStorage('MAPBOX_TOKEN'),
@@ -70,14 +70,14 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   };
 
   // update iframe
-  useEffect(() => {
-    setConfig &&
-      iframeId &&
-      setConfig({
-        ...config,
-        iframeId,
-      });
-  }, [iframeId, setConfig]);
+  // useEffect(() => {
+  //   setConfig &&
+  //     iframeId &&
+  //     setConfig({
+  //       ...config,
+  //       iframeId,
+  //     });
+  // }, [iframeId, setConfig]);
 
   //   Listen for messages from the iframe
   useEffect(() => {
