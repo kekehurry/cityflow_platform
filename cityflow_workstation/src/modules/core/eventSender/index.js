@@ -5,8 +5,7 @@ import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArro
 export default function EventSender(props) {
   const { input, config, setConfig, setOutput } = props;
 
-  const [eventType, setEventType] = useState('');
-  const [eventMessage, setEventMessage] = useState('');
+  const [eventType, setEventType] = useState(config?.eventType || '');
 
   const sendCustomEvent = (eventType, eventData) => {
     if (!eventType) {
@@ -16,6 +15,10 @@ export default function EventSender(props) {
     const event = new CustomEvent(eventType, { detail: eventData });
     window.dispatchEvent(event);
   };
+
+  useEffect(() => {
+    setConfig({ ...config, eventType });
+  }, [eventType]);
 
   useEffect(() => {
     if (config?.run && input?.message) {

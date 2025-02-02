@@ -16,7 +16,7 @@ import { useState } from 'react';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
 
-export default function ConfigTab({
+export default function ConfigPanel({
   code,
   language,
   formValue,

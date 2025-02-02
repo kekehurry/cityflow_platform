@@ -25,6 +25,10 @@ export default class Assistant {
 
   async chat(inputMessage, messageHistory = null) {
     const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
+    const isBase64Image = (str) => {
+      return /^data:image\/[a-zA-Z]+;base64,/.test(str);
+    };
+
     const messages = [
       {
         role: 'system',
@@ -32,7 +36,12 @@ export default class Assistant {
       },
       { role: 'user', content: this.props.context || '' },
       ...parseMessage(messageHistory),
-      { role: 'user', content: inputMessage || '' },
+      isBase64Image(inputMessage)
+        ? {
+            role: 'user',
+            content: [{ type: 'image_url', image_url: { url: inputMessage } }],
+          }
+        : { role: 'user', content: inputMessage || '' },
     ];
 
     try {

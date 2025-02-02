@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask import send_file,send_from_directory
 from flask_cors import CORS
 import os
-import base64
+import logging
 
 from utils.core import check_node_exists
 
@@ -27,6 +27,10 @@ from utils.index import fulltext_query,semantic_query
 
 app = Flask(__name__)
 CORS(app)
+
+# logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.WARNING)
 
 # Node
 

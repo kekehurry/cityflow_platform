@@ -246,8 +246,18 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
     userFlows.push(data);
   }
   cs_data['userFlows'] = userFlows;
-  localStorage.setItem('cs_flow', JSON.stringify(cs_data));
-  alert('Your workflow has been saved locally!');
+  try {
+    localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+    alert('Your workflow has been saved locally!');
+  } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+      alert(
+        'Local storage limit exceeded. Please clear some data and try again.'
+      );
+    } else {
+      throw e;
+    }
+  }
 };
 
 export const deleteUserFlow = async (id) => {

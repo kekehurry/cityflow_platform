@@ -6,13 +6,14 @@ import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArro
 
 // main function
 export default function EventListener(props) {
-  const { config, setOutput } = props;
-  const [eventType, setEventType] = useState('');
+  const { config, setOutput, setConfig } = props;
+  const [eventType, setEventType] = useState(config?.eventType || '');
 
   // Effect to listen for the custom event
   useEffect(() => {
     const handleEvent = (event) => {
       setOutput({ message: event.detail });
+      setConfig({ ...config, eventType });
     };
 
     if (eventType && config?.run) {

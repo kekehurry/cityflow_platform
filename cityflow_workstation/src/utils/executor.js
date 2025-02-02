@@ -34,7 +34,7 @@ export async function* setupExecutor(flowId, packages, image) {
   }
 }
 
-export const executeCode = async ({
+export async function compileCode({
   flowId,
   sessionId,
   files,
@@ -42,7 +42,51 @@ export const executeCode = async ({
   input,
   config,
   image,
-}) => {
+}) {
+  const { code, icon, ...rest } = config;
+  const userId = await initUserId();
+  const inputFile = {
+    data: JSON.stringify(input),
+    path: 'input.json',
+  };
+  const configFile = {
+    data: JSON.stringify(rest),
+    path: 'config.json',
+  };
+  const api = `${executorServer}/compile`;
+  const res = await fetch(api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      flowId,
+      userId,
+      sessionId,
+      image,
+      codeBlock: {
+        files: [...(files || []), inputFile, configFile],
+        code: code,
+        language: language,
+      },
+    }),
+  }).catch((err) => {
+    console.error(err);
+  });
+  if (res && res.ok) {
+    return await res.json();
+  }
+}
+
+export async function* executeCode({
+  flowId,
+  sessionId,
+  files,
+  language,
+  input,
+  config,
+  image,
+}) {
   const { code, icon, ...rest } = config;
   const userId = await initUserId();
   const inputFile = {
@@ -70,11 +114,20 @@ export const executeCode = async ({
         language: language,
       },
     }),
+  }).catch((err) => {
+    console.error(err);
   });
   if (res && res.ok) {
-    return await res.json();
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      yield chunk;
+    }
   }
-};
+}
 
 export const useExecuteCode = ({
   flowId,

@@ -7,7 +7,9 @@ from hashlib import md5
 import logging
 import os
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.WARNING)
 
 app = Flask(__name__)
 CORS(app)
@@ -71,7 +73,31 @@ def execute():
         language=code_block["language"],
         files=[File(path=file["path"], data=file["data"]) for file in code_block["files"]] if "files" in code_block else None
     )
-    code_result= executor.execute(exeucte_block)
+    return  Response(executor.execute(exeucte_block), mimetype='text/plain')
+    
+@app.route('/compile', methods=['POST'])
+def compile():
+    id = request.json.get('flowId')
+    user_id = request.json.get('userId')
+    session_id = request.json.get('sessionId')
+    image = request.json.get('image')
+    container_name = f"csflow-{user_id}-{id}"
+    # print(f"Execute Container: {container_name}, Session ID: {session_id}")
+    code_block = request.json.get('codeBlock')
+    if code_block is None:
+        return jsonify({'error': 'No code blocks provided.'}), 400
+    executor = manager.get_executor(container_name)
+    if executor is None:
+        executor = CodeExecutor(container_name=container_name,image=image)
+        manager.register_excutor(executor)
+    
+    exeucte_block = CodeBlock(
+        session_id = session_id,
+        code=code_block["code"],
+        language=code_block["language"],
+        files=[File(path=file["path"], data=file["data"]) for file in code_block["files"]] if "files" in code_block else None
+    )
+    code_result= executor.compile(exeucte_block)
     return jsonify({
         'container_name': executor._container_name,
         'exit_code': code_result.exit_code, 
@@ -80,6 +106,7 @@ def execute():
         'config': code_result.config,
         'html': code_result.html,
     })
+    
 
 @app.route('/remove_session', methods=['POST'])
 def remove_ssesion():

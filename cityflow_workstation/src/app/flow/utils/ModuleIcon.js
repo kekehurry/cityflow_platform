@@ -1,4 +1,11 @@
-import { Box, Stack, Typography, Avatar, IconButton } from '@mui/material';
+import {
+  Box,
+  Stack,
+  Typography,
+  Avatar,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { connect } from 'react-redux';
 import theme from '@/theme';
@@ -114,8 +121,8 @@ const ModuleIcon = (props) => {
         sx={{
           display: 'flex',
           p: 1,
-          width: 65,
-          height: 65,
+          width: 50,
+          height: 50,
           borderRadius: 2,
           cursor: 'pointer',
           '&:hover': {
@@ -125,27 +132,16 @@ const ModuleIcon = (props) => {
           justifyContent: 'center',
         }}
       >
-        <Avatar
-          id={newManifest.id}
-          alt={newManifest.config.name}
-          variant="rounded"
-          src={newManifest.config.icon}
-          sx={{ width: 30, height: 30 }}
-          onDragEnd={(e) => !newManifest.id && handleDragEnd(e, newManifest)}
-        />
-        <Typography
-          variant="caption"
-          sx={{
-            userSelect: 'none',
-            fontSize: 8,
-            textAlign: 'center',
-            width: 65,
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {newManifest.config.name}
-        </Typography>
+        <Tooltip title={newManifest.config.name} placement="top" arrow>
+          <Avatar
+            id={newManifest.id}
+            alt={newManifest.config.name}
+            variant="rounded"
+            src={newManifest.config.icon}
+            sx={{ width: 30, height: 30 }}
+            onDragEnd={(e) => !newManifest.id && handleDragEnd(e, newManifest)}
+          />
+        </Tooltip>
       </Stack>
     </Box>
   );

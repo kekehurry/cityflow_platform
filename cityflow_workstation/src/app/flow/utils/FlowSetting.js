@@ -23,6 +23,8 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
 import { useLocalStorage, getLocalStorage } from '@/utils/local';
 import { initUserId } from '@/utils/local';
+import { set } from 'lodash';
+import { image } from 'd3';
 
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
@@ -68,7 +70,7 @@ const FlowSettings = (props) => {
   const [author, setAuthor] = useLocalStorage('author', null);
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
-  const localLLMConfig = getLocalStorage('LLM_CONFIG');
+  const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG');
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
@@ -165,14 +167,15 @@ const FlowSettings = (props) => {
     if (!formValue.flowId) return;
     const isAlive = setInterval(() => {
       check(formValue.flowId).then((data) => {
-        setMeta({ isAlive: data?.alive });
+        if (props.state?.isAlive != data?.alive) {
+          setMeta({ isAlive: data?.alive });
+        }
       });
     }, 1000);
     return () => {
       clearInterval(isAlive);
-      killExecutor(formValue.flowId);
     };
-  }, [formValue.flowId]);
+  }, [formValue.flowId, props.state?.isAlive]);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -294,6 +297,62 @@ const FlowSettings = (props) => {
           <AccordionDetails sx={{ m: 0, p: 0, height: '600px' }}>
             <Stack spacing={2}>
               <Divider />
+              <Stack direction={'row'}>
+                <InputLabel
+                  htmlFor="LLM_BASE_URL"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  BASE_URL
+                </InputLabel>
+                <Input
+                  id="LLM_BASE_URL"
+                  value={localLLMConfig?.baseUrl || ''}
+                  onChange={(e) =>
+                    setLocalLLMConfig({
+                      ...localLLMConfig,
+                      baseUrl: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={{
+                    style: {
+                      background: 'none',
+                      color: '#616161',
+                      border: 'none',
+                      borderBottom: '1px solid #616161',
+                    },
+                  }}
+                />
+              </Stack>
+              <Stack direction={'row'}>
+                <InputLabel
+                  htmlFor="LLM_MODEL"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  LLM_MODEL
+                </InputLabel>
+                <Input
+                  id="LLM_MODEL"
+                  value={localLLMConfig?.model || ''}
+                  onChange={(e) =>
+                    setLocalLLMConfig({
+                      ...localLLMConfig,
+                      model: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={{
+                    style: {
+                      background: 'none',
+                      color: '#616161',
+                      border: 'none',
+                      borderBottom: '1px solid #616161',
+                    },
+                  }}
+                />
+              </Stack>
               <Stack direction={'row'}>
                 <InputLabel
                   htmlFor="LLM_API_KEY"

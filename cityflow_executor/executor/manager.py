@@ -11,7 +11,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 class ExecutorManage:
-    def __init__(self, check_interval=1, idle_time=5, max_last_minute=20):
+    def __init__(self, check_interval=60, idle_time=300, max_last_minute=20):
         self._client = docker.from_env()
         self._container_registry = {}
         self._check_interval = int(os.getenv("EXECUTOR_CHECK_INTERVAL", check_interval))

@@ -14,29 +14,15 @@ export const POST = async (req) => {
     const { flowId, userId, sessionId, image, codeBlock } = await req.json();
 
     // Make a POST request to the dataset server
-    const response = await fetch(`${executorServer}/execute`, {
+    const response = await fetch(`${executorServer}/compile`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ flowId, userId, sessionId, image, codeBlock }),
     });
 
     if (response.ok) {
-      const reader = response.body.getReader();
-      const stream = new ReadableStream({
-        async start(controller) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            controller.enqueue(value);
-          }
-          controller.close();
-        },
-      });
-
-      return new Response(stream, {
-        headers: { 'Content-Type': 'application/json' },
-        status: 200,
-      });
+      const data = await response.json();
+      return NextResponse.json(data, { status: 200 });
     }
   } catch (error) {
     console.error('Error:', error);

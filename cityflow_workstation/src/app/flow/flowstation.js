@@ -169,7 +169,7 @@ const FlowStation = (props) => {
     };
   };
 
-  const panOnDrag = [1, 2];
+  const panOnDrag = [2];
 
   const flow = (
     <ReactFlow

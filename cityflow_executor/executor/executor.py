@@ -11,6 +11,7 @@ import shutil
 import base64
 import requests
 import json
+import time
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -161,18 +162,14 @@ class CodeExecutor:
         except Exception as e:
             yield str(e)
 
+    def prepare(self, code_block) -> None:  
 
-    def execute(self, code_block) -> CodeResult:
-        """Execute the code blocks."""
-        console_outputs = []
-        last_exit_code = 0
         lang = code_block.language.lower()
-        if lang not in self.DEFAULT_EXECUTION_POLICY:
-            console_outputs.append(f"Unsupported language {lang}\n")
-            last_exit_code = 1
 
         session_id = code_block.session_id
+
         foldername = f"codeblock_{session_id}"
+
         if not os.path.exists(os.path.join(self._work_dir, foldername)):
             try:
                 os.makedirs(os.path.join(self._work_dir, foldername))
@@ -212,39 +209,65 @@ class CodeExecutor:
                         with open(file_path,"w") as f:
                             f.write(file.data)
                 except Exception as e:
-                        # print(e)
                         logging.error(e)
                         pass
         
         runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
         runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
-        command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
-        
-        result = self._container.exec_run(command)
-        exit_code = result.exit_code
-        output = result.output.decode("utf-8")
-        console_outputs.append(output)
-        if exit_code == 124:
-            console_outputs.append("Execution timeout\n")
-        last_exit_code = exit_code
+        # command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
+        command = ["sh", "-c", f"cd {runner_work_dir} && {_cmd(lang)} ."]
+        return command, lang, foldername
+    
+
+    def execute(self, code_block):
+        """Execute the code blocks."""
+        command, lang, foldername = self.prepare(code_block)
+        result = self._container.exec_run(command,stream=True,tty=True)
+        try:
+            for line in result.output:
+                logs = line.decode("utf-8")
+                self._last_update_time = time.time()
+                yield  json.dumps({
+                    'container_name': self._container_name,
+                    'console': logs,
+                }) + '\n'
+
+            final_output = ""
+            if os.path.exists(os.path.join(self._work_dir, foldername, "output.json")):
+                with open(os.path.join(self._work_dir, foldername, "output.json"), "r") as f:
+                    final_output = f.read()
+                yield  json.dumps({
+                    'container_name': self._container_name,
+                    'console': "\nCode Excuted Successfully\n" + time.strftime("%Y-%m-%d %H:%M:%S"),
+                    'output': final_output,
+                }) + '\n'
+                
+        except Exception as e:
+            yield json.dumps({
+                    'container_name': self._container_name,
+                    'console': str(e),
+                }) + '\n'
             
+    def compile(self, code_block) -> CodeResult:
+
+        command, lang, foldername = self.prepare(code_block)
+
+        result = self._container.exec_run(command)
+
+        logs =result.output.decode("utf-8")
+
         final_output = ""
         if os.path.exists(os.path.join(self._work_dir, foldername, "output.json")):
             with open(os.path.join(self._work_dir, foldername, "output.json"), "r") as f:
-                final_output = f.read()
-
-        final_config = ""
-        if os.path.exists(os.path.join(self._work_dir, foldername, "config.json")):
-            with open(os.path.join(self._work_dir, foldername, "config.json"), "r") as f:
-                final_config = f.read()
+                final_output = json.load(f)
 
         rendered_html = ""
-        if os.path.exists(os.path.join(self._work_dir, foldername, "index.html")):
+        if lang == 'javascript' and os.path.exists(os.path.join(self._work_dir, foldername, "index.html")):
             with open(os.path.join(self._work_dir, foldername, "index.html"), "r") as f:
                 rendered_html = f.read()
-        
+
         self._last_update_time = time.time()
-        return CodeResult(exit_code=last_exit_code, console="\n".join(console_outputs), output=final_output, config=final_config, html=rendered_html)
+        return  CodeResult(exit_code=0, console=logs, output=final_output, config="", html=rendered_html)
 
     def remove_session(self, session_id: str) -> None:
         """Remove the session."""
