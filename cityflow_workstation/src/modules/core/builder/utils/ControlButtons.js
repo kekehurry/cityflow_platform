@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box, SpeedDial, SpeedDialIcon, SpeedDialAction } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import PublishIcon from '@mui/icons-material/Publish';
+import theme from '@/theme';
 
 export default function ControlButtons({
   config,
@@ -58,12 +59,20 @@ export default function ControlButtons({
   ];
 
   return (
-    <Box sx={{ position: 'absolute', top: 400, right: 330 }}>
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 400,
+        right: 330,
+        background: theme.palette.primary.dark,
+        color: theme.palette.text,
+      }}
+    >
       <SpeedDial
-        ariaLabel="SpeedDial basic example"
+        ariaLabel="actions"
         size="small"
         icon={<SpeedDialIcon sx={{ minHeight: 0, minWidth: 0 }} />}
-        FabProps={{ size: 'small' }}
+        FabProps={{ size: 'small', color: 'secondary' }}
         open={open}
         onClick={() => setOpen(!open)}
       >

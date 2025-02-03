@@ -154,7 +154,7 @@ export default function CodeEditor({
           disableRipple
         />
       </Tabs>
-      <Box style={{ height: '600px' }} className="nowheel nodrag">
+      <Box className="nowheel nodrag">
         <ControlButtons
           config={config}
           formValue={formValue}
@@ -162,22 +162,22 @@ export default function CodeEditor({
           setCodeSubmited={setCodeSubmited}
         />
         {config.expandHeight && (
-          <Box key={editor}>
-            <MonacoEditor
-              width="100%"
-              height={config.expandHeight - 50}
-              language={formValue.language}
-              theme="vs-dark"
-              value={formValue.code[editor]}
-              onChange={(value) => handleCodeChange(editor, value)}
-              options={{
-                minimap: { enabled: false },
-                wordWrap: 'on',
-              }}
-            />
-          </Box>
+          <MonacoEditor
+            key={editor}
+            width="100%"
+            height={config.expandHeight - 20}
+            language={formValue.language}
+            theme="vs-dark"
+            value={formValue.code[editor]}
+            onChange={(value) => handleCodeChange(editor, value)}
+            options={{
+              minimap: { enabled: false },
+              wordWrap: 'on',
+            }}
+          />
         )}
       </Box>
+      {/* <Box height={20} /> */}
     </Box>
   );
 }

@@ -6,6 +6,7 @@ import {
   Tooltip,
   Accordion,
   AccordionSummary,
+  Typography,
   AccordionDetails,
   Divider,
   Input,
@@ -280,7 +281,11 @@ const FlowSettings = (props) => {
           color={props.state.isAlive ? 'secondary' : 'primary'}
           onClick={hangleSubmit}
         >
-          Init Environment
+          <Typography
+            sx={{ color: theme.palette.flow.main, fontWeight: 'bold' }}
+          >
+            Init Environment
+          </Typography>
         </LoadingButton>
         <Accordion
           sx={{ border: '0px', background: 'none' }}

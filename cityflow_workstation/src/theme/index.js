@@ -1,6 +1,7 @@
 import { head } from 'lodash';
 import typography from './typography';
 import { createTheme } from '@mui/material/styles';
+import PinBoard from '@/app/flow/utils/PinBoard';
 
 const black = 'rgba(15, 17, 18, 1)';
 
@@ -11,6 +12,7 @@ const theme = createTheme({
     primary: {
       main: 'rgb(149, 109, 248)',
       dark: 'rgba(116, 63, 245,1)',
+      hex: '#733ff5',
     },
     secondary: {
       main: 'rgba(116, 63, 245,1)',
@@ -20,7 +22,8 @@ const theme = createTheme({
     flow: {
       main: black,
       grid: '#424242',
-      background: 'rgb(26, 28, 29)',
+      background: 'rgb(30, 31, 32)',
+      pinBoard: 'rgba(20, 21, 22, 1)',
     },
     community: {
       main: black,

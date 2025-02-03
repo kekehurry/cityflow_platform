@@ -43,7 +43,11 @@ const UserFlows = ({ items, edit }) => {
   }, [userFlows]);
 
   return (
-    <ImageList cols={4} gap={20}>
+    <ImageList
+      cols={4}
+      gap={20}
+      sx={{ height: cardHeight + 100, overflow: 'auto' }}
+    >
       {localItems?.map(
         (item, index) =>
           item && (

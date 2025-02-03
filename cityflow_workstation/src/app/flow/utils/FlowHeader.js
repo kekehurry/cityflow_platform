@@ -267,7 +267,11 @@ const FlowHeader = (props) => {
             }}
             sx={{ width: 80, height: 30, borderRadius: 10 }}
           >
-            Share
+            <Typography
+              sx={{ color: theme.palette.flow.main, fontWeight: 'bold' }}
+            >
+              Share
+            </Typography>
           </Button>
         </Toolbar>
       </AppBar>
