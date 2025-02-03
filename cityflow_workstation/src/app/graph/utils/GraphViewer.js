@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, TextField, Stack } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import SearchIcon from '@mui/icons-material/Search';
+import theme from '@/theme';
 
 import { useSemanticSearch } from '@/utils/dataset';
 
@@ -93,7 +94,7 @@ export default function GraphViewer(props) {
             onClick={handleSearch}
             sx={{
               width: 100,
-              backgroundColor: '#64B5F6',
+              backgroundColor: theme.palette.primary.main,
               borderRadius: 10,
             }}
           >
@@ -116,9 +117,9 @@ export default function GraphViewer(props) {
               nodeAutoColorBy={'type'}
               linkWidth={0.5}
               nodeLabel={'name'}
-              linkColor={'#607D8B'}
-              nodeStrokeColor={'#BBDEFB'}
-              nodeHighlightColor={'#EA80FC'}
+              linkColor={theme.palette.graph.link}
+              nodeStrokeColor={theme.palette.graph.node}
+              nodeHighlightColor={theme.palette.graph.highlight}
               selectedNode={selectedNode}
               setSelectedNode={setSelectedNode}
             />

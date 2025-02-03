@@ -146,7 +146,7 @@ def semantic_query(query_string, limit=20):
     ids = []
     workflow_result = query(cypher,{"index":"workflowVectorIndex"})
     module_result = query(cypher,{"index":"moduleVectorIndex"})
-    print(len(workflow_result['ids']),len(module_result['ids']))
+    # print(len(workflow_result['ids']),len(module_result['ids']))
     for result in [workflow_result,module_result]:
         if result:
             for id,node,label,score in zip(result['ids'],result['nodes'],result['labels'],result['scores']):

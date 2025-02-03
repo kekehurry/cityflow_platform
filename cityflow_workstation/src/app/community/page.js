@@ -7,7 +7,7 @@ import {
   CircularProgress,
   IconButton,
   ToggleButtonGroup,
-  Avatar,
+  Tooltip,
   ToggleButton,
 } from '@mui/material';
 import Footer from '@/components/Footer';
@@ -16,7 +16,6 @@ import { useEffect, useState } from 'react';
 import CommunityShowcase from '@/app/community/utils/CommunityShowcase';
 import CommunityFlows from '@/app/community/utils/CommunityFlows';
 import CommunityModules from '@/app/community/utils/CommunityModules';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import SearchIcon from '@mui/icons-material/Search';
 import theme from '@/theme';
@@ -63,27 +62,24 @@ const Community = () => {
           href="/graph"
           style={{ textDecoration: 'none', color: 'inherit' }}
         >
-          <Box
-            sx={{
-              width: 50,
-              height: 50,
-              border: '1px solid #424242',
-              borderRadius: '50%',
-              background: 'linear-gradient(45deg, #212121 30%, #424242 90%)',
-              textAlign: 'center',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              ':hover': { border: '2px solid #EA80FC' },
-            }}
-          >
-            <SearchIcon sx={{ fontSize: 30, color: '#9E9E9E' }} />
-            {/* <img
-              src="/networks.png"
-              alt="logo"
-              style={{ width: '100%', height: '100%', padding: '12px' }}
-            /> */}
-          </Box>
+          <Tooltip title="Search workflows">
+            <Box
+              sx={{
+                width: 50,
+                height: 50,
+                border: '1px solid #424242',
+                borderRadius: '50%',
+                background: 'linear-gradient(45deg, #212121 30%, #424242 90%)',
+                textAlign: 'center',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                ':hover': { border: `2px solid ${theme.palette.primary.main}` },
+              }}
+            >
+              <SearchIcon sx={{ fontSize: 30, color: '#9E9E9E' }} />
+            </Box>
+          </Tooltip>
         </Link>
       </Box>
       <Box

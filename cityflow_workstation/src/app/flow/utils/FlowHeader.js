@@ -234,12 +234,12 @@ const FlowHeader = (props) => {
             </Link>
           </Typography>
           <IconButton
-            color={props.state.isAlive ? 'primary' : 'secondary'}
+            color={props.state.isAlive ? 'secondary' : 'primary'}
             sx={{
               '&:hover': {
                 color: props.state.isAlive
-                  ? theme.palette.primary.dark
-                  : theme.palette.secondary.dark,
+                  ? theme.palette.secondary.dark
+                  : theme.palette.primary.dark,
               },
             }}
             onClick={() => {
@@ -249,7 +249,7 @@ const FlowHeader = (props) => {
           >
             {props.state.loading ? (
               <CircularProgress
-                color={props.state.isAlive ? 'primary' : 'secondary'}
+                color={props.state.isAlive ? 'secondary' : 'primary'}
                 size={30}
               />
             ) : globalRun && props.state.isAlive ? (
@@ -260,7 +260,7 @@ const FlowHeader = (props) => {
           </IconButton>
           <Button
             variant="contained"
-            color={props.state.isAlive ? 'primary' : 'secondary'}
+            color={props.state.isAlive ? 'secondary' : 'primary'}
             onClick={() => {
               setDialogOpen(true);
               setDialogName('Share');

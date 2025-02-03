@@ -13,6 +13,7 @@ from hashlib import md5
 import uuid
 import json
 import os
+import time
 
 # Author
 def get_author(id):
@@ -159,7 +160,7 @@ def search_workflows(params,limit=25):
                 WITH w LIMIT {limit}
                 RETURN collect(DISTINCT w) as workflows
             '''
-    print(cypher,params)
+    # print(cypher,params)
     result = query(cypher,params)
     if result:
         workflows = result['workflows']
@@ -173,7 +174,9 @@ def delete_workflow(id):
     workflow = get_workflow(id)
     if workflow:
         screenshot = workflow.get('screenShot')
-        delete_file(screenshot)
+        source_folder = os.getenv('DATABASE_SOURCE_DIR')
+        screenshot_path = os.path.join(source_folder,'images',os.path.basename(screenshot))
+        delete_file(screenshot_path)
     return delete_node('Workflow',id)
 
 
@@ -200,7 +203,7 @@ def save_workflow(data,user_id):
     workflow_data['authorId'] = user_id
     screenshot = workflow_data.get('screenShot') 
     if screenshot and 'base64' in screenshot:
-        screenshot_path = os.path.join(source_folder,f"images/{workflow_id}.png")
+        screenshot_path = os.path.join(source_folder,f"images/{workflow_id}_{time.strftime('%H-%M-%S')}.png")
         workflow_data['screenShot'] = base642file(screenshot_path,screenshot)
 
     # delete existing workflow

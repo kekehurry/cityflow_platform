@@ -210,6 +210,7 @@ class PinNode extends PureComponent {
                 // ref={handleRef}
                 fontSize="10px"
                 sx={{
+                  color: '#5c5d5d',
                   position: 'absolute',
                   left: '50%',
                   transform: 'translateX(-50%)',

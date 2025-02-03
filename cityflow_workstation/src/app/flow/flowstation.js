@@ -17,6 +17,7 @@ import FlowPanel from './utils/FlowPanel';
 import PinBoard from './utils/PinBoard';
 import StyledControls from './utils/FlowControl';
 import FlowHeader from './utils/FlowHeader';
+import GridBackground from './utils/GridBackground';
 import Header from '@/components/Header';
 
 // import ContextMenu from './utils/ContextMenu';
@@ -195,12 +196,7 @@ const FlowStation = (props) => {
       <PinBoard />
       {/* <ContextMenu /> */}
       <StyledControls />
-      {/* <Background /> */}
-      <Background
-        style={{
-          background: theme.palette.flow.background,
-        }}
-      />
+      <GridBackground />
     </ReactFlow>
   );
 

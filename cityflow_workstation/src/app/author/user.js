@@ -7,6 +7,7 @@ import {
   Typography,
   Stack,
   CircularProgress,
+  Tooltip,
   Avatar,
 } from '@mui/material';
 import UserFlows from './utils/UserFlows';
@@ -15,9 +16,10 @@ import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getAuthor, useSearchWorkflow } from '@/utils/dataset';
-import { initUserId, useLocalStorage } from '@/utils/local';
+import { getAuthor, useSearchWorkflow, getWorkflow } from '@/utils/dataset';
+import { initUserId, useLocalStorage, download } from '@/utils/local';
 import Footer from '@/components/Footer';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -43,7 +45,17 @@ const UserPage = () => {
   const [userId, setUserId] = useState(null);
   const [userFlows, setUserFlows] = useLocalStorage('userFlows', []);
   const basicData = useSearchWorkflow({ tutorial: true });
+  const allFlows = useSearchWorkflow({ authorId: userId });
   const { data, error, isLoading } = useSearchWorkflow({ authorId });
+
+  const handleDownload = () => {
+    if (!allFlows?.data) return;
+    allFlows.data.map((flow) => {
+      getWorkflow(flow.id).then((flowData) => {
+        flowData && download(flowData);
+      });
+    });
+  };
 
   useEffect(() => {
     initUserId().then((userId) => {
@@ -91,6 +103,28 @@ const UserPage = () => {
 
   return (
     <>
+      <Box sx={{ position: 'absolute', top: 80, right: 80, zIndex: 1 }}>
+        <Tooltip title="Download all your workflows">
+          <Box
+            sx={{
+              width: 50,
+              height: 50,
+              border: '1px solid #424242',
+              borderRadius: '50%',
+              background: 'linear-gradient(45deg, #212121 30%, #424242 90%)',
+              textAlign: 'center',
+              display: 'flex',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              alignItems: 'center',
+              ':hover': { border: `2px solid ${theme.palette.primary.main}` },
+            }}
+            onClick={handleDownload}
+          >
+            <ArrowDownwardIcon sx={{ fontSize: 30, color: '#9E9E9E' }} />
+          </Box>
+        </Tooltip>
+      </Box>
       <Box
         sx={{
           width: '100vw',
@@ -130,10 +164,6 @@ const UserPage = () => {
             <Typography variant="h1" textAlign="center">
               {displayName}
             </Typography>
-            {/* <Typography variant="h5" textAlign="center">
-              Sharing your methods of solving city problems and learn from each
-              other.
-            </Typography> */}
             <Stack
               direction="row"
               spacing={2}

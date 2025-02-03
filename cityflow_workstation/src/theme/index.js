@@ -2,53 +2,60 @@ import { head } from 'lodash';
 import typography from './typography';
 import { createTheme } from '@mui/material/styles';
 
-const black = 'rgba(10, 10, 10, 1)';
+const black = 'rgba(15, 17, 18, 1)';
 
 const theme = createTheme({
   typography,
   palette: {
     mode: 'dark',
     primary: {
-      main: 'rgba(144, 202, 249,1)',
-      dark: 'rgb(48, 140, 216)',
+      main: 'rgb(149, 109, 248)',
+      dark: 'rgba(116, 63, 245,1)',
     },
     secondary: {
-      main: 'rgba(206, 147, 216,1)',
-      dark: 'rgba(171, 71, 188, 1)',
+      main: 'rgba(116, 63, 245,1)',
+      dark: 'rgb(100, 44, 240)',
       grey: 'rgba(66, 66, 66,1)',
     },
     flow: {
       main: black,
-      background: 'rgba(75, 75, 75, 0.2)',
+      grid: '#424242',
+      background: 'rgb(26, 28, 29)',
     },
     community: {
       main: black,
       background:
-        'radial-gradient(circle, rgb(46, 46, 46,0.5),rgba(10, 10, 10, 1))',
+        'radial-gradient(circle, rgba(36, 38, 39,1),rgba(10, 10, 10, 1))',
+    },
+    graph: {
+      link: '#607D8B',
+      node: '#BBDEFB',
+      highlight: 'rgba(116, 63, 245,1)',
     },
     user: {
       main: black,
       background:
-        'radial-gradient(circle, rgb(46, 46, 46,0.5),rgba(10, 10, 10, 1))',
+        'radial-gradient(circle, rgba(36, 38, 39,1),rgba(10, 10, 10, 1))',
     },
     home: {
-      background: black,
+      background:
+        'radial-gradient(circle, rgba(36, 38, 39,1),rgba(10, 10, 10, 1))',
     },
     node: {
       main: black,
       header: black,
       container: black,
-      border: '0.5px solid #424242',
+      border: '0.5px solid rgb(50, 50, 50)',
     },
     edge: {
-      main: 'rgba(206, 147, 216,1)',
-      dark: 'rgba(171, 71, 188, 1)',
+      main: 'rgb(149, 109, 248)',
+      dark: 'rgba(116, 63, 245,1)',
     },
     pin: {
       main: black,
       header: black,
       container: black,
-      border: '0.5px solid #424242',
+      border: '0.5px solid rgb(31, 31, 31)',
     },
     annotation: {
       main: 'rgba(117, 117, 117,1)',

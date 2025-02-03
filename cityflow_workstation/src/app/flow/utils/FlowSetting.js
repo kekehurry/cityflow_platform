@@ -277,7 +277,7 @@ const FlowSettings = (props) => {
         <LoadingButton
           loading={props.state.loading || loading}
           variant="contained"
-          color={props.state.isAlive ? 'primary' : 'secondary'}
+          color={props.state.isAlive ? 'secondary' : 'primary'}
           onClick={hangleSubmit}
         >
           Init Environment

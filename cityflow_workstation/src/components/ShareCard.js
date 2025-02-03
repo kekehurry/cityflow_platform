@@ -106,7 +106,7 @@ export default function ShareCard({
                     top: -20,
                     right: 0,
                     fontWeight: 'bold',
-                    color: theme.palette.secondary.dark,
+                    color: theme.palette.primary.main,
                   }}
                 >
                   {score.toFixed(2)}
@@ -118,7 +118,7 @@ export default function ShareCard({
               <Stack spacing={0.5}>
                 <Typography
                   variant="caption"
-                  sx={{ color: theme.palette.secondary.dark }}
+                  sx={{ color: theme.palette.primary.main }}
                 >
                   {author && `@${author}${label ? ' | ' + label : ''}`}
                 </Typography>
@@ -130,7 +130,7 @@ export default function ShareCard({
                   <Typography variant="caption">{`${description}`}</Typography>
                   <Typography
                     variant="body1"
-                    sx={{ color: theme.palette.secondary.dark }}
+                    sx={{ color: theme.palette.primary.main }}
                   >
                     {author && `@${author}`}
                   </Typography>

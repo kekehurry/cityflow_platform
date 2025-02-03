@@ -71,11 +71,11 @@ const ShareBoard = (props) => {
         .finally(() => {
           publish ? setPublishing(false) : setSharing(false);
         });
-      if (publish && flowId) {
-        window.location.href = `/flow?id=${flowId}&pinBoard=true`;
-      } else if (flowId) {
-        window.location.href = `/flow?id=${flowId}`;
-      }
+      // if (publish && flowId) {
+      //   window.location.href = `/flow?id=${flowId}&pinBoard=true`;
+      // } else if (flowId) {
+      //   window.location.href = `/flow?id=${flowId}`;
+      // }
       setDialogOpen(false);
     },
     [rfInstance, formValue]
@@ -122,8 +122,8 @@ const ShareBoard = (props) => {
         PaperProps={{
           component: 'form',
           style: {
-            border: '1px solid #424242',
-            background: theme.palette.flow.main,
+            border: theme.palette.node.border,
+            background: theme.palette.node.main,
           },
         }}
       >

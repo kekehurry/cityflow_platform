@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import FingerprintJS from 'fingerprintjs2';
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
+import theme from '@/theme';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -126,7 +127,7 @@ export const getFlowData = async ({ rfInstance, state }) => {
     };
     const flowContainer = document.getElementById('react-flow');
     const clonedFlowContainer = flowContainer.cloneNode(true);
-    clonedFlowContainer.style.background = '#0a0a0a';
+    clonedFlowContainer.style.background = theme.palette.flow.main;
     clonedFlowContainer.style.position = 'absolute';
     document.body.appendChild(clonedFlowContainer);
     let screenShot;
@@ -153,7 +154,6 @@ export const getFlowData = async ({ rfInstance, state }) => {
       ...newFlowData,
       screenShot,
     };
-    console.log(savedData);
     return savedData;
   }
 };
