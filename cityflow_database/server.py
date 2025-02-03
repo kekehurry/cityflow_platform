@@ -90,13 +90,15 @@ def _delete_workflow():
     id = request.json.get('flowId')
     user_id = request.json.get('userId')
     workflow = get_workflow(id)
-    if workflow['author_id'] != user_id:
+    workflow_author = workflow['author']
+    user_info = get_author(user_id)
+    if user_info['name'] == workflow_author:
+        workflow = delete_workflow(id)
+        return jsonify(f'workflow {id} deleted')
+    else:
         print('Unauthorized Access')
         return jsonify({'error': 'Unauthorized  Access'}, 500)
-    else:
-        workflow = delete_workflow(id)
-    return jsonify(workflow)
-
+    
 
 # Search
 @app.route('/fulltext_search', methods=['POST'])

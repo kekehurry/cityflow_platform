@@ -120,11 +120,44 @@ export async function* executeCode({
   if (res && res.ok) {
     const reader = res.body.getReader();
     const decoder = new TextDecoder('utf-8');
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      yield chunk;
+
+    let buffer = ''; // buffer
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (buffer.trim()) {
+            yield { error: 'Incomplete JSON at the end', buffer };
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        //（the meesage in server end with \n）
+        const messages = buffer.split('\n');
+        buffer = messages.pop() || '';
+
+        for (const msg of messages) {
+          if (!msg.trim()) continue;
+          try {
+            const parsed = JSON.parse(msg);
+            if (parsed.output) {
+              // if output is present, return the output
+              yield { output: parsed.output };
+              return;
+            } else {
+              // if output is not present, return the parsed message
+              yield parsed;
+            }
+          } catch (e) {
+            yield { error: 'JSON parse error', raw: msg };
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
     }
   }
 }

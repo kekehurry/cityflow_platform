@@ -143,17 +143,24 @@ export default function ModuleBuilder(props) {
       setConfig(newConfig);
       let logs = '';
 
-      const handleResult = (result) => {
-        logs += result?.console;
-        setLog(logs);
-        setOutput({ ...output, logs: result?.console });
-        if (result?.output) {
-          setOutput({ ...JSON.parse(result.output), logs: result?.console });
+      const handleResult = (chunk) => {
+        if (chunk.console) {
+          logs += chunk?.console;
+          setLog(logs);
+          setOutput({ logs: chunk?.console });
+          setLoading(true);
+        } else if (chunk.output) {
+          setOutput({ ...chunk.output, logs: chunk?.console });
         }
-        if (result?.html) {
-          setConfig({ ...newConfig, html: result.html });
-        }
-        setLoading(true);
+        // logs += result?.console;
+        // setLog(logs);
+        // setOutput({ ...output, logs: result?.console });
+        // if (result?.output) {
+        //   setOutput({ ...JSON.parse(result.output), logs: result?.console });
+        // }
+        // if (result?.html) {
+        //   setConfig({ ...newConfig, html: result.html });
+        // }
       };
 
       try {
@@ -168,7 +175,7 @@ export default function ModuleBuilder(props) {
             config: newConfig,
             image: image,
           })) {
-            chunk && isValidJson(chunk) && handleResult(JSON.parse(chunk));
+            chunk && handleResult(chunk);
           }
           setLoading(false);
           setCodeSubmited(false);

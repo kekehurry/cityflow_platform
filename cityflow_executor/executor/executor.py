@@ -235,7 +235,7 @@ class CodeExecutor:
             final_output = ""
             if os.path.exists(os.path.join(self._work_dir, foldername, "output.json")):
                 with open(os.path.join(self._work_dir, foldername, "output.json"), "r") as f:
-                    final_output = f.read()
+                    final_output = json.load(f)
                 yield  json.dumps({
                     'container_name': self._container_name,
                     'console': "\nCode Excuted Successfully\n" + time.strftime("%Y-%m-%d %H:%M:%S"),

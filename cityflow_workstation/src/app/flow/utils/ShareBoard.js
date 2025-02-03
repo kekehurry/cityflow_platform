@@ -6,11 +6,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
   TextField,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { styled } from '@mui/material/styles';
 import { useState, useCallback, useEffect } from 'react';
 import { useReactFlow } from 'reactflow';
 import { getFlowData, download } from '@/utils/local';
@@ -20,13 +18,6 @@ import { connect } from 'react-redux';
 import { useLocalStorage } from '@/utils/local';
 
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
-
-const StyledInput = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    // borderRadius: '15px',
-    height: 35,
-  },
-});
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -109,7 +100,7 @@ const ShareBoard = (props) => {
       city: props.state?.city || '',
       author: author || '',
       packages: props.state?.packages || '',
-      image: defaultRunner,
+      image: props.state?.image || defaultRunner,
     });
   }, [
     props.state?.name,
@@ -139,7 +130,7 @@ const ShareBoard = (props) => {
         <DialogTitle sx={{ fontSize: 20 }}>{name || 'Share'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 2 }}>
-            <StyledInput
+            <TextField
               label="name"
               id="name"
               value={formValue?.name || ''}
@@ -149,7 +140,7 @@ const ShareBoard = (props) => {
             />
             <Stack>
               <Stack direction="row" spacing={2} justifyContent="space-between">
-                <StyledInput
+                <TextField
                   fullWidth
                   label="city"
                   id="city"
@@ -157,7 +148,7 @@ const ShareBoard = (props) => {
                   onChange={handleValueChange}
                   InputLabelProps={{ shrink: true }}
                 />
-                <StyledInput
+                <TextField
                   fullWidth
                   label="author"
                   id="author"
@@ -188,20 +179,13 @@ const ShareBoard = (props) => {
               InputLabelProps={{ shrink: true }}
             />
             <TextField
-              select
               id="image"
               fullWidth
               label="image"
-              value={defaultRunner}
-              onChange={(e) => {
-                handleValueChange({
-                  target: { id: 'image', value: e.target.value },
-                });
-              }}
+              value={formValue?.image || defaultRunner}
+              onChange={handleValueChange}
               InputLabelProps={{ shrink: true }}
-            >
-              <MenuItem value={defaultRunner}>{defaultRunner}</MenuItem>
-            </TextField>
+            />
           </Stack>
         </DialogContent>
 
