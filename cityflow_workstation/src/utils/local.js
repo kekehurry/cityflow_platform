@@ -71,25 +71,56 @@ export const getSettings = (module) => {
   });
 };
 
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export const getFlowData = async ({ rfInstance, state }) => {
   if (rfInstance) {
     const flowData = rfInstance.toObject();
     const newFlowData = {
       ...flowData,
-      nodes: flowData.nodes.map((node) => {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            input: null,
-            output: null,
-          },
-          config: {
-            ...node.config,
-            run: false,
-          },
-        };
-      }),
+      nodes: await Promise.all(
+        flowData.nodes.map(async (node) => {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              input: null,
+              output: null,
+            },
+            config: {
+              ...node.config,
+              icon:
+                node.config.icon && node.config.icon.includes('base64')
+                  ? node.config.icon
+                  : await fetch(node.config.icon)
+                      .then((res) => res.blob())
+                      .then((blob) => blobToBase64(blob)),
+              files:
+                node.config.files &&
+                (await Promise.all(
+                  node.config.files.map(async (file) => {
+                    return {
+                      ...file,
+                      data: file.data.includes('base64')
+                        ? file.data
+                        : await fetch(file.data)
+                            .then((res) => res.blob())
+                            .then((blob) => blobToBase64(blob)),
+                    };
+                  })
+                )),
+              run: false,
+            },
+          };
+        })
+      ),
       edges: [...flowData.edges],
       globalScale: 0.1,
     };
@@ -122,6 +153,7 @@ export const getFlowData = async ({ rfInstance, state }) => {
       ...newFlowData,
       screenShot,
     };
+    console.log(savedData);
     return savedData;
   }
 };

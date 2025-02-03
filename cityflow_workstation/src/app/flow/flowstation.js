@@ -1,6 +1,6 @@
 'use client';
-import ReactFlow, { Background } from 'reactflow';
-import React, { use, useEffect, useState } from 'react';
+import ReactFlow, { Background, BackgroundVariant } from 'reactflow';
+import React, { useEffect, useState } from 'react';
 import Loading from '@/components/Loading';
 import {
   onConnect,
@@ -195,7 +195,12 @@ const FlowStation = (props) => {
       <PinBoard />
       {/* <ContextMenu /> */}
       <StyledControls />
-      <Background />
+      {/* <Background /> */}
+      <Background
+        style={{
+          background: theme.palette.flow.background,
+        }}
+      />
     </ReactFlow>
   );
 
@@ -203,7 +208,6 @@ const FlowStation = (props) => {
     <div
       id="react-flow"
       style={{
-        background: `radial-gradient(circle, ${theme.palette.home.flow}, rgba(0, 0, 0, 0.5))`,
         width: '100%',
         height: '100%',
       }}

@@ -1,21 +1,14 @@
 import React, { PureComponent, useEffect, memo } from 'react';
 import { Resizable } from 're-resizable';
-import { useDraggable } from 'use-draggable';
-import {
-  Typography,
-  Stack,
-  Box,
-  Divider,
-  CardContent,
-  CircularProgress,
-  Paper,
-} from '@mui/material';
+import { Typography, Box, CircularProgress, Paper } from '@mui/material';
 import { connect } from 'react-redux';
 import { updateOutput, updateConfig } from '@/store/actions';
 import theme from '@/theme';
-import RemoveIcon from '@mui/icons-material/Remove';
 
-import IframeComponent from '@/modules/core/builder/utils/IframeComponent';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import RemoveIcon from '@mui/icons-material/Remove';
+import DragHandleIcon from '@mui/icons-material/DragHandle';
+
 import Loading from '@/components/Loading';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -41,11 +34,20 @@ class PinNode extends PureComponent {
       localOutput: null,
       expanded: true,
       loading: false,
-      pinWidth: this.props.config.pinWidth,
-      pinHeight: this.props.config.pinHeight,
-      pinTop: this.props.config.pinTop,
-      pinLeft: this.props.config.pinLeft,
+      pinWidth: props.config.pinWidth,
+      pinHeight: props.config.pinHeight,
+      pinTop: props.config.pinTop,
+      pinLeft: props.config.pinLeft,
+      currentX: props.config.pinLeft || 100 + Math.floor(Math.random() * 200),
+      currentY: props.config.pinTop || 100 + Math.floor(Math.random() * 200),
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
     };
+
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseUp = this.handleMouseUp.bind(this);
   }
 
   setOutput = (output) => {
@@ -76,6 +78,9 @@ class PinNode extends PureComponent {
 
   componentDidMount() {
     this.setLoading(true);
+    if (this.handleRef) {
+      this.handleRef.addEventListener('mousedown', this.handleMouseDown);
+    }
   }
 
   handleResize = (e, direction, ref, d) => {
@@ -85,6 +90,46 @@ class PinNode extends PureComponent {
       pinHeight: ref.offsetHeight,
     });
   };
+
+  handleMouseDown(e) {
+    if (e.target.closest('.drag-handle')) {
+      this.setState({
+        isDragging: true,
+        dragStartX: e.clientX,
+        dragStartY: e.clientY,
+      });
+      document.addEventListener('mousemove', this.handleMouseMove);
+      document.addEventListener('mouseup', this.handleMouseUp);
+      document.body.style.userSelect = 'none'; // 防止选中文本
+    }
+  }
+
+  handleMouseMove(e) {
+    if (!this.state.isDragging) return;
+    const deltaX = e.clientX - this.state.dragStartX;
+    const deltaY = e.clientY - this.state.dragStartY;
+
+    this.setState((prevState) => ({
+      currentX: prevState.currentX + deltaX,
+      currentY: prevState.currentY + deltaY,
+      dragStartX: e.clientX,
+      dragStartY: e.clientY,
+    }));
+  }
+
+  handleMouseUp() {
+    if (!this.state.isDragging) return;
+    this.props.setConfig({
+      ...this.props.config,
+      pinTop: this.state.currentY,
+      pinLeft: this.state.currentX,
+    });
+
+    this.setState({ isDragging: false });
+    document.removeEventListener('mousemove', this.handleMouseMove);
+    document.removeEventListener('mouseup', this.handleMouseUp);
+    document.body.style.userSelect = '';
+  }
 
   render() {
     const {
@@ -102,26 +147,10 @@ class PinNode extends PureComponent {
       React.isValidElement(children) &&
       React.Children.map(children, (child) => {
         return React.cloneElement(child, {
-          // id,
-          // flowId,
-          // flowAuthor,
           input,
           output,
           config,
-          // setConfig,
-          // image,
-          // position,
-          // expand: this.state.expand,
-          // updateInterface: this.props.updateInterface,
           setOutput: this.setOutput,
-          // run: config?.run,
-          // setRun: (run) => {
-          //   setConfig({ ...config, run: run });
-          // },
-          // loading: this.state.loading,
-          // setLoading: (loading) => {
-          //   this.setState({ loading: loading });
-          // },
         });
       });
     return (
@@ -129,12 +158,13 @@ class PinNode extends PureComponent {
         ref={targetRef}
         sx={{
           display: 'flex',
-          background: theme.palette.node.main,
-          border: '1px solid #424242',
+          background: theme.palette.pin.main,
+          border: theme.palette.pin.border,
           borderRadius: '5px',
           position: 'absolute',
-          top: this.state.pinTop || 100,
-          left: this.state.pinLeft || 100,
+          top: this.state.currentY,
+          left: this.state.currentX,
+          cursor: this.state.isDragging ? 'grabbing' : 'default',
         }}
       >
         <Resizable
@@ -144,78 +174,101 @@ class PinNode extends PureComponent {
             width: config?.pinWidth || config?.width,
             height: config?.pinHeight || config?.height,
           }}
-          enable={{ bottomRight: true }}
+          // enable={{ bottomRight: true, right: true, bottom: true }}
         >
-          <Stack
+          <Paper
+            variant="outlined"
             sx={{
               width: '100%',
-              height: this.state.expanded ? '100%' : headerHeight,
-              display: 'flex',
-              flexGrow: 1,
-              overflow: this.state.expanded ? 'auto' : 'hidden',
+              height: '100%',
+              overflow: 'hidden',
+              width: config?.pinWidth || config?.width,
+              height: config?.pinHeight || config?.height,
+              p: 0,
+              m: 0,
+              border: 'none',
             }}
           >
-            <CardContent
-              ref={handleRef}
-              // onClick={() => this.setState({expanded:!this.state.expanded})}
+            <Box
+              // ref={handleRef}
               sx={{
-                height: headerHeight,
+                width: '100%',
+                height: 20,
                 display: 'flex',
+                top: 0,
                 alignContent: 'center',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'none',
+                position: 'relative',
               }}
             >
               <Typography variant="caption"> {config?.title || ''} </Typography>
-              <RemoveIcon
+              <DragHandleIcon
+                className="drag-handle"
+                ref={(ref) => (this.handleRef = ref)}
+                // ref={handleRef}
                 fontSize="10px"
-                sx={{ marginLeft: 'auto', cursor: 'pointer' }}
-                onClick={() => {
-                  this.props.setConfig({ ...config, pin: false });
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  cursor: 'grab',
+                  ':active': { cursor: 'grabbing' },
                 }}
               />
-            </CardContent>
-            <Divider />
-            <Paper
-              variant="outlined"
-              sx={{
-                flexGrow: 1,
-                width: config?.pinWidth || config?.width,
-                height: config?.pinHeight || config?.height,
-                p: 0,
-                m: 0,
-              }}
-            >
-              {this.state.loading ? (
-                <Loading dotSize={10} />
-              ) : (
-                mapModule(interfaceComponent)
-              )}
-            </Paper>
-          </Stack>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  position: 'absolute',
+                  right: 10,
+                }}
+              >
+                {this.state.loading ? (
+                  <CircularProgress
+                    size={10}
+                    sx={{ color: '#FFB300', cursor: 'pointer' }}
+                    onClick={() => {
+                      this.setState({ loading: false });
+                      setConfig({ ...config, run: false });
+                    }}
+                  />
+                ) : (
+                  <PlayArrowIcon
+                    fontSize="1px"
+                    onClick={() => {
+                      this.setState({ error: false, warning: false });
+                      setConfig({ ...config, run: !config.run });
+                    }}
+                    sx={{
+                      cursor: 'pointer',
+                      color: config.run ? '#4bec13' : '#5c5d5d',
+                      transform: 'scale(0.8)',
+                    }}
+                  />
+                )}
+                <RemoveIcon
+                  fontSize="10px"
+                  sx={{ cursor: 'pointer', marginLeft: 1, color: '#5c5d5d' }}
+                  onClick={() => {
+                    this.props.setConfig({ ...config, pin: false });
+                  }}
+                />
+              </Box>
+            </Box>
+            {/* {interfaceComponent && mapModule(interfaceComponent)}
+             */}
+            {this.state.loading ? (
+              <Loading dotSize={10} />
+            ) : (
+              interfaceComponent && mapModule(interfaceComponent)
+            )}
+          </Paper>
         </Resizable>
       </Box>
     );
   }
 }
 
-const DraggablePinNode = ({ ...props }) => {
-  const { targetRef, handleRef, getTargetProps, delta } = useDraggable({
-    controlStyle: true,
-  });
-
-  useEffect(() => {
-    if ((delta.x || delta.y) && targetRef.current) {
-      const rect = targetRef.current.getBoundingClientRect();
-      props.setConfig({
-        ...props.config,
-        pinTop: rect.top * props.globalScale,
-        pinLeft: rect.left * props.globalScale,
-      });
-    }
-  }, [targetRef, delta]);
-
-  return <PinNode {...props} targetRef={targetRef} handleRef={handleRef} />;
-};
-
-export default memo(
-  connect(mapStateToProps, mapDispatchToProps)(DraggablePinNode)
-);
+export default memo(connect(mapStateToProps, mapDispatchToProps)(PinNode));

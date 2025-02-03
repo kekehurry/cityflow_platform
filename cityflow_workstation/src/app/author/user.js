@@ -98,7 +98,7 @@ const UserPage = () => {
           p: 10,
           pt: 0,
           overflow: 'auto',
-          background: `radial-gradient(circle, ${theme.palette.community.main}, rgba(0, 0, 0, 0.5))`,
+          background: theme.palette.user.background,
         }}
       >
         <Stack

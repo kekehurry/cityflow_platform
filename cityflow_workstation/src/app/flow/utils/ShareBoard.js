@@ -132,7 +132,7 @@ const ShareBoard = (props) => {
           component: 'form',
           style: {
             border: '1px solid #424242',
-            background: theme.palette.flow.shareBoard,
+            background: theme.palette.flow.main,
           },
         }}
       >

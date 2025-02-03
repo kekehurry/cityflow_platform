@@ -7,14 +7,14 @@ import { useDispatch } from 'react-redux';
 
 const CustomControl = styled(Controls)`
   button {
-    background-color: ${theme.palette.flow.panel};
+    background-color: ${theme.palette.flow.main};
     color: ${theme.palette.text.secondary};
-    border-bottom: 1px solid ${theme.palette.flow.panel};
+    border-bottom: 1px solid ${theme.palette.flow.main};
     border-radius: 5px;
     margin-bottom: 2px;
 
     &:hover {
-      background-color: ${theme.palette.secondary.dark};
+      background-color: ${theme.palette.secondary.main};
     }
 
     path {

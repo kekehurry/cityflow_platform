@@ -13,8 +13,7 @@ export default function assistantTab({
     <Box hidden={tab !== 1}>
       {config.expandHeight && (
         <CodeAssistant
-          language={formValue.language || 'javascript'}
-          code={formValue.code}
+          language={formValue.type == 'interface' ? 'javascript' : 'python'}
           editor={editor}
           formValue={formValue}
           setFormValue={setFormValue}

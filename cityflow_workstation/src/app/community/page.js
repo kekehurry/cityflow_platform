@@ -91,7 +91,7 @@ const Community = () => {
           width: '100vw',
           height: '100vh',
           p: 4,
-          background: `radial-gradient(circle, ${theme.palette.community.main}, rgba(0, 0, 0, 0.5))`,
+          background: theme.palette.community.background,
         }}
       >
         <Stack
@@ -191,7 +191,7 @@ const Community = () => {
           p: 10,
           pt: 0,
           overflow: 'auto',
-          background: `radial-gradient(circle, ${theme.palette.community.main}, rgba(0, 0, 0, 0.5))`,
+          background: theme.palette.community.background,
         }}
       >
         <Box

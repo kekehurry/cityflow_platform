@@ -17,7 +17,7 @@ const Home = () => {
     <>
       <Box
         sx={{
-          background: `radial-gradient(circle, ${theme.palette.home.main}, rgba(0, 0, 0, 0.5))`,
+          background: theme.palette.home.background,
         }}
       >
         <HomeBackground />

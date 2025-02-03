@@ -61,7 +61,7 @@ const ModuleIcon = ({ manifest }) => {
         <Typography variant="caption" sx={{ userSelect: 'none' }}>
           {manifest.config.name}
         </Typography>
-        {hover && (
+        {/* {hover && (
           <Radio
             size="small"
             sx={{
@@ -70,11 +70,13 @@ const ModuleIcon = ({ manifest }) => {
               right: 0,
               zIndex: 1,
               '& .MuiSvgIcon-root': { fontSize: 10 },
-              color: isSaved ? theme.palette.secondary.main : '#424242',
+              color: isSaved
+                ? theme.palette.secondary.main
+                : theme.palette.secondary.grey,
             }}
             checked={isSaved}
           />
-        )}
+        )} */}
       </Stack>
     </Box>
   );

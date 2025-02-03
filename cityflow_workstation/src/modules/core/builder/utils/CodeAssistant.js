@@ -4,7 +4,6 @@ import { getLocalStorage } from '@/utils/local';
 export default function CodeAssistant(props) {
   const {
     language,
-    code,
     editor,
     formValue,
     setFormValue,
@@ -108,7 +107,7 @@ export default function ModuleTitle(props){
     cm.output = main(input_data)
     \`\`\`
     `),
-    context: `Current code: ${code}`,
+    context: `Current code: ${formValue.code[editor]}`,
     greeding: `Hi, I'm code assistant! How can I help you today?`,
     model: config.llmConfig?.model || localLLMConfig?.model || 'gpt-4o-mini',
     assistantIcon:

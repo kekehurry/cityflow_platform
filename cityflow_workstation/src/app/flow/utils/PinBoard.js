@@ -50,7 +50,7 @@ const PinBoard = (props) => {
             left: 0,
             width: '100vw',
             height: '100vh',
-            background: theme.palette.flow.pinBoard.secondary,
+            background: theme.palette.flow.main,
             zIndex: 1110,
           }}
         ></Box>
@@ -65,7 +65,7 @@ const PinBoard = (props) => {
           width: '100%',
           height: '100%',
           borderRadius: '20px',
-          background: theme.palette.flow.pinBoard.main,
+          background: theme.palette.flow.main,
           position: 'fixed',
           bottom: globalScale === 1 ? '50%' : '2%',
           right: globalScale === 1 ? '50%' : '1%',
@@ -139,9 +139,7 @@ const PinBoard = (props) => {
           pinNodes.map((nodeData, index) => {
             try {
               return (
-                <div key={index}>
-                  <NodeType {...nodeData} globalScale={globalScale} />
-                </div>
+                <NodeType key={index} {...nodeData} globalScale={globalScale} />
               );
             } catch (e) {
               console.log(e);

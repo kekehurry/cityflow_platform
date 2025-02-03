@@ -325,7 +325,7 @@ class ExpandNode extends PureComponent {
               padding: `${margin}px`,
               border: this.state.hover
                 ? `1px solid ${theme.palette.edge.dark}`
-                : `0.5px solid #424242`,
+                : theme.palette.node.border,
               borderRadius: '10px',
               zIndex: 1,
               background: theme.palette.node.main,

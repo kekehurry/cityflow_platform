@@ -2,9 +2,7 @@ import {
   Box,
   TextField,
   Stack,
-  Typography,
   IconButton,
-  MenuItem,
   Tooltip,
   Accordion,
   AccordionSummary,
@@ -12,19 +10,17 @@ import {
   Divider,
   Input,
   InputLabel,
-  FormControl,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import React, { useState, useEffect, useRef, use } from 'react';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { setupExecutor, check, killExecutor } from '@/utils/executor';
+import { setupExecutor, check } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
-import { useLocalStorage, getLocalStorage } from '@/utils/local';
+import { useLocalStorage } from '@/utils/local';
 import { initUserId } from '@/utils/local';
-import { set } from 'lodash';
-import { image } from 'd3';
+import theme from '@/theme';
 
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
@@ -318,9 +314,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: '#616161',
+                      color: theme.palette.text.secondary,
                       border: 'none',
-                      borderBottom: '1px solid #616161',
+                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
                     },
                   }}
                 />
@@ -346,9 +342,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: '#616161',
+                      color: theme.palette.text.secondary,
                       border: 'none',
-                      borderBottom: '1px solid #616161',
+                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
                     },
                   }}
                 />
@@ -370,9 +366,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: '#616161',
+                      color: theme.palette.text.secondary,
                       border: 'none',
-                      borderBottom: '1px solid #616161',
+                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
                     },
                   }}
                 />
@@ -394,9 +390,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: '#616161',
+                      color: theme.palette.text.secondary,
                       border: 'none',
-                      borderBottom: '1px solid #616161',
+                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
                     },
                   }}
                 />

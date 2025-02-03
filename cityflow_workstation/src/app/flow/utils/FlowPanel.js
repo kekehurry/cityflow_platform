@@ -61,7 +61,7 @@ export const FlowPanel = (props) => {
         </Box>
         <Box
           sx={{
-            backgroundColor: theme.palette.flow.panel,
+            backgroundColor: theme.palette.flow.main,
             position: 'absolute',
             width: '100%',
             height: 100,

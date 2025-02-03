@@ -74,7 +74,7 @@ const ResizableDrawer = ({
             border: '1px solid #212121',
             borderLeft: '0',
             borderTop: '0',
-            background: theme.palette.flow.panel,
+            background: theme.palette.flow.main,
           }}
           enable={{
             top: direction === 'vertical',

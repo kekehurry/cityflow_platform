@@ -149,7 +149,7 @@ const FlowHeader = (props) => {
         <Toolbar
           variant="dense"
           sx={{
-            background: theme.palette.flow.header,
+            background: theme.palette.flow.main,
             minHeight: '6vh',
             p: 0,
             m: 0,

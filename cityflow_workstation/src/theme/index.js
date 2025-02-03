@@ -1,47 +1,57 @@
-import { head } from "lodash";
-import typography from "./typography";
-import { createTheme } from "@mui/material/styles";
+import { head } from 'lodash';
+import typography from './typography';
+import { createTheme } from '@mui/material/styles';
+
+const black = 'rgba(10, 10, 10, 1)';
 
 const theme = createTheme({
   typography,
   palette: {
-    mode: "dark",
-    // secondary: {
-    //   main: "#AEEA00",
-    //   dark: "#C6FF00",
-    // },
-    flow:{
-      main: "rgba(64, 64, 64, 0.1)",
-      header: "#0a0a0a",
-      panel: "#0a0a0a",
-      pinBoard: {
-        main: "#0a0a0a",
-        secondary: "#0a0a0a",
-      },
-      shareBoard: "#0a0a0a",
+    mode: 'dark',
+    primary: {
+      main: 'rgba(144, 202, 249,1)',
+      dark: 'rgb(48, 140, 216)',
     },
-    community:{
-      main: "rgba(128, 128, 128, 0.1)",
+    secondary: {
+      main: 'rgba(206, 147, 216,1)',
+      dark: 'rgba(171, 71, 188, 1)',
+      grey: 'rgba(66, 66, 66,1)',
     },
-    home:{
-      main: "rgba(64, 64, 64, 0.05)",
+    flow: {
+      main: black,
+      background: 'rgba(75, 75, 75, 0.2)',
     },
-    node:{
-      main: "#0a0a0a",
-      header: "#0a0a0a",
-      container: "#0a0a0a",
+    community: {
+      main: black,
+      background:
+        'radial-gradient(circle, rgb(46, 46, 46,0.5),rgba(10, 10, 10, 1))',
     },
-    edge:{
-      main: "#CE93D8",
-      dark: "rgba(171, 71, 188, 1)",
+    user: {
+      main: black,
+      background:
+        'radial-gradient(circle, rgb(46, 46, 46,0.5),rgba(10, 10, 10, 1))',
     },
-    pin:{
-      main: "#212121",
-      header: "#0a0a0a",
-      container: "#0a0a0a",
+    home: {
+      background: black,
     },
-    annotation:{
-      main: "#757575",
+    node: {
+      main: black,
+      header: black,
+      container: black,
+      border: '0.5px solid #424242',
+    },
+    edge: {
+      main: 'rgba(206, 147, 216,1)',
+      dark: 'rgba(171, 71, 188, 1)',
+    },
+    pin: {
+      main: black,
+      header: black,
+      container: black,
+      border: '0.5px solid #424242',
+    },
+    annotation: {
+      main: 'rgba(117, 117, 117,1)',
     },
   },
 });
