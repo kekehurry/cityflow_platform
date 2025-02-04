@@ -56,7 +56,7 @@ export default function ShareCard({
             width: width,
             border:
               hover || selected
-                ? `2px solid ${theme.palette.secondary.main}`
+                ? `2px solid ${theme.palette.primary.main}`
                 : '1px solid #212121',
             cursor: 'pointer',
           }}

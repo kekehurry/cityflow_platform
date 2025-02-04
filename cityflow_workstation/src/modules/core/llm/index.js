@@ -4,7 +4,6 @@ import LLMInterface from './interface';
 import LLMSetting from '@/components/Chatbot/utils/LLMSetting';
 import { useReactFlow } from 'reactflow';
 import { getLocalStorage } from '@/utils/local';
-import base from '@/elements/nodes/base';
 
 export default function LLM(props) {
   const {
@@ -20,7 +19,7 @@ export default function LLM(props) {
     updateInterface,
   } = props;
 
-  const { setCenter, fitBounds } = useReactFlow();
+  const { setCenter } = useReactFlow();
   const localLLMConfig = getLocalStorage('LLM_CONFIG');
   const [formValue, setFormValue] = useState({
     baseUrl:

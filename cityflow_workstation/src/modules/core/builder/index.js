@@ -17,7 +17,6 @@ export default function ModuleBuilder(props) {
     flowId,
     flowAuthor,
     input,
-    output,
     config,
     setConfig,
     image,
@@ -39,7 +38,7 @@ export default function ModuleBuilder(props) {
     name: config.name || 'Untitled Module',
     input: config.input || ['input'],
     output: config.output || ['output'],
-    width: config.width || 200,
+    width: config.width || 150,
     height: config.height || 100,
     expandWidth: config.expandWidth || 800,
     expandHeight: config.expandHeight || 600,
@@ -58,15 +57,6 @@ export default function ModuleBuilder(props) {
   //helper functions
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
-  };
-
-  const isValidJson = (str) => {
-    try {
-      JSON.parse(str);
-      return true;
-    } catch (e) {
-      return false;
-    }
   };
 
   // init
@@ -113,6 +103,8 @@ export default function ModuleBuilder(props) {
       ...initForm,
       language: language,
       type: formValue.type,
+      width: formValue.type === 'interface' ? config.width : 150,
+      height: formValue.type === 'interface' ? config.height || 100 : 0,
       code:
         config?.code &&
         config.code != initCode['interface'] &&
@@ -152,15 +144,6 @@ export default function ModuleBuilder(props) {
         } else if (chunk.output) {
           setOutput({ ...chunk.output, logs: chunk?.console });
         }
-        // logs += result?.console;
-        // setLog(logs);
-        // setOutput({ ...output, logs: result?.console });
-        // if (result?.output) {
-        //   setOutput({ ...JSON.parse(result.output), logs: result?.console });
-        // }
-        // if (result?.html) {
-        //   setConfig({ ...newConfig, html: result.html });
-        // }
       };
 
       try {
@@ -180,6 +163,7 @@ export default function ModuleBuilder(props) {
           setLoading(false);
           setCodeSubmited(false);
         } else {
+          setConfig({ ...config, html: null });
           const result = await compileCode({
             sessionId: id,
             flowId: flowId,
@@ -190,7 +174,20 @@ export default function ModuleBuilder(props) {
             config: newConfig,
             image: image,
           });
-          handleResult(result);
+          if (result?.html) {
+            setConfig({ ...config, html: result.html });
+          } else if (result?.console) {
+            // result?.console.includes('success') &&
+            setConfig({
+              ...config,
+              html: `<pre  style="font-size: 6px; white-space: pre-wrap;">${result.console}</pre>`,
+            });
+          } else {
+            setConfig({
+              ...config,
+              html: `<pre  style="font-size: 6px; white-space: pre-wrap;">compile failed!</pre>`,
+            });
+          }
           setLoading(false);
           setCodeSubmited(false);
         }

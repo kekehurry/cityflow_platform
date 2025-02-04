@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
+  Box,
   Toolbar,
   AppBar,
   Menu,
@@ -11,7 +12,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+// import SaveIcon from '@mui/icons-material/Save';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useReactFlow } from 'reactflow';
@@ -20,8 +21,7 @@ import ShareBoard from './ShareBoard';
 import Link from 'next/link';
 import theme from '@/theme';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-
-import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import AppsIcon from '@mui/icons-material/Apps';
@@ -29,8 +29,8 @@ import HomeIcon from '@mui/icons-material/Home';
 import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 import { setupExecutor, check } from '@/utils/executor';
-import { saveUserFlow } from '@/utils/local';
-import { saveWorkflow } from '@/utils/dataset';
+// import { saveUserFlow } from '@/utils/local';
+// import { saveWorkflow } from '@/utils/dataset';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
@@ -234,42 +234,45 @@ const FlowHeader = (props) => {
             </Link>
           </Typography>
           <IconButton
-            color={props.state.isAlive ? 'secondary' : 'primary'}
-            sx={{
-              '&:hover': {
-                color: props.state.isAlive
-                  ? theme.palette.secondary.dark
-                  : theme.palette.primary.dark,
-              },
-            }}
+            color="primary"
             onClick={() => {
               globalRun && props.state.isAlive ? stopAll() : initAndRunALL();
               setGlobalRun(!globalRun);
             }}
           >
             {props.state.loading ? (
-              <CircularProgress
-                color={props.state.isAlive ? 'secondary' : 'primary'}
-                size={30}
-              />
+              <CircularProgress color="primary" size={30} />
             ) : globalRun && props.state.isAlive ? (
               <StopCircleOutlinedIcon sx={{ fontSize: 35 }} />
             ) : (
-              <PlayCircleIcon sx={{ fontSize: 35 }} />
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderRadius: '50%',
+                  width: 30,
+                  height: 30,
+                  backgroundColor: theme.palette.primary.main,
+                  ':hover': {
+                    backgroundColor: theme.palette.primary.dark,
+                  },
+                }}
+              >
+                <PlayArrowIcon sx={{ fontSize: 20, color: 'white' }} />
+              </Box>
             )}
           </IconButton>
           <Button
             variant="contained"
-            color={props.state.isAlive ? 'secondary' : 'primary'}
+            color="primary"
             onClick={() => {
               setDialogOpen(true);
               setDialogName('Share');
             }}
             sx={{ width: 80, height: 30, borderRadius: 10 }}
           >
-            <Typography
-              sx={{ color: theme.palette.flow.main, fontWeight: 'bold' }}
-            >
+            <Typography sx={{ fontWeight: 'bold', fontSize: 12 }}>
               Share
             </Typography>
           </Button>

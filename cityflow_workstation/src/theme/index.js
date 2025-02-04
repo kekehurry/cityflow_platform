@@ -10,13 +10,14 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: 'rgb(149, 109, 248)',
-      dark: 'rgba(116, 63, 245,1)',
+      // linear gradient
+      main: 'rgb(116, 63, 245)',
+      dark: 'rgb(100, 44, 240)',
       hex: '#733ff5',
     },
     secondary: {
-      main: 'rgba(116, 63, 245,1)',
-      dark: 'rgb(100, 44, 240)',
+      main: 'rgb(184, 134, 198)',
+      dark: 'rgb(174, 94, 196)',
       grey: 'rgba(66, 66, 66,1)',
     },
     flow: {

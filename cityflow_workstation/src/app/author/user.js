@@ -175,7 +175,7 @@ const UserPage = () => {
               <Link href="/flow" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setFlowLoading(true);
                   }}
@@ -191,7 +191,7 @@ const UserPage = () => {
               <Link href="/community" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setHomeLoading(true);
                   }}
@@ -207,7 +207,7 @@ const UserPage = () => {
               {authorId && authorId === userId && (
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setEdit(!edit);
                     if (edit) {

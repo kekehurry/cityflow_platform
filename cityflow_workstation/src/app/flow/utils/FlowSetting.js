@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   TextField,
   Stack,
   IconButton,
@@ -16,12 +17,14 @@ import { LoadingButton } from '@mui/lab';
 import React, { useState, useEffect, useRef, use } from 'react';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
-import { setupExecutor, check } from '@/utils/executor';
+import { setupExecutor, check, killExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
 import { useLocalStorage } from '@/utils/local';
 import { initUserId } from '@/utils/local';
 import theme from '@/theme';
+
+import LogBoard from './LogBoard';
 
 const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
@@ -68,22 +71,30 @@ const FlowSettings = (props) => {
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
   const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG');
+  const [logOpen, setLogOpen] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState(props.state?.logs);
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
     setMeta({ ...formValue, loading: true });
     setAuthor(formValue.author);
     let logs = '';
-    for await (const chunk of await setupExecutor(
-      formValue.flowId,
-      formValue.packages,
-      formValue.image
-    )) {
-      logs += chunk;
-      setMeta({ logs });
+    if (props.state?.isAlive) {
+      await killExecutor(formValue.flowId);
+    } else {
+      setLogOpen(true);
+      for await (const chunk of await setupExecutor(
+        formValue.flowId,
+        formValue.packages,
+        formValue.image
+      )) {
+        logs += chunk;
+        setMeta({ logs });
+      }
     }
     check(formValue.flowId).then((data) => {
       setMeta({ loading: false });
+      setLogOpen(false);
     });
   };
 
@@ -278,15 +289,29 @@ const FlowSettings = (props) => {
         <LoadingButton
           loading={props.state.loading || loading}
           variant="contained"
-          color={props.state.isAlive ? 'secondary' : 'primary'}
+          color="primary"
           onClick={hangleSubmit}
         >
-          <Typography
-            sx={{ color: theme.palette.flow.main, fontWeight: 'bold' }}
-          >
-            Init Environment
+          <Typography sx={{ fontWeight: 'bold', fontSize: 12 }}>
+            {props.state.isAlive ? 'Stop Runner' : 'Init Environment'}
           </Typography>
         </LoadingButton>
+        <Button
+          fullWidth
+          variant="contained"
+          sx={{
+            background: theme.palette.secondary.grey,
+          }}
+          onClick={() => {
+            setLogOpen(true);
+          }}
+        >
+          <Typography
+            sx={{ fontWeight: 'bold', color: 'text.secondary', fontSize: 12 }}
+          >
+            Open Terminal
+          </Typography>
+        </Button>
         <Accordion
           sx={{ border: '0px', background: 'none' }}
           variant="outlined"
@@ -295,7 +320,7 @@ const FlowSettings = (props) => {
           <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
             Advance Settings
           </AccordionSummary>
-          <AccordionDetails sx={{ m: 0, p: 0, height: '600px' }}>
+          <AccordionDetails sx={{ m: 0, p: 0, height: '550px' }}>
             <Stack spacing={2}>
               <Divider />
               <Stack direction={'row'}>
@@ -319,9 +344,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: theme.palette.text.secondary,
+                      color: 'text.secondary',
                       border: 'none',
-                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
+                      borderBottom: `1px solid text.secondary`,
                     },
                   }}
                 />
@@ -347,9 +372,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: theme.palette.text.secondary,
+                      color: 'text.secondary',
                       border: 'none',
-                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
+                      borderBottom: `1px solid text.secondary`,
                     },
                   }}
                 />
@@ -371,9 +396,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: theme.palette.text.secondary,
+                      color: 'text.secondary',
                       border: 'none',
-                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
+                      borderBottom: `1px solid text.secondary`,
                     },
                   }}
                 />
@@ -395,9 +420,9 @@ const FlowSettings = (props) => {
                   inputProps={{
                     style: {
                       background: 'none',
-                      color: theme.palette.text.secondary,
+                      color: 'text.secondary',
                       border: 'none',
-                      borderBottom: `1px solid ${theme.palette.text.secondary}`,
+                      borderBottom: `1px solid text.secondary`,
                     },
                   }}
                 />
@@ -406,28 +431,23 @@ const FlowSettings = (props) => {
               <TextField
                 id="packages"
                 fullWidth
-                label="Packages"
                 onChange={handleFormChange}
                 value={formValue?.packages}
                 multiline
-                rows={5}
-                sx={{ mt: 2 }}
-                placeholder={`#conda,pip or npm packages in json format:\n{ "conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"] }`}
-                InputLabelProps={{ shrink: true }}
+                rows={6}
+                placeholder={`# conda,pip or npm packages to install:\n {\n "conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"] \n}`}
               />
-              <TextField
-                id="logs"
-                fullWidth
-                label="logs"
-                multiline
-                value={props.state.logs || ''}
-                InputLabelProps={{ shrink: true }}
-                rows={5}
-              />
-              <Divider />
             </Stack>
           </AccordionDetails>
         </Accordion>
+        <LogBoard
+          flowId={formValue.flowId}
+          logOpen={logOpen}
+          setLogOpen={setLogOpen}
+          isAlive={props.state?.isAlive}
+          terminalLogs={props.state?.logs}
+          setTerminalLogs={setTerminalLogs}
+        />
       </Stack>
     </Box>
   );

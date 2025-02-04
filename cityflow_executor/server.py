@@ -24,17 +24,32 @@ def setup():
     container_name = f"csflow-{user_id}-{id}"
     # print(f"Setup Container: {container_name} Image: {image}, Packages: {packages}")
     logging.info(f"Setup Container: {container_name} Image: {image}, Packages: {packages}")
+    if manager.check_image_exist(image) is False:
+        return jsonify({'error': 'Image not found.'}), 400
+    else:
+        executor = manager.get_executor(container_name)
+        if executor is None:
+            executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
+            manager.register_excutor(executor)
+        else:
+            # print(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
+            logging.info(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
+            manager.unregister_excutor(container_name)
+            executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
+            manager.register_excutor(executor)
+        return Response(executor.run('./install.sh'), mimetype='text/plain')
+    
+@app.route('/run_command', methods=['POST'])
+def run_command():
+    id = request.json.get('flowId')
+    user_id = request.json.get('userId')
+    command = request.json.get('command')
+    container_name = f"csflow-{user_id}-{id}"
     executor = manager.get_executor(container_name)
     if executor is None:
-        executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
-        manager.register_excutor(executor)
+        return jsonify({'error': 'Ruuner not found.'}), 400
     else:
-        # print(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
-        logging.info(f"Restarting container {container_name} with new image {image}, Packages: {packages}")
-        manager.unregister_excutor(container_name)
-        executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
-        manager.register_excutor(executor)
-    return Response(executor.run('./install.sh'), mimetype='text/plain')
+        return Response(executor.run(command), mimetype='text/plain')
 
 @app.route('/check', methods=['POST'])
 def is_alive():

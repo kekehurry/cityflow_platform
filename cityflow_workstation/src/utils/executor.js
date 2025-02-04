@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { initUserId } from './local';
-import useSWR from 'swr';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const executorServer = '/api/executor';
@@ -21,6 +20,7 @@ export async function* setupExecutor(flowId, packages, image) {
     }),
   }).catch((err) => {
     console.error(err);
+    return err;
   });
   if (res && res.ok) {
     const reader = res.body.getReader();
@@ -31,6 +31,41 @@ export async function* setupExecutor(flowId, packages, image) {
       const chunk = decoder.decode(value, { stream: true });
       yield chunk;
     }
+  } else if (res.status === 400) {
+    alert(
+      `No selected image found in the system.\n Please pull the image first: ${image}`
+    );
+  }
+}
+
+export async function* runCommand(flowId, command) {
+  const api = `${executorServer}/run_command`;
+  const userId = await initUserId();
+  const res = await fetch(basePath + api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      flowId,
+      userId,
+      command,
+    }),
+  }).catch((err) => {
+    console.error(err);
+    return err;
+  });
+  if (res && res.ok) {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      yield chunk;
+    }
+  } else {
+    alert(`Runner not propoerly initialized. Please restart the runner.`);
   }
 }
 
@@ -72,6 +107,7 @@ export async function compileCode({
     }),
   }).catch((err) => {
     console.error(err);
+    return err;
   });
   if (res && res.ok) {
     return await res.json();
@@ -116,6 +152,7 @@ export async function* executeCode({
     }),
   }).catch((err) => {
     console.error(err);
+    return err;
   });
   if (res && res.ok) {
     const reader = res.body.getReader();

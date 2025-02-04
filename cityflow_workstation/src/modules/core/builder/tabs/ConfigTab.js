@@ -2,6 +2,7 @@ import { Box, TextField, Typography } from '@mui/material';
 import ConfigPanel from '../utils/ConfigPanel';
 import IframeComponent from '../utils/IframeComponent';
 import theme from '@/theme';
+import Ansi from 'ansi-to-react';
 
 export default function ConfigTab({
   tab,
@@ -73,7 +74,26 @@ export default function ConfigTab({
       ) : (
         <>
           <Typography variant="caption">Logs</Typography>
-          <TextField
+          <div
+            style={{
+              maxWidth: '100%',
+              width: '100%',
+              height: '200px',
+              margin: '0 auto',
+              whiteSpace: 'pre-wrap',
+              fontFamily: 'monospace',
+              backgroundColor: theme.palette.node.main,
+              borderRadius: '5px',
+              border: `1px solid ${theme.palette.secondary.grey}`,
+              color: theme.palette.text.secondary,
+              padding: '16px',
+              marginTop: '8px',
+              overflow: 'auto',
+            }}
+          >
+            <Ansi>{log}</Ansi>
+          </div>
+          {/* <TextField
             id="log"
             multiline
             className="nowheel"
@@ -82,7 +102,7 @@ export default function ConfigTab({
             value={log || ''}
             rows={9}
             sx={{ background: theme.palette.node.main }}
-          />
+          /> */}
         </>
       )}
     </Box>

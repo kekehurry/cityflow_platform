@@ -74,8 +74,8 @@ export const FlowPanel = (props) => {
             value={tab}
             onChange={handleTabChange}
             centered
-            textColor={props.state.isAlive ? 'primary' : 'secondary'}
-            indicatorColor={props.state.isAlive ? 'primary' : 'secondary'}
+            textColor="primary"
+            indicatorColor="primary"
             sx={{
               width: '100%',
               height: 5,

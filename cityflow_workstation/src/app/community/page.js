@@ -74,7 +74,7 @@ const Community = () => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                ':hover': { border: `2px solid ${theme.palette.primary.main}` },
+                ':hover': { border: `2px solid primary` },
               }}
             >
               <SearchIcon sx={{ fontSize: 30, color: '#9E9E9E' }} />
@@ -122,7 +122,7 @@ const Community = () => {
               <Link href="/flow" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setFlowLoading(true);
                   }}
@@ -138,7 +138,7 @@ const Community = () => {
               <Link href="/author" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setHomeLoading(true);
                   }}

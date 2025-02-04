@@ -59,7 +59,7 @@ class CodeExecutor:
         "javascript": True,
     }
     def __init__(self, 
-                image: str = "ghcr.io/kekehurry/cityflow_runner:latest", 
+                image: str = "", 
                 container_name = None,
                 timeout: int = 60,
                 auto_remove: bool = True,
@@ -69,7 +69,7 @@ class CodeExecutor:
                 packages: dict= '',
                 ):
         self._client = docker.from_env()
-        self.image = os.getenv("NEXT_PUBLIC_DEFAULT_RUNNER", image)
+        self.image = os.getenv("NEXT_PUBLIC_DEFAULT_RUNNER", "ghcr.io/kekehurry/cityflow_runner:latest")
         if image:
             self._image = image
         if container_name is None:
@@ -99,14 +99,6 @@ class CodeExecutor:
                 f.write(self._packages)
             else:
                 f.write("")   
-
-        # Check if the image exists
-        execute_image = self._client.images.list(name=self._image)
-        if not execute_image:
-            try:
-                self._client.images.pull(image)
-            except Exception as e:
-                self._image = "ghcr.io/kekehurry/cityflow_runner:light"
         self.init()
 
     def init(self) -> None:
@@ -155,12 +147,12 @@ class CodeExecutor:
     def run(self,command) -> str: # type: ignore
         try:
             container = self._client.containers.get(self._container_name)
-            results = container.exec_run(f"/bin/bash -c '{command}'",stream=True,tty=True)   
+            results = container.exec_run(f"/bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && {command}'", stream=True) 
             for line in results.output:
                 logs = line.decode("utf-8")
-                yield logs
+                yield logs + '\n'
         except Exception as e:
-            yield str(e)
+            yield str(e) + '\n'
 
     def prepare(self, code_block) -> None:  
 
@@ -222,6 +214,11 @@ class CodeExecutor:
     def execute(self, code_block):
         """Execute the code blocks."""
         command, lang, foldername = self.prepare(code_block)
+        output_file = os.path.join(self._work_dir, foldername, "output.json")
+        # remove old output files
+        if os.path.exists(output_file):
+            os.remove(output_file)
+
         result = self._container.exec_run(command,stream=True,tty=True)
         try:
             for line in result.output:
@@ -233,8 +230,8 @@ class CodeExecutor:
                 }) + '\n'
 
             final_output = ""
-            if os.path.exists(os.path.join(self._work_dir, foldername, "output.json")):
-                with open(os.path.join(self._work_dir, foldername, "output.json"), "r") as f:
+            if os.path.exists(output_file):
+                with open(output_file, "r") as f:
                     final_output = json.load(f)
                 yield  json.dumps({
                     'container_name': self._container_name,
@@ -252,18 +249,28 @@ class CodeExecutor:
 
         command, lang, foldername = self.prepare(code_block)
 
+        html_file = os.path.join(self._work_dir, foldername, "index.html")
+        output_file = os.path.join(self._work_dir, foldername, "output.json")
+
+        # remove old output files
+        if os.path.exists(html_file):
+            os.remove(html_file)
+        
+        if os.path.exists(output_file):
+            os.remove(output_file)
+
         result = self._container.exec_run(command)
 
         logs =result.output.decode("utf-8")
 
         final_output = ""
-        if os.path.exists(os.path.join(self._work_dir, foldername, "output.json")):
-            with open(os.path.join(self._work_dir, foldername, "output.json"), "r") as f:
+        if os.path.exists(output_file):
+            with open(output_file, "r") as f:
                 final_output = json.load(f)
 
         rendered_html = ""
-        if lang == 'javascript' and os.path.exists(os.path.join(self._work_dir, foldername, "index.html")):
-            with open(os.path.join(self._work_dir, foldername, "index.html"), "r") as f:
+        if lang == 'javascript' and os.path.exists(html_file):
+            with open(html_file, "r") as f:
                 rendered_html = f.read()
 
         self._last_update_time = time.time()

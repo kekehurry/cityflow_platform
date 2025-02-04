@@ -21,6 +21,13 @@ class ExecutorManage:
         self._auto_remove_thread.daemon = True
         self._auto_remove_thread.start()
         pass
+
+    def check_image_exist(self, image_name:str):
+        try:
+            self._client.images.get(image_name)
+            return True
+        except docker.errors.ImageNotFound:
+            return False
     
     def register_excutor(self, excutor:CodeExecutor):
         container_name = excutor._container_name

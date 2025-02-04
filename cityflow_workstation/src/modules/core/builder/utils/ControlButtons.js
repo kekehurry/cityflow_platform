@@ -72,7 +72,7 @@ export default function ControlButtons({
         ariaLabel="actions"
         size="small"
         icon={<SpeedDialIcon sx={{ minHeight: 0, minWidth: 0 }} />}
-        FabProps={{ size: 'small', color: 'secondary' }}
+        FabProps={{ size: 'small', color: 'primary' }}
         open={open}
         onClick={() => setOpen(!open)}
       >
