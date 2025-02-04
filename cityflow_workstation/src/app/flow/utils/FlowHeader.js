@@ -29,11 +29,10 @@ import HomeIcon from '@mui/icons-material/Home';
 import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 import { setupExecutor, check } from '@/utils/executor';
-// import { saveUserFlow } from '@/utils/local';
+import { getLocalStorage } from '@/utils/local';
 // import { saveWorkflow } from '@/utils/dataset';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -58,6 +57,7 @@ const FlowHeader = (props) => {
   const open = Boolean(anchorEl);
 
   const [globalRun, setGlobalRun] = useState(false);
+  const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
 
   const { runAll, stopAll, setMeta } = props;
 

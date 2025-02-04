@@ -103,8 +103,6 @@ export default function ModuleBuilder(props) {
       ...initForm,
       language: language,
       type: formValue.type,
-      width: formValue.type === 'interface' ? config.width : 150,
-      height: formValue.type === 'interface' ? config.height || 100 : 0,
       code:
         config?.code &&
         config.code != initCode['interface'] &&
@@ -163,7 +161,8 @@ export default function ModuleBuilder(props) {
           setLoading(false);
           setCodeSubmited(false);
         } else {
-          setConfig({ ...config, html: null });
+          let logs = '';
+          setConfig({ ...newConfig, html: null });
           const result = await compileCode({
             sessionId: id,
             flowId: flowId,
@@ -175,16 +174,16 @@ export default function ModuleBuilder(props) {
             image: image,
           });
           if (result?.html) {
-            setConfig({ ...config, html: result.html });
+            setConfig({ ...newConfig, html: result.html });
           } else if (result?.console) {
             // result?.console.includes('success') &&
             setConfig({
-              ...config,
+              ...newConfig,
               html: `<pre  style="font-size: 6px; white-space: pre-wrap;">${result.console}</pre>`,
             });
           } else {
             setConfig({
-              ...config,
+              ...newConfig,
               html: `<pre  style="font-size: 6px; white-space: pre-wrap;">compile failed!</pre>`,
             });
           }
@@ -210,6 +209,7 @@ export default function ModuleBuilder(props) {
       <Stack direction="row" spacing={0.1}>
         <Box className="nowheel" sx={{ width: '60%', height: '600px' }}>
           <CodeEditor
+            sessionId={id}
             userId={userId}
             config={config}
             editor={editor}

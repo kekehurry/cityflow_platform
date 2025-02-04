@@ -99,6 +99,7 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   useEffect(() => {
     // Prepare styles for the iframe content
     const head = `
+    <head>
     <style>
         ::-webkit-scrollbar {
             display: none;
@@ -127,6 +128,7 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
           \`;
         });
     </script>
+    </head>
     `;
     if (config?.html) {
       setHtml(head + config?.html);

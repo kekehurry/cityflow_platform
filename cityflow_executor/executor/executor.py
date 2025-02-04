@@ -59,7 +59,7 @@ class CodeExecutor:
         "javascript": True,
     }
     def __init__(self, 
-                image: str = "", 
+                image: str = "ghcr.io/kekehurry/cityflow_runner:latest", 
                 container_name = None,
                 timeout: int = 60,
                 auto_remove: bool = True,
@@ -69,7 +69,6 @@ class CodeExecutor:
                 packages: dict= '',
                 ):
         self._client = docker.from_env()
-        self.image = os.getenv("NEXT_PUBLIC_DEFAULT_RUNNER", "ghcr.io/kekehurry/cityflow_runner:latest")
         if image:
             self._image = image
         if container_name is None:
@@ -147,7 +146,7 @@ class CodeExecutor:
     def run(self,command) -> str: # type: ignore
         try:
             container = self._client.containers.get(self._container_name)
-            results = container.exec_run(f"/bin/bash -c 'export DEBIAN_FRONTEND=noninteractive && {command}'", stream=True) 
+            results = container.exec_run(f"/bin/bash -c '{command}'", stream=True) 
             for line in results.output:
                 logs = line.decode("utf-8")
                 yield logs + '\n'
@@ -206,8 +205,8 @@ class CodeExecutor:
         
         runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
         runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
-        # command = ["sh", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
-        command = ["sh", "-c", f"cd {runner_work_dir} && {_cmd(lang)} ."]
+        # command = ["/bin/bash", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
+        command = ["/bin/bash", "-c", f"cd {runner_work_dir} && {_cmd(lang)} ."]
         return command, lang, foldername
     
 

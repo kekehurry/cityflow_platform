@@ -56,7 +56,7 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
           const { children, className, inline, node, ...rest } = props;
           const match = /language-(\w+)/.exec(className || '');
           return match ? (
-            <>
+            <div style={{ width: '100%', overflow: 'hidden' }}>
               <MarkdownHeader code={children} sendCode={sendCode} />
               <SyntaxHighlighter
                 {...rest}
@@ -64,12 +64,14 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
                 children={String(children).replace(/\n$/, '')}
                 language={match[1]}
                 style={darcula}
+                wrapLongLines={true}
+                wrapLines={true}
                 customStyle={{
-                  maxWidth: '300px', // Optional: set a maximum width
-                  margin: '0 auto', // Center the block
+                  maxWidth: '400px',
+                  margin: '0 auto',
                 }}
               />
-            </>
+            </div>
           ) : (
             <code
               {...rest}
@@ -77,9 +79,11 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
               style={{
                 color: '#FFC400',
                 backgroundColor: '#424242',
-                padding: '1px',
                 font: "300 .9em 'Open Sans', sans-serif",
                 borderRadius: '3px',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontFamily: 'monospace',
               }}
             >
               {children}
@@ -94,7 +98,7 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
 const MessageRowRight = styled(Box)({
   display: 'flex',
   justifyContent: 'flex-end',
-  paddingLeft: '40px',
+  paddingLeft: '10px',
 });
 const MessageNoFrame = styled(Box)({
   position: 'relative',

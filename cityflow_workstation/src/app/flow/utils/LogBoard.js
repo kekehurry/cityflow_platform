@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Stack,
@@ -8,22 +8,20 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Fade,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import theme from '@/theme';
 import { runCommand } from '@/utils/executor';
 import Ansi from 'ansi-to-react';
 
-const LogBoard = ({
-  flowId,
-  logOpen,
-  setLogOpen,
-  isAlive,
-  terminalLogs,
-  setTerminalLogs,
-}) => {
+const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
+
+const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   const [loading, setLoading] = useState(false);
   const [command, setCommand] = useState('');
+  const [terminalLogs, setTerminalLogs] = useState(logs || '');
+  const logEndRef = useRef(null);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -36,13 +34,24 @@ const LogBoard = ({
 
   const handleClose = () => {
     setLogOpen(false);
+    setCommand('');
   };
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [terminalLogs]);
+
+  useEffect(() => {
+    setTerminalLogs(logs);
+  }, [logs]);
 
   return (
     <>
       <Dialog
         open={logOpen}
         onClose={handleClose}
+        TransitionComponent={Fade}
+        transitionDuration={{ enter: 500, exit: 500 }}
         variant="outlined"
         maxWidth="xs"
         PaperProps={{
@@ -63,6 +72,7 @@ const LogBoard = ({
                 height: '100%',
                 margin: '0 auto',
                 whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
                 fontFamily: 'monospace',
                 backgroundColor: theme.palette.flow.main,
                 borderRadius: '5px',
@@ -73,14 +83,16 @@ const LogBoard = ({
               }}
             >
               <Ansi>{terminalLogs}</Ansi>
+              <div ref={logEndRef} />
             </div>
             <TextField
               value={command}
               onChange={(e) => setCommand(e.target.value)}
-              placeholder="Enter command"
+              placeholder={`Enter command ${enableCommand ? '' : '(Disabled)'}`}
               variant="outlined"
               size="small"
               fullWidth
+              disabled={!enableCommand}
               sx={{
                 background: theme.palette.flow.main,
                 fontFamily: 'monospace',
@@ -93,12 +105,12 @@ const LogBoard = ({
             loading={loading}
             onClick={handleSubmit}
             color="primary"
-            disabled={!isAlive}
+            disabled={!isAlive || !enableCommand}
           >
-            Run
+            RUN
           </LoadingButton>
           <Button onClick={handleClose} color="primary">
-            Close
+            CLOSE
           </Button>
         </DialogActions>
       </Dialog>

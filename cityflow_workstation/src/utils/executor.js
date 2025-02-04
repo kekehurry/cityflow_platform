@@ -32,9 +32,7 @@ export async function* setupExecutor(flowId, packages, image) {
       yield chunk;
     }
   } else if (res.status === 400) {
-    alert(
-      `No selected image found in the system.\n Please pull the image first: ${image}`
-    );
+    alert(`No selected image found in the system.\n <${image}>`);
   }
 }
 
@@ -64,8 +62,6 @@ export async function* runCommand(flowId, command) {
       const chunk = decoder.decode(value, { stream: true });
       yield chunk;
     }
-  } else {
-    alert(`Runner not propoerly initialized. Please restart the runner.`);
   }
 }
 

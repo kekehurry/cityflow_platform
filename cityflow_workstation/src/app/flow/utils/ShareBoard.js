@@ -15,9 +15,7 @@ import { getFlowData, download } from '@/utils/local';
 import theme from '@/theme';
 import { saveWorkflow } from '@/utils/dataset';
 import { connect } from 'react-redux';
-import { useLocalStorage } from '@/utils/local';
-
-const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
+import { useLocalStorage, getLocalStorage } from '@/utils/local';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -34,6 +32,7 @@ const ShareBoard = (props) => {
   const [formValue, setFormValue] = useState({});
   const [sharing, setSharing] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
 
   const handleClose = () => {
     setDialogOpen(false);

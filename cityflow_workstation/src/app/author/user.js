@@ -19,7 +19,7 @@ import { useSearchParams } from 'next/navigation';
 import { getAuthor, useSearchWorkflow, getWorkflow } from '@/utils/dataset';
 import { initUserId, useLocalStorage, download } from '@/utils/local';
 import Footer from '@/components/Footer';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -121,7 +121,7 @@ const UserPage = () => {
             }}
             onClick={handleDownload}
           >
-            <ArrowDownwardIcon sx={{ fontSize: 30, color: '#9E9E9E' }} />
+            <CloudDownloadIcon sx={{ fontSize: 30, color: '#9E9E9E' }} />
           </Box>
         </Tooltip>
       </Box>

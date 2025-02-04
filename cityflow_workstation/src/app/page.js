@@ -56,7 +56,7 @@ const Home = () => {
               <Link href="/flow" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setFlowLoading(true);
                   }}
@@ -72,7 +72,7 @@ const Home = () => {
               <Link href="/author" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setAuthorLoading(true);
                   }}
@@ -88,7 +88,7 @@ const Home = () => {
               <Link href="/community" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   onClick={() => {
                     setCommunityLoading(true);
                   }}

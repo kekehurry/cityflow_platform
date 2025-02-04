@@ -26,8 +26,6 @@ import theme from '@/theme';
 
 import LogBoard from './LogBoard';
 
-const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
-
 const mapStateToProps = (state, ownProps) => ({
   state: state,
   flowCodes: {
@@ -71,8 +69,11 @@ const FlowSettings = (props) => {
   const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
   const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG');
+  const [defaultRunner, setDefaultRunner] = useLocalStorage(
+    'DEFAULT_RUNNER',
+    process.env.NEXT_PUBLIC_DEFAULT_RUNNER || 'cityflow/cityflow-runner:latest'
+  );
   const [logOpen, setLogOpen] = useState(false);
-  const [terminalLogs, setTerminalLogs] = useState(props.state?.logs);
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
@@ -81,6 +82,7 @@ const FlowSettings = (props) => {
     let logs = '';
     if (props.state?.isAlive) {
       await killExecutor(formValue.flowId);
+      setMeta({ logs: null });
     } else {
       setLogOpen(true);
       for await (const chunk of await setupExecutor(
@@ -445,8 +447,7 @@ const FlowSettings = (props) => {
           logOpen={logOpen}
           setLogOpen={setLogOpen}
           isAlive={props.state?.isAlive}
-          terminalLogs={props.state?.logs}
-          setTerminalLogs={setTerminalLogs}
+          logs={props.state?.logs}
         />
       </Stack>
     </Box>

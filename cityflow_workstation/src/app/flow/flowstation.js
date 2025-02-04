@@ -1,6 +1,6 @@
 'use client';
-import ReactFlow, { Background, BackgroundVariant } from 'reactflow';
-import React, { useEffect, useState } from 'react';
+import ReactFlow from 'reactflow';
+import React, { use, useEffect, useState } from 'react';
 import Loading from '@/components/Loading';
 import {
   onConnect,
@@ -37,11 +37,11 @@ import { debounce, set } from 'lodash';
 
 import 'reactflow/dist/style.css';
 import { useSearchParams } from 'next/navigation';
-import theme from '@/theme';
+// import theme from '@/theme';
 
 import { useGetWorkflow, useGetModule } from '@/utils/dataset';
 import { setupExecutor, check } from '@/utils/executor';
-import { getUserFlow } from '@/utils/local';
+import { getLocalStorage } from '@/utils/local';
 import { nanoid } from 'nanoid';
 
 const mapStateToProps = (state, ownProps) => {
@@ -74,8 +74,6 @@ const nodeTypes = {
 };
 const edgeTypes = { base: ButtonEdge, invisible: InvisibleEdge };
 
-const defaultRunner = process.env.NEXT_PUBLIC_DEFAULT_RUNNER;
-
 const FlowStation = (props) => {
   const {
     nodes,
@@ -92,12 +90,13 @@ const FlowStation = (props) => {
   const id = searchParams.get('id');
   const module = searchParams.get('module');
   const run = searchParams.get('run');
-  const local = searchParams.get('local');
+  // const local = searchParams.get('local');
   const pinBoard = searchParams.get('pinBoard');
   const [initData, setInitData] = useState(null);
-  const [localFlowData, setLocalFlowData] = useState(null);
+  // const [localFlowData, setLocalFlowData] = useState(null);
   const workflowData = useGetWorkflow(id || null);
   const moduleData = useGetModule(module || null);
+  const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
 
   const initAndRunALL = async () => {
     setMeta({ loading: true });
@@ -131,6 +130,8 @@ const FlowStation = (props) => {
       flowInited: false,
       globalScale: 0.1,
       showcase: false,
+      loading: false,
+      isAlive: false,
     });
     instance.setViewport(flow.viewport);
     instance.setNodes(flow.nodes);
@@ -223,26 +224,28 @@ const FlowStation = (props) => {
 
   const flowPanel = <FlowPanel />;
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const flowData = getUserFlow(id);
-      setLocalFlowData(flowData);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     const flowData = getUserFlow(id);
+  //     setLocalFlowData(flowData);
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (workflowData?.data) {
-      console.log('workflowData', workflowData.data);
       setInitData(workflowData.data);
     }
     if (moduleData?.data) {
       setInitData(precoessModule(moduleData.data));
     }
-    if (localFlowData) {
-      console.log('localFlowData', localFlowData);
-      setInitData(localFlowData);
-    }
-  }, [workflowData?.data, moduleData?.data, localFlowData]);
+    // if (localFlowData) {
+    //   setInitData(localFlowData);
+    // }
+  }, [
+    workflowData?.data,
+    moduleData?.data,
+    // localFlowData
+  ]);
 
   useEffect(() => {
     // initialize the store when the component is unmounted

@@ -1,8 +1,7 @@
-import { Box, Tab, Tabs, IconButton, Stack } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
 import MonacoEditor from '@monaco-editor/react';
 import ControlButtons from '../utils/ControlButtons';
 import { useState, useRef } from 'react';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 export const initCode = {
   interface: [
@@ -53,7 +52,7 @@ const getFileName = (code) => {
 };
 
 export default function CodeEditor({
-  userId,
+  sessionId,
   config,
   editor,
   setEditor,
@@ -63,10 +62,11 @@ export default function CodeEditor({
   setCodeSubmited,
 }) {
   const [editorTabs, setEditorTabs] = useState(
-    config?.code && Array.isArray(config.code)
-      ? config.code.map((item, id) => getFileName(item))
+    formValue?.code && Array.isArray(formValue.code)
+      ? formValue.code.map((item, id) => getFileName(item))
       : ['entrypoint']
   );
+
   const createNewTab = () => {
     let newTabName = `new${editorTabs.length}`;
     if (editorTabs.includes(newTabName)) {
@@ -74,6 +74,10 @@ export default function CodeEditor({
     }
     setEditorTabs([...editorTabs, newTabName]);
     setEditor(editorTabs.length);
+    setFormValue({
+      ...formValue,
+      code: [...formValue.code, ''],
+    });
   };
 
   const handleTabDelete = (index) => {
@@ -93,18 +97,17 @@ export default function CodeEditor({
     setEditor(newValue);
   };
 
-  const handleCodeChange = (index, value) => {
+  const handleCodeChange = (value, e) => {
     let newCode = formValue.code;
     let tabs = [...editorTabs];
-    newCode[index] = value;
+    newCode[editor] = value;
     setFormValue({
       ...formValue,
-      author_id: userId,
       code: newCode,
     });
-    const filename = index === 0 ? 'entrypoint' : getFileName(value);
-    tabs[index] = filename;
-    setEditor(index);
+    const filename = editor === 0 ? 'entrypoint' : getFileName(value);
+    tabs[editor] = filename;
+    setEditor(editor);
     setEditorTabs(tabs);
   };
 
@@ -161,15 +164,15 @@ export default function CodeEditor({
           setConfig={setConfig}
           setCodeSubmited={setCodeSubmited}
         />
-        {config.expandHeight && (
+        {formValue.expandHeight && (
           <MonacoEditor
-            key={editor}
+            key={sessionId}
             width="100%"
-            height={config.expandHeight - 20}
+            height={formValue.expandHeight - 20}
             language={formValue.language}
             theme="vs-dark"
             value={formValue.code[editor]}
-            onChange={(value) => handleCodeChange(editor, value)}
+            onChange={(value, e) => handleCodeChange(value, e)}
             options={{
               minimap: { enabled: false },
               wordWrap: 'on',

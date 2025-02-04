@@ -27,7 +27,6 @@ const ModuleIcon = (props) => {
   const { manifest, edit, userModules, setUserModules } = props;
   const [newManifest, setNewManifest] = useState({
     ...manifest,
-    id: null,
   });
   const { data, error, isLoading } = useGetModule(newManifest.config?.id);
 
@@ -35,9 +34,7 @@ const ModuleIcon = (props) => {
 
   const handleClick = (manifest) => {
     const node = { ...manifest };
-    if (!node.config?.custom) {
-      node.id = nanoid();
-    }
+    node.id = nanoid();
     node.config.category = 'custom';
     node.config.basic = false;
     node.position = {
@@ -52,9 +49,7 @@ const ModuleIcon = (props) => {
     const flowPanel = document.getElementById('FlowPanel');
     const newX = (e.clientX - flowPanel.offsetWidth - x) / zoom;
     const newY = (e.clientY - y) / zoom;
-    if (!node.config?.custom) {
-      node.id = nanoid();
-    }
+    node.id = nanoid();
     node.config.category = 'custom';
     node.config.basic = false;
     node.position = { x: newX, y: newY };
@@ -75,27 +70,12 @@ const ModuleIcon = (props) => {
   }, [props]);
 
   useEffect(() => {
-    if (isLoading) return;
-    setNewManifest({
-      ...newManifest,
-      config: data ? data : newManifest.config,
-      id: nanoid(),
-    });
-  }, [isLoading]);
-
-  useEffect(() => {
-    const draggableElement = document.getElementById(newManifest.id);
-    if (draggableElement) {
-      draggableElement.addEventListener('dragend', (e) =>
-        handleDragEnd(e, newManifest)
-      );
-      return () => {
-        draggableElement.removeEventListener('dragend', (e) =>
-          handleDragEnd(e, newManifest)
-        );
-      };
-    }
-  }, [newManifest]);
+    data &&
+      setNewManifest({
+        ...newManifest,
+        config: data,
+      });
+  }, [data]);
 
   return (
     <Box position="relative">
@@ -114,8 +94,9 @@ const ModuleIcon = (props) => {
         </IconButton>
       )}
       <Stack
-        key={newManifest.id}
+        key={newManifest.name}
         onClick={() => handleClick(newManifest)}
+        onDragEnd={(e) => handleDragEnd(e, newManifest)}
         direction="column"
         spacing={1}
         sx={{
@@ -134,12 +115,10 @@ const ModuleIcon = (props) => {
       >
         <Tooltip title={newManifest.config.name} placement="top" arrow>
           <Avatar
-            id={newManifest.id}
             alt={newManifest.config.name}
             variant="rounded"
             src={newManifest.config.icon}
             sx={{ width: 30, height: 30 }}
-            onDragEnd={(e) => !newManifest.id && handleDragEnd(e, newManifest)}
           />
         </Tooltip>
       </Stack>
