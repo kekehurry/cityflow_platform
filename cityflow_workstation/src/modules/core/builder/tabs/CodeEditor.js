@@ -1,7 +1,16 @@
-import { Box, Tab, Tabs } from '@mui/material';
+import {
+  Box,
+  Tab,
+  Tabs,
+  CircularProgress,
+  Stack,
+  Typography,
+} from '@mui/material';
 import MonacoEditor from '@monaco-editor/react';
 import ControlButtons from '../utils/ControlButtons';
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
+import { registerLLMCompletions } from '../utils/CodeAssistant';
+import { getLocalStorage } from '@/utils/local';
 
 export const initCode = {
   interface: [
@@ -66,6 +75,17 @@ export default function CodeEditor({
       ? formValue.code.map((item, id) => getFileName(item))
       : ['entrypoint']
   );
+  const monacoRef = useRef(null);
+  const AUTO_COMPLETION = getLocalStorage('CODE_COMPLETION') === 'true';
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('');
+
+  const handleEditorDidMount = (editor, monaco) => {
+    monacoRef.current = monaco;
+    ['javascript', 'python'].forEach((lang) => {
+      registerLLMCompletions(monaco, lang, setLoading, setStatus);
+    });
+  };
 
   const createNewTab = () => {
     let newTabName = `new${editorTabs.length}`;
@@ -157,7 +177,7 @@ export default function CodeEditor({
           disableRipple
         />
       </Tabs>
-      <Box className="nowheel nodrag">
+      <Box className="nowheel nodrag" height={formValue.expandHeight - 50}>
         <ControlButtons
           config={config}
           formValue={formValue}
@@ -168,17 +188,49 @@ export default function CodeEditor({
           <MonacoEditor
             key={sessionId}
             width="100%"
-            height={formValue.expandHeight - 20}
+            height={formValue.expandHeight - 65}
             language={formValue.language}
             theme="vs-dark"
             value={formValue.code[editor]}
             onChange={(value, e) => handleCodeChange(value, e)}
+            onMount={handleEditorDidMount}
             options={{
               minimap: { enabled: false },
               wordWrap: 'on',
+              inlineSuggest: {
+                enabled: AUTO_COMPLETION,
+                showToolbar: true,
+              },
+              suggestOnTriggerCharacters: AUTO_COMPLETION,
             }}
           />
         )}
+        <Box
+          sx={{
+            width: '100%',
+            height: 12,
+            backgroundColor: 'primary',
+            zIndex: 1,
+            p: 1,
+            display: 'flex',
+            alignItems: 'center',
+            overflow: 'hidden',
+          }}
+        >
+          <Stack direction="row" spacing={1}>
+            {loading && (
+              <CircularProgress
+                size={6}
+                sx={{ color: '#FFB300', cursor: 'pointer' }}
+              />
+            )}
+            {status && (
+              <Typography sx={{ color: 'text.secondary', fontSize: 6 }}>
+                {status}
+              </Typography>
+            )}
+          </Stack>
+        </Box>
       </Box>
       {/* <Box height={20} /> */}
     </Box>

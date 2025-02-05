@@ -13,7 +13,8 @@ import {
 import { LoadingButton } from '@mui/lab';
 import theme from '@/theme';
 import { runCommand } from '@/utils/executor';
-import Ansi from 'ansi-to-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
 
@@ -65,24 +66,31 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
         <DialogTitle sx={{ fontSize: 20 }}>Terminal</DialogTitle>
         <DialogContent>
           <Stack width={400} height={300} spacing={2}>
-            <div
-              style={{
-                maxWidth: '100%',
-                width: '100%',
-                height: '100%',
-                margin: '0 auto',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                fontFamily: 'monospace',
-                backgroundColor: theme.palette.flow.main,
-                borderRadius: '5px',
-                border: theme.palette.node.border,
-                color: theme.palette.text.secondary,
-                padding: '16px',
-                overflow: 'auto',
-              }}
-            >
-              <Ansi>{terminalLogs}</Ansi>
+            <div>
+              <SyntaxHighlighter
+                language="bash"
+                style={dark}
+                wrapLongLines={true}
+                wrapLines={true}
+                lineProps={{
+                  style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' },
+                }}
+                customStyle={{
+                  maxWidth: '100%',
+                  width: '100%',
+                  height: 260,
+                  margin: '0 auto',
+                  fontFamily: 'monospace',
+                  backgroundColor: theme.palette.flow.main,
+                  borderRadius: '5px',
+                  border: theme.palette.node.border,
+                  color: theme.palette.text.secondary,
+                  padding: '16px',
+                  overflow: 'auto',
+                }}
+              >
+                {terminalLogs}
+              </SyntaxHighlighter>
               <div ref={logEndRef} />
             </div>
             <TextField

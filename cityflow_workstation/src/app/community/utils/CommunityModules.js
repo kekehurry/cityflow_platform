@@ -72,7 +72,7 @@ const ModuleIcon = ({ manifest }) => {
               '& .MuiSvgIcon-root': { fontSize: 10 },
               color: isSaved
                 ? theme.palette.secondary.main
-                : theme.palette.secondary.grey,
+                : theme.palette.secondary.gray,
             }}
             checked={isSaved}
           />

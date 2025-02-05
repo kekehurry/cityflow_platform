@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Stack,
@@ -32,6 +32,7 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   const [userId, setUserId] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
   const [assistant, setAssistant] = useState(new Assistant(llmConfig));
+  const messageEndRef = useRef(null);
 
   const handleAbort = () => {
     try {
@@ -89,6 +90,13 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
         { role: 'AI', message: `![loading](${basePath}/static/loading.gif)` },
       ]);
   }, [isLoading]);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    });
+  }, [messages]);
 
   return (
     <Stack spacing={1} width="100%" height={height} overflow={'auto'}>
@@ -156,6 +164,7 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                   />
                 );
               })}
+            <div ref={messageEndRef} />
           </Stack>
           <OutlinedInput
             placeholder="Chat with Miya..."

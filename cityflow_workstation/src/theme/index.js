@@ -18,7 +18,7 @@ const theme = createTheme({
     secondary: {
       main: 'rgb(184, 134, 198)',
       dark: 'rgb(174, 94, 196)',
-      grey: 'rgba(66, 66, 66,1)',
+      gray: 'rgba(66, 66, 66,1)',
     },
     flow: {
       main: black,

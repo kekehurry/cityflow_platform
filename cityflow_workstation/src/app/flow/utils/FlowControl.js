@@ -14,7 +14,7 @@ const CustomControl = styled(Controls)`
     margin-bottom: 2px;
 
     &:hover {
-      background-color: ${theme.palette.secondary.main};
+      background-color: ${theme.palette.primary.main};
     }
 
     path {

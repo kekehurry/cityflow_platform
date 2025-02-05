@@ -14,7 +14,7 @@ import {
   InputLabel,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import React, { useState, useEffect, useRef, use } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 import { setupExecutor, check, killExecutor } from '@/utils/executor';
@@ -25,6 +25,8 @@ import { initUserId } from '@/utils/local';
 import theme from '@/theme';
 
 import LogBoard from './LogBoard';
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -66,19 +68,48 @@ const FlowSettings = (props) => {
   const latestPropsRef = useRef(props);
   const [loading, setLoading] = useState(false);
   const [author, setAuthor] = useLocalStorage('author', null);
-  const [LLM_API_KEY, setLLLMAPIKey] = useLocalStorage('LLM_API_KEY', '');
   const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
-  const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG');
+  const [codeCompletion, saveCodeCompletion] = useLocalStorage(
+    'CODE_COMPLETION',
+    'false'
+  );
+  const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG', {
+    name: 'CityFlow',
+    assistantIcon: `${basePath}/static/favicon.ico`,
+    systemPrompt: `You are a helpful assistant for CityFlow Platform. You can help users to design, evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows.`,
+    context: `Today is ${new Date().toDateString()}`,
+    greeding: `What can I do for you?`,
+    model: 'gpt-4o-mini',
+    baseUrl: 'https://api.openai.com/v1',
+    temperature: 0.8,
+    maxTokens: 4192,
+    presencePenalty: 0.0,
+    frequencyPenalty: 0.0,
+    responseFormat: 'text',
+    apiKey: '',
+  });
   const [defaultRunner, setDefaultRunner] = useLocalStorage(
     'DEFAULT_RUNNER',
     process.env.NEXT_PUBLIC_DEFAULT_RUNNER || 'cityflow/cityflow-runner:latest'
   );
   const [logOpen, setLogOpen] = useState(false);
+  const [autoCompletion, setAutoCompletion] = useState(true);
+  const accordionRef = useRef(null);
+
+  const inputProps = {
+    style: {
+      background: 'none',
+      color: 'text.secondary',
+      border: 'none',
+      borderBottom: `1px solid text.secondary`,
+    },
+  };
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
     setMeta({ ...formValue, loading: true });
     setAuthor(formValue.author);
+    setDefaultRunner(formValue.image);
     let logs = '';
     if (props.state?.isAlive) {
       await killExecutor(formValue.flowId);
@@ -111,7 +142,6 @@ const FlowSettings = (props) => {
   const explainWorkflow = () => {
     const systemPrompt = `You are a helpful assistant who can help human explain a worflow consisting of a series of nodes and edges. Each node is a code block, and the edges indicate the data flow between the code blocks. Your task is to provide a brief description of the workflow in one sentence based on the code and the description of nodes.`;
     const context = `workflow: ${JSON.stringify(props.flowCodes)}`;
-    console.log(props.flowCodes);
     const assistant = new Assistant({
       ...localLLMConfig,
       systemPrompt,
@@ -156,6 +186,16 @@ const FlowSettings = (props) => {
     });
   };
 
+  const handleAccordionChange = (event, expanded) => {
+    const parentContainer = accordionRef.current?.parentElement;
+    setTimeout(() => {
+      parentContainer.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }, 100);
+  };
+
   useEffect(() => {
     if (!props.state?.flowId) return;
     initUserId().then((userId) => {
@@ -186,6 +226,10 @@ const FlowSettings = (props) => {
       clearInterval(isAlive);
     };
   }, [formValue.flowId, props.state?.isAlive]);
+
+  useEffect(() => {
+    setAutoCompletion(codeCompletion === 'true');
+  }, []);
 
   useEffect(() => {
     latestPropsRef.current = props;
@@ -238,7 +282,7 @@ const FlowSettings = (props) => {
             onChange={handleFormChange}
             value={formValue?.description || ''}
             multiline
-            rows={6}
+            rows={3}
             placeholder="breifly describe your workflow"
             InputLabelProps={{ shrink: true }}
           ></TextField>
@@ -288,6 +332,17 @@ const FlowSettings = (props) => {
           onChange={handleFormChange}
           InputLabelProps={{ shrink: true }}
         />
+        <TextField
+          id="packages"
+          label="packages"
+          fullWidth
+          onChange={handleFormChange}
+          value={formValue?.packages}
+          multiline
+          rows={5}
+          placeholder={`# conda,pip or npm packages to install:\n {"conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"]}`}
+          InputLabelProps={{ shrink: true }}
+        />
         <LoadingButton
           loading={props.state.loading || loading}
           variant="contained"
@@ -302,7 +357,7 @@ const FlowSettings = (props) => {
           fullWidth
           variant="contained"
           sx={{
-            background: theme.palette.secondary.grey,
+            background: theme.palette.secondary.gray,
           }}
           onClick={() => {
             setLogOpen(true);
@@ -318,6 +373,8 @@ const FlowSettings = (props) => {
           sx={{ border: '0px', background: 'none' }}
           variant="outlined"
           disableGutters
+          slotProps={{ transition: { timeout: { enter: 100, exit: 500 } } }}
+          onChange={handleAccordionChange}
         >
           <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
             Advance Settings
@@ -343,14 +400,7 @@ const FlowSettings = (props) => {
                     })
                   }
                   fullWidth
-                  inputProps={{
-                    style: {
-                      background: 'none',
-                      color: 'text.secondary',
-                      border: 'none',
-                      borderBottom: `1px solid text.secondary`,
-                    },
-                  }}
+                  inputProps={inputProps}
                 />
               </Stack>
               <Stack direction={'row'}>
@@ -371,14 +421,7 @@ const FlowSettings = (props) => {
                     })
                   }
                   fullWidth
-                  inputProps={{
-                    style: {
-                      background: 'none',
-                      color: 'text.secondary',
-                      border: 'none',
-                      borderBottom: `1px solid text.secondary`,
-                    },
-                  }}
+                  inputProps={inputProps}
                 />
               </Stack>
               <Stack direction={'row'}>
@@ -392,17 +435,15 @@ const FlowSettings = (props) => {
                 <Input
                   type="password"
                   id="LLM_API_KEY"
-                  value={LLM_API_KEY || ''}
-                  onChange={(e) => setLLLMAPIKey(e.target.value)}
+                  value={localLLMConfig?.apiKey || ''}
+                  onChange={(e) =>
+                    setLocalLLMConfig({
+                      ...localLLMConfig,
+                      apiKey: e.target.value,
+                    })
+                  }
                   fullWidth
-                  inputProps={{
-                    style: {
-                      background: 'none',
-                      color: 'text.secondary',
-                      border: 'none',
-                      borderBottom: `1px solid text.secondary`,
-                    },
-                  }}
+                  inputProps={inputProps}
                 />
               </Stack>
               <Stack direction={'row'} sx={{ pb: 2 }}>
@@ -419,27 +460,116 @@ const FlowSettings = (props) => {
                   value={MAPBOX_TOKEN || ''}
                   onChange={(e) => setMapboxToken(e.target.value)}
                   fullWidth
-                  inputProps={{
-                    style: {
-                      background: 'none',
-                      color: 'text.secondary',
-                      border: 'none',
-                      borderBottom: `1px solid text.secondary`,
-                    },
-                  }}
+                  inputProps={inputProps}
                 />
               </Stack>
               <Divider />
-              <TextField
-                id="packages"
-                fullWidth
-                onChange={handleFormChange}
-                value={formValue?.packages}
-                multiline
-                rows={6}
-                placeholder={`# conda,pip or npm packages to install:\n {\n "conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"] \n}`}
-              />
+              <Stack
+                direction={'row'}
+                sx={{ pb: 2 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  paddingBottom: '16px',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <InputLabel
+                  htmlFor="CODE_COMPLETION"
+                  style={{ fontSize: '10px', width: '50%' }}
+                >
+                  CODE_COMPLETION
+                </InputLabel>
+                <input
+                  type="checkbox"
+                  id="CODE_COMPLETION"
+                  size="small"
+                  checked={autoCompletion}
+                  onChange={(e) => {
+                    const status = e.target.checked;
+                    setAutoCompletion(e.target.checked);
+                    saveCodeCompletion(JSON.stringify(status));
+                  }}
+                  style={{
+                    appearance: 'none',
+                    width: '12px',
+                    height: '12px',
+                    cursor: 'pointer',
+                    backgroundColor: autoCompletion
+                      ? theme.palette.primary.main
+                      : '#f0f0f0', // Change colors based on checked state
+                    border: `0.5px solid ${theme.palette.secondary.gray}`,
+                    borderRadius: '50%',
+                    transition: 'background-color 0.3s ease', // Optional smooth transition
+                  }}
+                />
+              </Stack>
+              <Stack direction={'row'}>
+                <InputLabel
+                  htmlFor="CODE_BASE_URL"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  CODE_BASE_URL
+                </InputLabel>
+                <Input
+                  id="CODE_BASE_URL"
+                  value={localLLMConfig?.codeBaseUrl || ''}
+                  onChange={(e) =>
+                    setLocalLLMConfig({
+                      ...localLLMConfig,
+                      codeBaseUrl: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={inputProps}
+                />
+              </Stack>
+              <Stack direction={'row'}>
+                <InputLabel
+                  htmlFor="CODE_MODEL"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  CODE_MODEL
+                </InputLabel>
+                <Input
+                  id="CODE_MODEL"
+                  value={localLLMConfig?.codeModel || ''}
+                  onChange={(e) =>
+                    setLocalLLMConfig({
+                      ...localLLMConfig,
+                      codeModel: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={inputProps}
+                />
+              </Stack>
+              <Stack direction={'row'}>
+                <InputLabel
+                  htmlFor="CODE_API_KEY"
+                  size="small"
+                  sx={{ fontSize: 10, width: '50%' }}
+                >
+                  CODE_API_KEY
+                </InputLabel>
+                <Input
+                  id="CODE_API_KEY"
+                  type="password"
+                  value={localLLMConfig?.codeApiKey || ''}
+                  onChange={(e) =>
+                    setLocalLLMConfig({
+                      ...localLLMConfig,
+                      codeApiKey: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={inputProps}
+                />
+              </Stack>
             </Stack>
+            <div ref={accordionRef}></div>
           </AccordionDetails>
         </Accordion>
         <LogBoard

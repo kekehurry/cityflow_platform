@@ -32,7 +32,7 @@ export async function* setupExecutor(flowId, packages, image) {
       yield chunk;
     }
   } else if (res.status === 400) {
-    alert(`No selected image found in the system.\n <${image}>`);
+    alert(`This workflow requires <${image}> \n. Please pull it first.`);
   }
 }
 

@@ -116,6 +116,7 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
         }
         ${cssString}
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
         const secrets = ${JSON.stringify(secrets)};
         window.iframeId = "${iframeId}";

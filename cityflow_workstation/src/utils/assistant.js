@@ -24,7 +24,6 @@ export default class Assistant {
   }
 
   async chat(inputMessage, messageHistory = null) {
-    const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
     const isBase64Image = (str) => {
       return /^data:image\/[a-zA-Z]+;base64,/.test(str);
     };
@@ -43,13 +42,12 @@ export default class Assistant {
           }
         : { role: 'user', content: inputMessage || '' },
     ];
-
     try {
       const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${LLM_API_KEY}`,
+          Authorization: `Bearer ${this.props.apiKey}`,
         },
         body: JSON.stringify({
           model: this.props.model || 'gpt-4o-mini',
@@ -64,6 +62,8 @@ export default class Assistant {
           presence_penalty: this.props.presencePenalty || 0.0,
           frequency_penalty: this.props.frequencyPenalty || 0.0,
         }),
+      }).catch((error) => {
+        throw new Error(error);
       });
       if (!response.ok) {
         throw new Error(response.status);
@@ -76,7 +76,6 @@ export default class Assistant {
   }
 
   async *stream(inputMessage, messageHistory, signal) {
-    const LLM_API_KEY = getLocalStorage('LLM_API_KEY');
     const messages = [
       {
         role: 'system',
@@ -92,7 +91,7 @@ export default class Assistant {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${LLM_API_KEY}`,
+          Authorization: `Bearer ${this.props.apiKey}`,
         },
         body: JSON.stringify({
           model: this.props.model || 'gpt-4o-mini',
@@ -109,6 +108,8 @@ export default class Assistant {
           stream: true,
         }),
         signal,
+      }).catch((error) => {
+        throw new Error(error);
       });
 
       if (!response.ok) {
