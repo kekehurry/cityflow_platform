@@ -9,7 +9,7 @@ import {
   AccordionDetails,
   IconButton,
 } from '@mui/material';
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo, use } from 'react';
 import { nanoid } from 'nanoid';
 import { addNode, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
@@ -18,7 +18,7 @@ import { getCoreModuleList, getSettings } from '@/utils/local';
 import { searchModule } from '@/utils/dataset';
 import SearchBar from './SearchBar';
 import ModuleIcon from './ModuleIcon';
-import { useLocalStorage } from '@/utils/local';
+import { useLocalStorage, initUserId } from '@/utils/local';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -57,35 +57,29 @@ export const ModuleList = (props) => {
   const [builderManifest, setBuilderManifest] = useState(null);
   const latestPropsRef = useRef(props);
   const [edit, setEdit] = useState(false);
-  const [userModules, setUserModules] = useLocalStorage('userModules', []);
+  const [userModules, setUserModules] = useState([]);
   const [basicModules, setBasicModules] = useState([]);
   const [coreModules, setCoreModules] = useState({});
   const [groupedModules, setGroupedModules] = useState({});
 
-  useEffect(() => {
-    latestPropsRef.current = props;
-  }, [props]);
+  const fetchModules = async (category, subList) => {
+    const modules = await Promise.all(
+      subList.map(async (moduleName) => {
+        const id = nanoid();
+        const module = `${category}/${moduleName}`;
+        let manifest = await getSettings(module);
+        if (!manifest) return null;
+        manifest.id = id;
+        if (manifest.module === 'builder') {
+          setBuilderManifest({ ...manifest });
+        }
+        return manifest;
+      })
+    );
+    return modules;
+  };
 
-  // Get modules from server
-  useEffect(() => {
-    // get core modules from server
-    const fetchModules = async (category, subList) => {
-      const modules = await Promise.all(
-        subList.map(async (moduleName) => {
-          const id = nanoid();
-          const module = `${category}/${moduleName}`;
-          let manifest = await getSettings(module);
-          if (!manifest) return null;
-          manifest.id = id;
-          if (manifest.module === 'builder') {
-            setBuilderManifest({ ...manifest });
-          }
-          return manifest;
-        })
-      );
-      return modules;
-    };
-
+  const getCoreModules = async () => {
     getCoreModuleList().then((moduleList) => {
       Object.entries(moduleList).forEach(([category, moduleList]) => {
         fetchModules(category, moduleList).then((modules) => {
@@ -96,7 +90,9 @@ export const ModuleList = (props) => {
         });
       });
     });
+  };
 
+  const getBasicModules = async () => {
     // get basic modules from server
     const params = { basic: true };
     searchModule(params).then((moduleList) => {
@@ -119,46 +115,68 @@ export const ModuleList = (props) => {
           return 0;
         });
       setBasicModules(modules);
+      return modules;
     });
+  };
+
+  const getUserModules = async () => {
+    // get user modules from server
+    initUserId().then((userId) => {
+      searchModule({ user_id: userId }).then((moduleList) => {
+        if (!moduleList) return;
+        const modules = moduleList.map((config) => {
+          let module = { ...config };
+          module.custom = true;
+          module.expand = false;
+          module.run = false;
+          return module;
+        });
+        setUserModules(modules);
+        return modules;
+      });
+    });
+  };
+
+  const groupModules = (moduleList) => {
+    const groupedModules = {};
+    Array.isArray(moduleList) &&
+      moduleList.forEach((config) => {
+        if (!config) return;
+        if (!groupedModules[config.category]) {
+          groupedModules[config.category] = [];
+        }
+        groupedModules[config.category].push({ ...config });
+      });
+    return groupedModules;
+  };
+
+  useEffect(() => {
+    latestPropsRef.current = props;
+  }, [props]);
+
+  // Get modules from server
+  useEffect(() => {
+    getCoreModules();
+    getBasicModules();
+    getUserModules();
+
+    const updateModules = () => {
+      console.log('update modules');
+      getUserModules().then((newUserModules) => {
+        setGroupedModules(groupModules([...basicModules, ...newUserModules]));
+      });
+    };
+
+    window.addEventListener('userModulesChange', updateModules);
+    return () => {
+      window.removeEventListener('userModulesChange', updateModules);
+    };
   }, []);
 
   // Group basic and user modules by category
   useEffect(() => {
-    const groupModules = (moduleList) => {
-      const groupedModules = {};
-      Array.isArray(moduleList) &&
-        moduleList.forEach((config) => {
-          if (!config) return;
-          if (!groupedModules[config.category]) {
-            groupedModules[config.category] = [];
-          }
-          groupedModules[config.category].push({ ...config });
-        });
-      return groupedModules;
-    };
-
-    const updateModules = (e) => {
-      const data = e.detail;
-      let newModules = userModules;
-      const index = userModules.findIndex((item) => item.id === data.id);
-      if (index > -1) {
-        newModules[index] = data;
-      } else {
-        newModules.push(data);
-      }
-      setUserModules(newModules);
-      const groupedModules = groupModules(newModules);
-      const groupedBasicModules = groupModules(basicModules);
-      setGroupedModules({ ...groupedBasicModules, ...groupedModules });
-    };
-
     const groupedModules = groupModules([...basicModules, ...userModules]);
     setGroupedModules({ ...groupedModules });
-
-    window.addEventListener('localModulesChange', updateModules);
-    return () => {
-      window.removeEventListener('localModulesChange', updateModules);
-    };
   }, [userModules, basicModules]);
 
   return (

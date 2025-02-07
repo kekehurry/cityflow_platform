@@ -12,7 +12,7 @@ import theme from '@/theme';
 import { addNode } from '@/store/actions';
 import { nanoid } from 'nanoid';
 import { useRef, useEffect, useState, memo } from 'react';
-import { useGetModule } from '@/utils/dataset';
+import { useGetModule, deleteModule } from '@/utils/dataset';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -58,11 +58,10 @@ const ModuleIcon = (props) => {
 
   // delete user module
   const handleDelete = (manifest) => {
-    const config = manifest.config;
-    let newModules = userModules.filter(
-      (m) => !(m.name === config.name && m.category === config.category)
-    );
-    setUserModules && setUserModules(newModules);
+    const moduleId = manifest.config?.id;
+    deleteModule(moduleId).then((res) => {
+      setUserModules(userModules.filter((module) => module.id !== moduleId));
+    });
   };
 
   useEffect(() => {

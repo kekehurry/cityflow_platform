@@ -6,7 +6,7 @@ import { useSearchWorkflow } from '@/utils/dataset';
 
 const CommunityFlows = () => {
   const [items, setItems] = useState([]);
-  const { data, error, isLoading } = useSearchWorkflow({});
+  const { data, error, isLoading } = useSearchWorkflow({ private: false });
   const cardWidth = 300;
   const cardHeight = 200;
 

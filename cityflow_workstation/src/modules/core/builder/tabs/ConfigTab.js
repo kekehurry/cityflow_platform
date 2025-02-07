@@ -3,7 +3,7 @@ import ConfigPanel from '../utils/ConfigPanel';
 import IframeComponent from '../utils/IframeComponent';
 import theme from '@/theme';
 import { useRef, useEffect } from 'react';
-import ReactAnsi from 'react-ansi';
+import LogViewer from '@/components/Logger';
 
 export default function ConfigTab({
   tab,
@@ -87,30 +87,8 @@ export default function ConfigTab({
               overflow: 'auto',
             }}
           >
-            <ReactAnsi
-              log={log || ''}
-              showHeader={false}
-              autoScroll={true}
-              style={{
-                borderRadius: '5px',
-                border: theme.palette.node.border,
-                backgroundColor: theme.palette.flow.main,
-                cursor: 'text',
-                userSelect: 'text',
-              }}
-              logStyle={{
-                fontFamily: 'monospace',
-                fontSize: 12,
-              }}
-              bodyStyle={{
-                height: 190,
-                width: '100%',
-                backgroundColor: theme.palette.flow.main,
-                borderRadius: '5px',
-                color: theme.palette.text.secondary,
-                overflow: 'auto',
-              }}
-            />
+            <LogViewer logs={log} width={'100%'} height={210} />
+            <div ref={logEndRef} />
           </div>
         </>
       )}

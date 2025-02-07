@@ -316,8 +316,6 @@ class ExpandNode extends PureComponent {
         >
           <Card
             sx={{
-              minWidth: 50,
-              minHeight: 50,
               width: this.state.expand ? 50 : config.width + 4 * margin,
               height: this.state.expand
                 ? 50

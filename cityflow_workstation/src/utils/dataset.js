@@ -37,10 +37,14 @@ export const saveWorkflow = async (flowData) => {
       //if success alert the user
       (response) => {
         if (response && response.ok) {
-          alert('Your workflow has been shared!');
+          alert(
+            `Your workflow has been ${flowData?.private ? 'saved' : 'shared'}!`
+          );
           return response.json();
         } else {
-          alert('Failed to share your workflow');
+          alert(
+            `Failed to ${flowData?.private ? 'save' : 'share'} your workflow`
+          );
         }
       }
     )
@@ -164,6 +168,32 @@ export const useSearchModule = (params, limit = 100) => {
   };
 };
 
+export const saveModule = async (moduleData) => {
+  const api = `${datasetServer}/save_module`;
+  const userId = await initUserId();
+  return fetch(basePath + api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ moduleData, userId }),
+  })
+    .then(
+      //if success alert the user
+      (response) => {
+        if (response && response.ok) {
+          alert(`Your module has been saved !`);
+          return response.json();
+        } else {
+          alert(`Failed to save your module`);
+        }
+      }
+    )
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+};
+
 export const getAuthor = async (authorId) => {
   const api = `${datasetServer}/get_author`;
   const res = await fetch(basePath + api, {
@@ -202,6 +232,20 @@ export const deleteWorkflow = async (flowId) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ flowId, userId }),
+  }).catch((error) => {
+    console.error('Error:', error);
+  });
+};
+
+export const deleteModule = async (moduleId) => {
+  const api = `${datasetServer}/delete_module`;
+  const userId = await initUserId();
+  return fetch(basePath + api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ moduleId, userId }),
   }).catch((error) => {
     console.error('Error:', error);
   });

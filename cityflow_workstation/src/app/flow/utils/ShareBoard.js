@@ -30,7 +30,7 @@ const ShareBoard = (props) => {
   const rfInstance = useReactFlow();
   const [author, setAuthor] = useLocalStorage('author', null);
   const [formValue, setFormValue] = useState({});
-  const [sharing, setSharing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
 
@@ -39,42 +39,61 @@ const ShareBoard = (props) => {
   };
 
   const handleDownload = useCallback(async () => {
-    setSharing(true);
+    setSaving(true);
     setAuthor(formValue.author);
     const { nodes, edges, ...res } = props.state;
     const flowData = await getFlowData({
       rfInstance,
       state: { ...res, ...formValue },
     }).then((flowData) => {
-      setSharing(false);
+      setSaving(false);
       return flowData;
     });
     download(flowData);
     setDialogOpen(false);
   }, [rfInstance, formValue]);
 
-  const handleShare = useCallback(
+  const handleSave = useCallback(
     async ({ publish = false }) => {
-      publish ? setPublishing(true) : setSharing(true);
+      setSaving(true);
       setAuthor(formValue.author);
       const { nodes, edges, ...res } = props.state;
       const flowData = await getFlowData({
         rfInstance,
-        state: { ...res, ...formValue, basic: false },
+        state: { ...res, ...formValue, basic: false, private: true },
       });
       const flowId = await saveWorkflow(flowData)
         .then((flowId) => {
-          publish ? setPublishing(true) : setSharing(true);
           return flowId;
         })
         .finally(() => {
-          publish ? setPublishing(false) : setSharing(false);
+          setSaving(false);
         });
-      // if (publish && flowId) {
-      //   window.location.href = `/flow?id=${flowId}&pinBoard=true`;
-      // } else if (flowId) {
-      //   window.location.href = `/flow?id=${flowId}`;
-      // }
+      setDialogOpen(false);
+    },
+    [rfInstance, formValue]
+  );
+
+  const handleShare = useCallback(
+    async ({ publish = false }) => {
+      publish ? setPublishing(true) : setSaving(true);
+      setAuthor(formValue.author);
+      const { nodes, edges, ...res } = props.state;
+      const flowData = await getFlowData({
+        rfInstance,
+        state: { ...res, ...formValue, basic: false, private: false },
+      });
+      const flowId = await saveWorkflow(flowData)
+        .then((flowId) => {
+          publish ? setPublishing(true) : setSaving(true);
+          return flowId;
+        })
+        .finally(() => {
+          publish ? setPublishing(false) : setSaving(false);
+        });
+      if (publish && flowId) {
+        window.location.href = `/flow?id=${flowId}&pinBoard=true`;
+      }
       setDialogOpen(false);
     },
     [rfInstance, formValue]
@@ -193,11 +212,17 @@ const ShareBoard = (props) => {
             Cancel
           </Button>
           <LoadingButton
-            loading={sharing}
-            onClick={name == 'Download' ? handleDownload : handleShare}
+            loading={saving}
+            onClick={
+              name == 'Download'
+                ? handleDownload
+                : name == 'Save'
+                ? handleSave
+                : handleShare
+            }
             color="secondary"
           >
-            {name || 'Share'}
+            {name || 'Save'}
           </LoadingButton>
           <LoadingButton
             loading={publishing}

@@ -77,6 +77,7 @@ def search_modules( params, limit=25):
 
 def add_module(props):
     id = props.get('id')
+    user_id = props.get('user_id')
     config = props['config']
     base = {k:v for k,v in props.items() if k != 'config'}
     if 'name' in config.keys():
@@ -89,7 +90,7 @@ def add_module(props):
         code = ''
     hash = md5(f"{name}/{code}".encode()).hexdigest()
     hash = name
-    data = {**config,"base": base, "id":id, "hash":hash, "name": name}
+    data = {**config,"base": base, "id":id, "hash":hash, "name": name, "user_id": user_id}
     return add_node('Module', data)
 
 def delete_module(id):
@@ -236,8 +237,8 @@ def save_workflow(data,user_id):
     # add module links
     id_maps = {}
     for module in data['nodes']:
-        name = module.get('name')
         config = module.get('config')
+        name = config.get('name')
         author = config.get('author')
         author_id = config.get('author_id')
         # if module author not exists, add author
@@ -249,7 +250,7 @@ def save_workflow(data,user_id):
             module['config']['author_id'] = user_id
         if not name:
             name = uuid.uuid4().hex[:5]
-            module['name'] = name
+            config['name'] = name
         module_id = md5(f"{user_id}/{name}".encode()).hexdigest()
 
         icon = config.get('icon')
@@ -274,12 +275,17 @@ def save_workflow(data,user_id):
         id_maps[module['id']] = module_id
         # update the module id
         module['id'] = module_id
+        module['user_id'] = user_id
+        module['name'] = config['name']
+        module['config'] = config
+
         query_list.append(f"""
         "name":{module.get('name')},
         "description":{config.get('description')},
         "category":{config.get('description')},
         "author":{config.get('description')},
         """)
+        
         add_module(module)
         add_link("part_of", module_id, workflow_id)
         add_link("created_by", module_id, author_id)
@@ -308,5 +314,61 @@ def save_workflow(data,user_id):
         for i, node in enumerate(workflow_data['nodes']):
             set_node('Module',node,{"embeddings":embeddings[i+1]})
     return workflow_id
+
+
+def save_module(config,user_id):
+    module = {}
+    source_folder = os.getenv('DATABASE_SOURCE_DIR')
+    name = config.get('name')
+    author = config.get('author')
+    author_id = config.get('author_id')
+    # if module author not exists, add author
+    if author_id:
+        if not get_author(author_id):
+            add_author({"name":author,"id":author_id})
+    else:
+        author_id = user_id
+        config['author_id'] = user_id
+    if not name:
+        config['name'] = uuid.uuid4().hex[:5]
+    module_id = md5(f"{user_id}/{config}".encode()).hexdigest()
+
+    icon = config.get('icon')
+    if icon:
+        icon_path = os.path.join(source_folder,f"icons/{module_id}.png")
+        icon_data = config['icon']
+        if 'base64' in icon_data:
+            config['icon'] = base642file(icon_path,icon)
+    
+    files = config.get('files',[])
+    file_urls = []
+    for file in files:
+        file_data = file.get('data')
+        file_id = md5(file_data.encode()).hexdigest()
+        file_path = os.path.join(source_folder,f"files/{file_id}")
+        if 'base64' in file_data:
+            file['data'] = base642file(file_path,file_data)
+        file_urls.append(file)
+    config['files'] = file_urls
+    # update the module id
+    module['id'] = module_id
+    module['user_id'] = user_id
+    module['config'] = config
+    module['name'] = config['name']
+
+    add_module(module)
+    add_link("created_by", module_id, author_id)
+
+    # add embeddings
+    embeddings = get_embedding(f"""
+    "name":{config.get('name')},
+    "description":{config.get('description')},
+    "category":{config.get('description')},
+    "author":{config.get('description')},
+    """)
+    if len(embeddings)>0:
+        set_node('Module',module_id,{"embeddings":embeddings[0]})
+
+    return module_id
     
 

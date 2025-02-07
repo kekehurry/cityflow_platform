@@ -51,7 +51,6 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   // init
   useEffect(() => {
     // Prepare styles for the iframe content
-    console.log(config?.html);
     const innerHTML = config?.html
       ? config?.html
       : `<div style="text-align:center;color:${

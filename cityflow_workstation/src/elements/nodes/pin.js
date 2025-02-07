@@ -41,6 +41,7 @@ class PinNode extends PureComponent {
       currentX: props.config.pinLeft || 100 + Math.floor(Math.random() * 200),
       currentY: props.config.pinTop || 100 + Math.floor(Math.random() * 200),
       isDragging: false,
+      isAnimating: false,
       dragStartX: 0,
       dragStartY: 0,
     };
@@ -83,6 +84,11 @@ class PinNode extends PureComponent {
     }
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('mousemove', this.handleMouseMove);
+    document.removeEventListener('mouseup', this.handleMouseUp);
+  }
+
   handleResize = (e, direction, ref, d) => {
     this.props.setConfig({
       ...this.props.config,
@@ -106,15 +112,24 @@ class PinNode extends PureComponent {
 
   handleMouseMove(e) {
     if (!this.state.isDragging) return;
+
+    // 计算鼠标移动的距离
     const deltaX = e.clientX - this.state.dragStartX;
     const deltaY = e.clientY - this.state.dragStartY;
 
-    this.setState((prevState) => ({
-      currentX: prevState.currentX + deltaX,
-      currentY: prevState.currentY + deltaY,
-      dragStartX: e.clientX,
-      dragStartY: e.clientY,
-    }));
+    // 使用 requestAnimationFrame 控制拖拽更新
+    if (!this.state.isAnimating) {
+      this.setState({ isAnimating: true });
+      window.requestAnimationFrame(() => {
+        this.setState((prevState) => ({
+          currentX: prevState.currentX + deltaX,
+          currentY: prevState.currentY + deltaY,
+          dragStartX: e.clientX,
+          dragStartY: e.clientY,
+          isAnimating: false,
+        }));
+      });
+    }
   }
 
   handleMouseUp() {

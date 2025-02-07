@@ -12,7 +12,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-// import SaveIcon from '@mui/icons-material/Save';
+import SaveIcon from '@mui/icons-material/Save';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useReactFlow } from 'reactflow';
@@ -30,7 +30,7 @@ import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import { connect } from 'react-redux';
 import { setupExecutor, check } from '@/utils/executor';
 import { getLocalStorage } from '@/utils/local';
-// import { saveWorkflow } from '@/utils/dataset';
+import { saveWorkflow } from '@/utils/dataset';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -93,13 +93,14 @@ const FlowHeader = (props) => {
   const rfInstance = useReactFlow();
 
   const actions = [
-    // {
-    //   icon: <SaveIcon />,
-    //   name: 'Save',
-    //   onClick: () => {
-    //     saveUserFlow({ rfInstance, state: props.state });
-    //   },
-    // },
+    {
+      icon: <SaveIcon />,
+      name: 'Save',
+      onClick: () => {
+        setDialogOpen(true);
+        setDialogName('Save');
+      },
+    },
     {
       icon: <DownloadIcon />,
       name: 'Download',

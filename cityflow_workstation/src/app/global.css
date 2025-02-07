@@ -64,4 +64,8 @@ html {
 
 .log-module_backToTop__8GR6Y {
     cursor: pointer;
+    background: none !important;
+    padding-right: 0px;
+    font-size: 8px;
+    color: '#BDBDBD';
 }

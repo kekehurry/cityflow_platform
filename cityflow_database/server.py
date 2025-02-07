@@ -11,11 +11,13 @@ from utils.processor import (
     get_workflow,
     get_workflow_info,
     delete_workflow,
+    delete_module,
     search_modules,
     get_module,
     get_module_info,
     get_author,
-    save_workflow,  
+    save_workflow,
+    save_module,
 )
 
 from utils.search import (
@@ -77,6 +79,13 @@ def _search_modules():
     modules = [get_module_info(id) for id in ids]
     return jsonify(modules)
 
+@app.route('/save_module', methods=['POST'])
+def _save_module():
+    data = request.json.get('moduleData')
+    user_id = request.json.get('userId','test_user_000')
+    module = save_module(data,user_id)
+    return jsonify(module)
+
 
 # Author
 @app.route('/get_author', methods=['POST'])
@@ -95,6 +104,19 @@ def _delete_workflow():
     if user_info['name'] == workflow_author:
         workflow = delete_workflow(id)
         return jsonify(f'workflow {id} deleted')
+    else:
+        print('Unauthorized Access')
+        return jsonify({'error': 'Unauthorized  Access'}, 500)
+    
+@app.route('/delete_module', methods=['POST'])
+def _delete_module():
+    id = request.json.get('moduleId')
+    user_id = request.json.get('userId')
+    module = get_module(id)
+    module_user = module['user_id']
+    if user_id == module_user:
+        module = delete_module(id)
+        return jsonify(f'module {id} deleted')
     else:
         print('Unauthorized Access')
         return jsonify({'error': 'Unauthorized  Access'}, 500)

@@ -12,7 +12,7 @@ import {
 import { LoadingButton } from '@mui/lab';
 import theme from '@/theme';
 import { runCommand } from '@/utils/executor';
-import ReactAnsi from 'react-ansi';
+import LogViewer from '@/components/Logger';
 
 const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
 
@@ -60,30 +60,7 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
         <DialogTitle sx={{ fontSize: 20 }}>Terminal</DialogTitle>
         <DialogContent>
           <Stack width={400} height={300} spacing={2}>
-            <ReactAnsi
-              log={terminalLogs}
-              showHeader={false}
-              autoScroll={true}
-              style={{
-                borderRadius: '5px',
-                border: theme.palette.node.border,
-                backgroundColor: theme.palette.flow.main,
-                cursor: 'text',
-                userSelect: 'text',
-              }}
-              logStyle={{
-                fontFamily: 'monospace',
-                fontSize: 12,
-              }}
-              bodyStyle={{
-                height: 240,
-                width: 400,
-                backgroundColor: theme.palette.flow.main,
-                borderRadius: '5px',
-                color: theme.palette.text.secondary,
-                overflow: 'auto',
-              }}
-            />
+            <LogViewer logs={terminalLogs} width={400} height={270} />
             <TextField
               value={command}
               onChange={(e) => setCommand(e.target.value)}

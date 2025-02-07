@@ -3,6 +3,7 @@ import { Box, SpeedDial, SpeedDialIcon, SpeedDialAction } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import PublishIcon from '@mui/icons-material/Publish';
 import theme from '@/theme';
+import { saveModule } from '@/utils/dataset';
 
 export default function ControlButtons({
   config,
@@ -48,9 +49,8 @@ export default function ControlButtons({
       basic: false,
       local: true,
     };
-    window.dispatchEvent(
-      new CustomEvent('localModulesChange', { detail: newManifest })
-    );
+    saveModule(newManifest);
+    window.dispatchEvent(new CustomEvent('userModulesChange'));
   };
 
   const actions = [

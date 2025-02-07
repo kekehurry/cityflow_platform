@@ -39,7 +39,7 @@ export default function ModuleBuilder(props) {
     input: config.input || ['input'],
     output: config.output || ['output'],
     width: config.width || 150,
-    height: config.height || 100,
+    height: config.height || 0,
     expandWidth: config.expandWidth || 800,
     expandHeight: config.expandHeight || 600,
     port: config.type === 'server' ? config.port || 8080 : null,
@@ -124,6 +124,7 @@ export default function ModuleBuilder(props) {
   }, [formValue.type]);
 
   useEffect(() => {
+    setLog('');
     const getResults = async () => {
       const newConfig = {
         ...config,

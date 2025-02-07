@@ -113,7 +113,7 @@ const FlowSettings = (props) => {
     let logs = '';
     if (props.state?.isAlive) {
       await killExecutor(formValue.flowId);
-      setMeta({ logs: null });
+      setMeta({ logs: null, loading: false });
     } else {
       setLogOpen(true);
       for await (const chunk of await setupExecutor(
@@ -126,8 +126,8 @@ const FlowSettings = (props) => {
       }
     }
     check(formValue.flowId).then((data) => {
-      setMeta({ loading: false });
       setLogOpen(false);
+      setMeta({ loading: false });
     });
   };
 
