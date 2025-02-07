@@ -2,3 +2,5 @@
 *.log
 *.env.local
 temp
+dev.sh
+.env

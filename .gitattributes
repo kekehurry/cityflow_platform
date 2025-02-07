@@ -1,2 +1,3 @@
-.github merge=ours
-deploy.sh merge=ours
+.github/workflows/build.yml merge=ours
+.gitattributes merge=ours
+.gitignore merge=ours
