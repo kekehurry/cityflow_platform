@@ -21,13 +21,11 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: 'AI',
-      message: llmConfig?.greeding || 'Hi, What can I do for you?',
-    },
-  ]);
+
+  const [historyMessages, setHistoryMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [currentMessage, setCurrentMessage] = useState('');
+
   const [controller, setController] = useState(null);
   const [userId, setUserId] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
@@ -51,44 +49,47 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   }, []);
 
   useEffect(() => {
-    if (messages.length > 0 && messages[messages.length - 1].role === 'human') {
+    if (
+      historyMessages.length > 0 &&
+      historyMessages[historyMessages.length - 1].role === 'human'
+    ) {
       setIsLoading(true);
       const newController = new AbortController();
       setController(newController);
       const signal = newController.signal;
-
-      const historyMessage = messages.slice(0, messages.length - 1);
-      const newMessage = messages[messages.length - 1].message;
       const readStream = async () => {
         let reply = '';
         try {
           for await (const chunk of await assistant.stream(
-            newMessage,
-            historyMessage,
+            '',
+            historyMessages,
             signal
           )) {
             reply += chunk;
-            setMessages((prevMessages) => [
-              ...prevMessages.slice(0, -1),
-              { role: 'AI', message: reply },
-            ]);
+            setCurrentMessage({ role: 'AI', message: reply });
           }
           setIsLoading(false);
         } catch (e) {
           setIsLoading(false);
-          setMessages([...messages, { role: 'AI', message: e }]);
+          setCurrentMessage({ role: 'AI', message: e });
+        } finally {
+          setHistoryMessages([
+            ...historyMessages,
+            { role: 'AI', message: reply },
+          ]);
+          setCurrentMessage('');
         }
       };
       readStream();
     }
-  }, [messages, inputMessage]);
+  }, [historyMessages]);
 
   useEffect(() => {
     isLoading &&
-      setMessages([
-        ...messages,
-        { role: 'AI', message: `![loading](${basePath}/static/loading.gif)` },
-      ]);
+      setCurrentMessage({
+        role: 'AI',
+        message: `![loading](${basePath}/static/loading.gif)`,
+      });
   }, [isLoading]);
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
       behavior: 'smooth',
       block: 'nearest',
     });
-  }, [messages]);
+  }, [historyMessages, currentMessage]);
 
   return (
     <Stack spacing={1} width="100%" height={height} overflow={'auto'}>
@@ -142,8 +143,17 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
             }}
             className="nowheel"
           >
-            {messages &&
-              messages.map((message, index) => {
+            {llmConfig?.greeding && (
+              <MessageLeft
+                key="greeding"
+                message={llmConfig?.greeding}
+                name={llmConfig?.name}
+                avatar={llmConfig?.assistantIcon}
+                sendCode={sendCode}
+              />
+            )}
+            {historyMessages &&
+              historyMessages.map((message, index) => {
                 return message['role'] === 'human' ? (
                   <MessageRight
                     key={index}
@@ -164,10 +174,18 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                   />
                 );
               })}
+            {currentMessage && currentMessage.role === 'AI' && (
+              <MessageLeft
+                message={currentMessage.message}
+                name={llmConfig?.name}
+                avatar={llmConfig?.assistantIcon}
+                sendCode={sendCode}
+              />
+            )}
             <div ref={messageEndRef} />
           </Stack>
           <OutlinedInput
-            placeholder="Chat with Miya..."
+            placeholder="Chat with CityFlow..."
             multiline
             rows={3}
             width="100%"
@@ -176,8 +194,8 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                setMessages([
-                  ...messages,
+                setHistoryMessages([
+                  ...historyMessages,
                   { role: 'human', message: inputMessage },
                 ]);
                 setInputMessage('');
@@ -194,8 +212,8 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                     <IconButton
                       size="small"
                       onClick={() => {
-                        setMessages([
-                          ...messages,
+                        setHistoryMessages([
+                          ...historyMessages,
                           { role: 'human', message: inputMessage },
                         ]);
                         setInputMessage('');
@@ -207,7 +225,7 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                   <IconButton
                     size="small"
                     onClick={() => {
-                      setMessages([messages[0]]);
+                      setHistoryMessages([]);
                       setInputMessage('');
                     }}
                   >

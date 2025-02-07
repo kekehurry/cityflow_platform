@@ -1,47 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import typography from '@/theme/typography';
+import palette from '@/theme/palette';
 import theme from '@/theme';
 import { nanoid } from 'nanoid';
 import { getLocalStorage } from '@/utils/local';
 
-const generateCSS = (typography) => {
-  const cssRules = [];
-
-  // Font family and general styles
-  cssRules.push(`
-    body {
-      font-family: ${typography.fontFamily};
-      font-size: ${typography.fontSize}px;
-      font-weight: ${typography.fontWeightRegular};
-    }
-  `);
-
-  // Header styles (h1 to h6)
-  for (let i = 1; i <= 6; i++) {
-    const h = typography[`h${i}`];
-    if (h) {
-      cssRules.push(`
-        h${i} {
-          font-weight: ${h.fontWeight};
-          font-size: ${h.fontSize}px;
-          letter-spacing: ${h.letterSpacing};
-        }
-      `);
-    }
-  }
-
-  // Overline styles
-  if (typography.overline) {
-    cssRules.push(`
-      .overline {
-        font-weight: ${typography.overline.fontWeight};
-      }
-    `);
-  }
-
-  return cssRules.join('\n');
-};
-
-const cssString = generateCSS(theme.typography);
 const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   const [html, setHtml] = useState(config.html || null);
   const [iframeId, setIframeId] = useState(nanoid());
@@ -69,16 +32,6 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
     }
   };
 
-  // update iframe
-  // useEffect(() => {
-  //   setConfig &&
-  //     iframeId &&
-  //     setConfig({
-  //       ...config,
-  //       iframeId,
-  //     });
-  // }, [iframeId, setConfig]);
-
   //   Listen for messages from the iframe
   useEffect(() => {
     if (!window) return;
@@ -98,7 +51,20 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   // init
   useEffect(() => {
     // Prepare styles for the iframe content
-    const head = `
+    console.log(config?.html);
+    const innerHTML = config?.html
+      ? config?.html
+      : `<div style="text-align:center;color:${
+          theme.palette.text.secondary
+        };height:100%;align-items:center;display:flex;justify-content:center">
+        <p style="font-size:${15 / (zoom || 1)}px">${
+          config?.name || 'Unnamed Module'
+        }</p>
+      </div>`;
+
+    const iframeHtml = `
+    <!DOCTYPE html>
+    <html>
     <head>
     <style>
         ::-webkit-scrollbar {
@@ -109,40 +75,36 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
             -ms-overflow-style: none; /* For Internet Explorer and Edge */
         }
         body {
-          color: #9E9E9E;
+          font-family: 'Roboto Mono', 'Arial', 'Kalam', sans-serif;
         }
-        h1, h2, h3, h4, h5, h6, p, div, span {
-            color: #9E9E9E;
-        }
-        ${cssString}
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
         const secrets = ${JSON.stringify(secrets)};
         window.iframeId = "${iframeId}";
+        window.zoom = ${zoom || 1};
+        window.typography = ${JSON.stringify(typography)};
+        window.palette = ${JSON.stringify(palette)};
+        window.theme = {
+        ...window.typography,
+        ...window.palette
+        };
         window.addEventListener('error', function(event) {
           document.body.innerHTML = \`
-            <div style="text-align:center; height='100%'">
-              <h4>Error running component</h4>
-              <p>\$\{event.message\}</p>
+            <div style="text-align:center; height:100%">
+              <p style="color:red; font-size:${
+                10 / zoom
+              }px">\$\{event.message\}</p>
             </div>
           \`;
         });
     </script>
     </head>
+    <body>
+    ${innerHTML}
+    </body>
+    </html>
     `;
-    if (config?.html) {
-      setHtml(head + config?.html);
-    } else {
-      setHtml(
-        head +
-          `
-        <div style="text-align:center">
-          <h4>${config?.name || 'Unnamed Module'}</h4>
-        </div>
-    `
-      );
-    }
+    setHtml(iframeHtml);
   }, [config?.html, config?.name, config?.author, iframeId]);
 
   return (

@@ -199,9 +199,10 @@ export default function CodeEditor({
               wordWrap: 'on',
               inlineSuggest: {
                 enabled: AUTO_COMPLETION,
-                showToolbar: true,
+                showToolbar: false,
               },
-              suggestOnTriggerCharacters: AUTO_COMPLETION,
+              suggestOnTriggerCharacters: true,
+              filterGraceful: true,
             }}
           />
         )}

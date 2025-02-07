@@ -3,8 +3,6 @@ import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { debounce } from 'lodash';
-import { useState, useEffect } from 'react';
 
 const buttonStyle = {
   marginRight: '8px',
@@ -50,37 +48,22 @@ const MarkdownHeader = ({ code, sendCode }) => (
 );
 
 const CustomMarkdown = ({ markdown, sendCode }) => {
-  const [debouncedMarkdown, setDebouncedMarkdown] = useState(markdown);
-
-  useEffect(() => {
-    const debouncedUpdate = debounce(() => {
-      const revisedMarkdown = markdown.replace(
-        /<think>(.*?)<\/think>/gs,
-        (match, content) => {
-          const lines = content.split('\n');
-          return `<div style="color: #a0a0a0; font-size: 0.9em; font-style: italic; margin: 12px 0; paddingLeft: 12px; border-left: 2px solid rgb(168, 168, 168);">${lines
-            .map((line) => `<p>${line}</p>`)
-            .join('')}</div>`;
-        }
-      );
-      setDebouncedMarkdown(revisedMarkdown);
-    }, 20);
-
-    debouncedUpdate();
-
-    return () => {
-      debouncedUpdate.cancel();
-    };
-  }, [markdown]);
-
+  const revisedMarkdown = markdown.replace(
+    /<think>(.*?)<\/think>/gs,
+    (match, content) => {
+      const lines = content.split('\n').filter((line) => line.trim() !== '');
+      return lines.map((line) => `<think>${line}</think>`).join('');
+    }
+  );
   return (
     <Markdown
       rehypePlugins={[rehypeRaw]}
       remarkPlugins={[remarkGfm]}
-      children={debouncedMarkdown}
+      children={revisedMarkdown}
       components={{
         code(props) {
           const { children, className, inline, node, ...rest } = props;
+          const isMultiline = (content) => String(content).includes('\n');
           const match = /language-(\w+)/.exec(className || '');
           return match ? (
             <div style={{ width: '100%', overflow: 'hidden' }}>
@@ -91,8 +74,7 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
                 language={match[1]}
                 style={darcula}
                 customStyle={{
-                  maxWidth: '400px',
-                  margin: '0 auto',
+                  margin: 0,
                 }}
               />
               <MarkdownHeader code={children} sendCode={sendCode} />
@@ -109,6 +91,7 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 fontFamily: 'monospace',
+                display: isMultiline(children) ? 'block' : 'unset',
               }}
             >
               {children}
@@ -117,19 +100,21 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
         },
         think({ node, children }) {
           return (
-            <div
+            <span
               style={{
                 color: '#a0a0a0', // 浅灰色
+                width: '100%',
                 fontSize: '0.9em',
                 fontStyle: 'italic',
-                margin: '8px 0',
-                padding: '12px',
+                margin: '0px 10px',
+                padding: '10px 12px 0px 12px',
                 borderLeft: '2px solid rgb(168, 168, 168)',
                 backgroundColor: 'none',
+                display: 'block',
               }}
             >
               {children}
-            </div>
+            </span>
           );
         },
       }}

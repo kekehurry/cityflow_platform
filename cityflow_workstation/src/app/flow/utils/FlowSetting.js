@@ -77,7 +77,7 @@ const FlowSettings = (props) => {
     name: 'CityFlow',
     assistantIcon: `${basePath}/static/favicon.ico`,
     systemPrompt: `You are a helpful assistant for CityFlow Platform. You can help users to design, evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows.`,
-    context: `Today is ${new Date().toDateString()}`,
+    context: '',
     greeding: `What can I do for you?`,
     model: 'gpt-4o-mini',
     baseUrl: 'https://api.openai.com/v1',
@@ -340,7 +340,18 @@ const FlowSettings = (props) => {
           value={formValue?.packages}
           multiline
           rows={5}
-          placeholder={`# conda,pip or npm packages to install:\n {"conda": ["osmnx","memopy"],\n "pip": ["seaborn"],\n "npm": ["three"]}`}
+          placeholder={`conda:
+  - package1
+  - package2
+npm:
+  - package1
+  - package2
+pip:
+  - package1
+  - package2
+channels:
+  - conda-forge
+  - defaults`}
           InputLabelProps={{ shrink: true }}
         />
         <LoadingButton

@@ -17,7 +17,7 @@ load_dotenv()
 
 dataserver= os.getenv('DATASET_SERVER')
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 def _wait_for_ready(container: Any, timeout: int = 60, stop_time: float = 0.1) -> None:
     elapsed_time = 0.0
@@ -92,7 +92,7 @@ class CodeExecutor:
             except FileExistsError:
                 pass
         
-        self._setup_path = os.path.join(self._work_dir, "setup.json")
+        self._setup_path = os.path.join(self._work_dir, "setup.yml")
         with open(self._setup_path, "w") as f:
             if self._packages:
                 f.write(self._packages)
@@ -204,7 +204,7 @@ class CodeExecutor:
                         pass
         
         runner_work_dir = self._container.attrs["Config"]["WorkingDir"]
-        runner_work_dir = os.path.join(runner_work_dir, "workflow",foldername)
+        runner_work_dir = os.path.join(runner_work_dir,foldername)
         # command = ["/bin/bash", "-c", f"cd {runner_work_dir} && timeout {self._timeout} {_cmd(lang)} ."]
         command = ["/bin/bash", "-c", f"cd {runner_work_dir} && {_cmd(lang)} ."]
         return command, lang, foldername

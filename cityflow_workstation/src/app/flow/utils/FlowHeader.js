@@ -186,6 +186,17 @@ const FlowHeader = (props) => {
             </Menu>
           </>
           <Link
+            href="/author"
+            style={{
+              color: theme.palette.text.primary,
+              textDecoration: 'none',
+            }}
+          >
+            <IconButton aria-label="graph search">
+              <HomeIcon />
+            </IconButton>
+          </Link>
+          <Link
             href="/community"
             style={{
               color: theme.palette.text.primary,
@@ -205,17 +216,6 @@ const FlowHeader = (props) => {
           >
             <IconButton aria-label="graph search">
               <SearchIcon />
-            </IconButton>
-          </Link>
-          <Link
-            href="/author"
-            style={{
-              color: theme.palette.text.primary,
-              textDecoration: 'none',
-            }}
-          >
-            <IconButton aria-label="graph search">
-              <HomeIcon />
             </IconButton>
           </Link>
           <Typography

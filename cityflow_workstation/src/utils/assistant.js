@@ -33,15 +33,26 @@ export default class Assistant {
         role: 'system',
         content: this.props.systemPrompt || 'you are a helpful assistant',
       },
-      { role: 'user', content: this.props.context || '' },
-      ...parseMessage(messageHistory),
-      isBase64Image(inputMessage)
-        ? {
-            role: 'user',
-            content: [{ type: 'image_url', image_url: { url: inputMessage } }],
-          }
-        : { role: 'user', content: inputMessage || '' },
     ];
+    if (this.props.context) {
+      messages.push({ role: 'user', content: this.props.context });
+    } else if (messageHistory) {
+      messages.push(...parseMessage(messageHistory));
+    } else if (inputMessage) {
+      messages.push(
+        isBase64Image(inputMessage)
+          ? {
+              role: 'user',
+              content: [
+                { type: 'image_url', image_url: { url: inputMessage } },
+              ],
+            }
+          : { role: 'user', content: inputMessage || '' }
+      );
+    } else {
+      return { error: 'No input message' };
+    }
+
     try {
       const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -81,10 +92,25 @@ export default class Assistant {
         role: 'system',
         content: this.props.systemPrompt || 'you are a helpful assistant',
       },
-      { role: 'user', content: this.props.context || '' },
-      ...parseMessage(messageHistory),
-      { role: 'user', content: inputMessage || '' },
     ];
+    if (this.props.context) {
+      messages.push({ role: 'user', content: this.props.context });
+    } else if (messageHistory) {
+      messages.push(...parseMessage(messageHistory));
+    } else if (inputMessage) {
+      messages.push(
+        isBase64Image(inputMessage)
+          ? {
+              role: 'user',
+              content: [
+                { type: 'image_url', image_url: { url: inputMessage } },
+              ],
+            }
+          : { role: 'user', content: inputMessage || '' }
+      );
+    } else {
+      return { error: 'No input message' };
+    }
 
     try {
       const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
@@ -118,6 +144,7 @@ export default class Assistant {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
+      let buffer = '';
 
       while (true) {
         // Check if the signal is aborted
@@ -129,8 +156,13 @@ export default class Assistant {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
 
-        for (const line of chunk.split('\n')) {
+        let boundary = buffer.indexOf('\n');
+        while (boundary !== -1) {
+          const line = buffer.slice(0, boundary).trim();
+          buffer = buffer.slice(boundary + 1);
+
           if (line.startsWith('data:')) {
             const jsonData = line.slice(5).trim();
             if (jsonData === '[DONE]') {
@@ -143,11 +175,10 @@ export default class Assistant {
                 if (content) {
                   yield content; // Stream output to the caller
                 }
-              } catch (e) {
-                yield e;
-              }
+              } catch (e) {}
             }
           }
+          boundary = buffer.indexOf('\n');
         }
       }
     } catch (error) {

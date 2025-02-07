@@ -15,7 +15,7 @@ import {
   updateZIndex,
   updateNode,
 } from '@/store/actions';
-import _, { set } from 'lodash';
+import _, { debounce } from 'lodash';
 import theme from '@/theme';
 
 import LimitHandle from './utils/LimitHandle';
@@ -72,6 +72,15 @@ class ExpandNode extends PureComponent {
     this.setOutput = this.setOutput.bind(this);
     this.error = this.error.bind(this);
     this.warning = this.warning.bind(this);
+    // this.componentUpdate = debounce(this.update, 1);
+    this.componentUpdate = this.update;
+  }
+
+  componentDidMount() {}
+  // Call the throttled version of componentDidUpdate
+
+  componentDidUpdate(prevProps, prevState) {
+    this.componentUpdate(prevProps, prevState);
   }
 
   setOutput = (output) => {
@@ -79,9 +88,7 @@ class ExpandNode extends PureComponent {
     this.setState({ loading: false, localOutput: output });
   };
 
-  componentDidMount() {}
-
-  componentDidUpdate(prevProps, prevState) {
+  update(prevProps, prevState) {
     // child module only update the localOutput to prevent infinite loop
     // if localOutput has changed, update the globalOutput
     if (!_.isEqual(prevState.localOutput, this.state.localOutput)) {

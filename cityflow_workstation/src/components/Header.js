@@ -49,6 +49,17 @@ const Header = (props) => {
             </IconButton>
           </Link>
           <Link
+            href="/author"
+            style={{
+              color: theme.palette.text.primary,
+              textDecoration: 'none',
+            }}
+          >
+            <IconButton aria-label="graph search">
+              <HomeIcon />
+            </IconButton>
+          </Link>
+          <Link
             href="/community"
             style={{
               color: theme.palette.text.primary,
@@ -73,17 +84,6 @@ const Header = (props) => {
                 alt="Dataset"
                 style={{ width: '15px', height: '15px' }}
               /> */}
-            </IconButton>
-          </Link>
-          <Link
-            href="/author"
-            style={{
-              color: theme.palette.text.primary,
-              textDecoration: 'none',
-            }}
-          >
-            <IconButton aria-label="graph search">
-              <HomeIcon />
             </IconButton>
           </Link>
           <Typography

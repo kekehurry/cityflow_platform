@@ -17,11 +17,9 @@ export default function ConfigTab({
   setConfig,
 }) {
   const logEndRef = useRef(null);
-
   useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [log]);
-
   return (
     <Box hidden={tab !== 0}>
       {config.expandHeight && (
@@ -82,7 +80,14 @@ export default function ConfigTab({
       ) : (
         <>
           <Typography variant="caption">Logs</Typography>
-          <div>
+          <div
+            style={{
+              marginTop: 10,
+              width: '100%',
+              height: '100%',
+              overflow: 'auto',
+            }}
+          >
             <SyntaxHighlighter
               language="bash"
               style={dark}
@@ -92,22 +97,23 @@ export default function ConfigTab({
               wrapLongLines={true}
               wrapLines={true}
               customStyle={{
-                maxWidth: '100%',
                 width: '100%',
-                height: 260,
+                height: 210,
                 margin: '0 auto',
                 fontFamily: 'monospace',
+                fontSize: 10,
                 backgroundColor: theme.palette.flow.main,
                 borderRadius: '5px',
                 border: theme.palette.node.border,
                 color: theme.palette.text.secondary,
                 padding: '16px',
                 overflow: 'auto',
+                boxShadow: 'none',
               }}
             >
               {log}
+              <div ref={logEndRef} />
             </SyntaxHighlighter>
-            <div ref={logEndRef} />
           </div>
         </>
       )}

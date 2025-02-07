@@ -183,7 +183,7 @@ export function registerLLMCompletions(
       setStatus && setStatus('Error');
       return [{ label: 'Error', insertText: `Error: ${e.message}` }];
     }
-  }, 2000);
+  }, 500);
 
   return monaco.languages.registerInlineCompletionsProvider(language, {
     provideInlineCompletions: async (model, position) => {
@@ -203,7 +203,7 @@ export function registerLLMCompletions(
                 kind: monaco.languages.CompletionItemKind.Text,
                 range: new monaco.Range(
                   position.lineNumber,
-                  position.column - currentLine.trimStart().length,
+                  position.column,
                   position.lineNumber,
                   model.getLineMaxColumn(position.lineNumber)
                 ),
@@ -219,7 +219,7 @@ export function registerLLMCompletions(
           kind: monaco.languages.CompletionItemKind.Text,
           range: new monaco.Range(
             position.lineNumber,
-            position.column - currentLine.trimStart().length,
+            position.column,
             position.lineNumber,
             model.getLineMaxColumn(position.lineNumber)
           ),
@@ -234,7 +234,6 @@ export function registerLLMCompletions(
       '.',
       '(',
       ':',
-      ' ',
       '=',
       '+',
       '-',

@@ -7,9 +7,9 @@ from hashlib import md5
 import logging
 import os
 
-# logging.basicConfig(level=logging.INFO)
+
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.WARNING)
+log.setLevel(logging.INFO)
 
 app = Flask(__name__)
 CORS(app)
@@ -37,7 +37,7 @@ def setup():
             manager.unregister_excutor(container_name)
             executor = CodeExecutor(image=image,container_name=container_name,packages=packages)
             manager.register_excutor(executor)
-        return Response(executor.run('./install.sh'), mimetype='text/plain')
+        return Response(executor.run("/cityflow_runner/install.sh"), mimetype='text/plain')
     
 @app.route('/run_command', methods=['POST'])
 def run_command():

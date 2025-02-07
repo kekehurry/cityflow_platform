@@ -6,7 +6,7 @@
     "name": "Module Builder",
     "type": "interface",
     "width": 150,
-    "height": 100,
+    "height": 60,
     "expandWidth": 800,
     "expandHeight": 600,
     "output": ["output"],

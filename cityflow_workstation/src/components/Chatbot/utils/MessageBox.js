@@ -2,6 +2,7 @@ import React from 'react';
 import { Avatar, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CustomMarkdown from './CumstomMarkdown';
+import { memo } from 'react';
 
 const MessageRowRight = styled(Box)({
   display: 'flex',
@@ -71,7 +72,7 @@ const ChatAvatar = styled(Avatar)(({ theme }) => ({
   height: theme.spacing(4),
 }));
 
-export const MessageRight = ({ message, name, avatar }) => {
+export const MessageRight = memo(({ message, name, avatar }) => {
   return (
     <MessageRowRight>
       <MessageGreen>
@@ -82,13 +83,13 @@ export const MessageRight = ({ message, name, avatar }) => {
       <ChatAvatar alt={name} src={avatar || ''} />
     </MessageRowRight>
   );
-};
+});
 
-export const MessageLeft = ({ message, name, avatar, sendCode }) => {
+export const MessageLeft = memo(({ message, name, avatar, sendCode }) => {
   return (
     <MessageNoFrame>
       <ChatAvatar alt={name} src={avatar || ''} />
       <CustomMarkdown markdown={message} sendCode={sendCode} />
     </MessageNoFrame>
   );
-};
+});
