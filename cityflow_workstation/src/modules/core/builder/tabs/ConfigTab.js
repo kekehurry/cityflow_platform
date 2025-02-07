@@ -3,8 +3,7 @@ import ConfigPanel from '../utils/ConfigPanel';
 import IframeComponent from '../utils/IframeComponent';
 import theme from '@/theme';
 import { useRef, useEffect } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ReactAnsi from 'react-ansi';
 
 export default function ConfigTab({
   tab,
@@ -88,32 +87,30 @@ export default function ConfigTab({
               overflow: 'auto',
             }}
           >
-            <SyntaxHighlighter
-              language="bash"
-              style={dark}
-              lineProps={{
-                style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' },
-              }}
-              wrapLongLines={true}
-              wrapLines={true}
-              customStyle={{
-                width: '100%',
-                height: 210,
-                margin: '0 auto',
-                fontFamily: 'monospace',
-                fontSize: 10,
-                backgroundColor: theme.palette.flow.main,
+            <ReactAnsi
+              log={log || ''}
+              showHeader={false}
+              autoScroll={true}
+              style={{
                 borderRadius: '5px',
                 border: theme.palette.node.border,
-                color: theme.palette.text.secondary,
-                padding: '16px',
-                overflow: 'auto',
-                boxShadow: 'none',
+                backgroundColor: theme.palette.flow.main,
+                cursor: 'text',
+                userSelect: 'text',
               }}
-            >
-              {log}
-              <div ref={logEndRef} />
-            </SyntaxHighlighter>
+              logStyle={{
+                fontFamily: 'monospace',
+                fontSize: 12,
+              }}
+              bodyStyle={{
+                height: 190,
+                width: '100%',
+                backgroundColor: theme.palette.flow.main,
+                borderRadius: '5px',
+                color: theme.palette.text.secondary,
+                overflow: 'auto',
+              }}
+            />
           </div>
         </>
       )}

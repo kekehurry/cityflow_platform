@@ -179,12 +179,20 @@ export default function ModuleBuilder(props) {
             // result?.console.includes('success') &&
             setConfig({
               ...newConfig,
-              html: `<pre  style="font-size: 6px; white-space: pre-wrap;">${result.console}</pre>`,
+              html: `
+              <pre id="error-message" style="color:red;">${result.console}</pre>
+              <script>
+                document.getElementById('error-message').style.fontSize = (12 / window.zoom) + 'px';
+              </script>
+            `,
             });
           } else {
             setConfig({
               ...newConfig,
-              html: `<pre  style="font-size: 6px; white-space: pre-wrap;">compile failed!</pre>`,
+              html: `<pre id="error-message" style="color:red;">compile failed</pre>
+              <script>
+                document.getElementById('error-message').style.fontSize = (12 / window.zoom) + 'px';
+              </script>`,
             });
           }
           setLoading(false);

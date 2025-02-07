@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Box,
   Stack,
   Button,
   Dialog,
@@ -13,22 +12,21 @@ import {
 import { LoadingButton } from '@mui/lab';
 import theme from '@/theme';
 import { runCommand } from '@/utils/executor';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ReactAnsi from 'react-ansi';
 
 const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
 
 const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   const [loading, setLoading] = useState(false);
   const [command, setCommand] = useState('');
-  const [terminalLogs, setTerminalLogs] = useState(logs || '');
-  const logEndRef = useRef(null);
+  const [terminalLogs, setTerminalLogs] = useState('');
 
   const handleSubmit = async () => {
     setLoading(true);
-    setTerminalLogs('');
+    let allLogs = '';
     for await (const chunk of await runCommand(flowId, command)) {
-      setTerminalLogs((logs) => logs + chunk);
+      allLogs += chunk;
+      setTerminalLogs(allLogs);
     }
     setLoading(false);
   };
@@ -37,10 +35,6 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
     setLogOpen(false);
     setCommand('');
   };
-
-  useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, [terminalLogs]);
 
   useEffect(() => {
     setTerminalLogs(logs);
@@ -66,32 +60,30 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
         <DialogTitle sx={{ fontSize: 20 }}>Terminal</DialogTitle>
         <DialogContent>
           <Stack width={400} height={300} spacing={2}>
-            <SyntaxHighlighter
-              language="bash"
-              style={dark}
-              wrapLongLines={true}
-              wrapLines={true}
-              lineProps={{
-                style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' },
-              }}
-              customStyle={{
-                maxWidth: '100%',
-                width: '100%',
-                height: 260,
-                margin: '0 auto',
-                fontFamily: 'monospace',
-                backgroundColor: theme.palette.flow.main,
+            <ReactAnsi
+              log={terminalLogs}
+              showHeader={false}
+              autoScroll={true}
+              style={{
                 borderRadius: '5px',
                 border: theme.palette.node.border,
-                color: theme.palette.text.secondary,
-                padding: '16px',
-                overflow: 'auto',
-                boxShadow: 'none',
+                backgroundColor: theme.palette.flow.main,
+                cursor: 'text',
+                userSelect: 'text',
               }}
-            >
-              {terminalLogs}
-              <div ref={logEndRef} />
-            </SyntaxHighlighter>
+              logStyle={{
+                fontFamily: 'monospace',
+                fontSize: 12,
+              }}
+              bodyStyle={{
+                height: 240,
+                width: 400,
+                backgroundColor: theme.palette.flow.main,
+                borderRadius: '5px',
+                color: theme.palette.text.secondary,
+                overflow: 'auto',
+              }}
+            />
             <TextField
               value={command}
               onChange={(e) => setCommand(e.target.value)}
