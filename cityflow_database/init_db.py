@@ -36,13 +36,6 @@ def load_flow_data(file,basic=False,showcase=False,user_id=admin_id):
 
 print('Loading workflows...')
 
-folder = './cityflow_database/json/basic'
-for file in os.listdir(folder):
-    if file.endswith('.json'):
-        file = os.path.join(folder,file)
-        flow = load_flow_data(file,basic=True,showcase=False)
-        save_workflow(flow,user_id=admin_id)
-
 
 folder = './cityflow_database/json/tutorial'
 for file in os.listdir(folder):
@@ -57,6 +50,13 @@ for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
         flow = load_flow_data(file,basic=False,showcase=True)
+        save_workflow(flow,user_id=admin_id)
+
+folder = './cityflow_database/json/basic'
+for file in os.listdir(folder):
+    if file.endswith('.json'):
+        file = os.path.join(folder,file)
+        flow = load_flow_data(file,basic=True,showcase=False)
         save_workflow(flow,user_id=admin_id)
 
 

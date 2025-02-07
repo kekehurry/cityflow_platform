@@ -90,7 +90,7 @@ const FlowSettings = (props) => {
   });
   const [defaultRunner, setDefaultRunner] = useLocalStorage(
     'DEFAULT_RUNNER',
-    process.env.NEXT_PUBLIC_DEFAULT_RUNNER || 'cityflow/cityflow-runner:latest'
+    process.env.NEXT_PUBLIC_DEFAULT_RUNNER || 'cityflow/cityflow-runner:light'
   );
   const [logOpen, setLogOpen] = useState(false);
   const [autoCompletion, setAutoCompletion] = useState(true);
@@ -110,7 +110,7 @@ const FlowSettings = (props) => {
     setMeta({ ...formValue, loading: true });
     setAuthor(formValue.author);
     setDefaultRunner(formValue.image);
-    let logs = '';
+    const logs = [];
     if (props.state?.isAlive) {
       await killExecutor(formValue.flowId);
       setMeta({ logs: null, loading: false });
@@ -121,8 +121,8 @@ const FlowSettings = (props) => {
         formValue.packages,
         formValue.image
       )) {
-        logs += chunk;
-        setMeta({ logs });
+        logs.push(chunk);
+        setMeta({ logs: logs.slice(-20).join('') });
       }
     }
     check(formValue.flowId).then((data) => {

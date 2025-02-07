@@ -157,9 +157,9 @@ export function registerLLMCompletions(
     maxTokens: 200,
     context: '',
     responseFormat: 'json_object',
-    baseUrl: localLLMConfig.codeBaseUrl || localLLMConfig.baseUrl,
-    model: localLLMConfig.codeModel || localLLMConfig.model,
-    apiKey: localLLMConfig.codeApiKey || localLLMConfig.apiKey,
+    baseUrl: localLLMConfig?.codeBaseUrl || localLLMConfig?.baseUrl,
+    model: localLLMConfig?.codeModel || localLLMConfig?.model,
+    apiKey: localLLMConfig?.codeApiKey || localLLMConfig?.apiKey,
   };
   const assistant = new Assistant(llmConfig);
 

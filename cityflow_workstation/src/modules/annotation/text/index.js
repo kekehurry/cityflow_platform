@@ -13,7 +13,7 @@ function TextNode(props) {
 
   useEffect(() => {
     if (!value) {
-      setValue('Double click to edit');
+      setValue('Double click to edit, Shift+Enter to save');
     } else {
       setConfig({ ...config, value });
     }
@@ -28,19 +28,17 @@ function TextNode(props) {
             autoFocus
             multiline
             variant="standard"
-            onMouseLeave={() => setEdit(false)}
+            // onMouseLeave={() => setEdit(false)}
+            onKeyDown={(e) => {
+              if (e.shiftKey && e.key === 'Enter') {
+                setEdit(false);
+              }
+            }}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             sx={{ width: '100%', minHeight: 0, height: '100%' }}
-            // InputProps={{ className: 'kalam-regular' }}
           />
         ) : (
-          // <Typography
-          // className='kalam-regular'
-          // sx = {{width: '100%',marginTop:0,marginBottom:0,color:theme.palette.annotation.main}}
-          // onDoubleClick={() => setEdit(true)}>
-          //   {value}
-          // </Typography>
           <div
             className="kalam-regular"
             sx={{

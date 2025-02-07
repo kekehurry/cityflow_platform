@@ -83,6 +83,7 @@ export const ModuleList = (props) => {
     getCoreModuleList().then((moduleList) => {
       Object.entries(moduleList).forEach(([category, moduleList]) => {
         fetchModules(category, moduleList).then((modules) => {
+          console.log('core modules', modules);
           setCoreModules((prevModules) => ({
             ...prevModules,
             [category]: modules,
@@ -115,6 +116,7 @@ export const ModuleList = (props) => {
           return 0;
         });
       setBasicModules(modules);
+      console.log('basic modules', modules);
       return modules;
     });
   };
@@ -122,7 +124,7 @@ export const ModuleList = (props) => {
   const getUserModules = async () => {
     // get user modules from server
     initUserId().then((userId) => {
-      searchModule({ user_id: userId }).then((moduleList) => {
+      searchModule({ user_id: userId, local: true }).then((moduleList) => {
         if (!moduleList) return;
         const modules = moduleList.map((config) => {
           let module = { ...config };
@@ -132,6 +134,7 @@ export const ModuleList = (props) => {
           return module;
         });
         setUserModules(modules);
+        console.log('user modules', modules);
         return modules;
       });
     });
@@ -161,9 +164,11 @@ export const ModuleList = (props) => {
     getUserModules();
 
     const updateModules = () => {
-      console.log('update modules');
       getUserModules().then((newUserModules) => {
-        setGroupedModules(groupModules([...basicModules, ...newUserModules]));
+        if (newUserModules && newUserModules.length > 0) {
+          setGroupedModules(groupModules([...basicModules, ...newUserModules]));
+        }
+        // newUserModules &&
       });
     };
 

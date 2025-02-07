@@ -146,7 +146,7 @@ class CodeExecutor:
     def run(self,command) -> str: # type: ignore
         try:
             container = self._client.containers.get(self._container_name)
-            results = container.exec_run(f"/bin/bash -c '{command}'", stream=True) 
+            results = container.exec_run(f"/bin/bash -c '{command}'", stream=True, tty=True) 
             for line in results.output:
                 logs = line.decode("utf-8")
                 yield logs + '\n'

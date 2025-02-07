@@ -39,7 +39,7 @@ export default function ControlButtons({
       minute: 'numeric',
       second: 'numeric',
     });
-    //save to localStorage
+    //save to  module Panel
     const newManifest = {
       ...config,
       ...formValue,

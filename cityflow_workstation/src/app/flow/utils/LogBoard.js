@@ -24,6 +24,7 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   const handleSubmit = async () => {
     setLoading(true);
     let allLogs = '';
+    setTerminalLogs('');
     for await (const chunk of await runCommand(flowId, command)) {
       allLogs += chunk;
       setTerminalLogs(allLogs);
@@ -60,7 +61,12 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
         <DialogTitle sx={{ fontSize: 20 }}>Terminal</DialogTitle>
         <DialogContent>
           <Stack width={400} height={300} spacing={2}>
-            <LogViewer logs={terminalLogs} width={400} height={270} />
+            <LogViewer
+              key="terminal"
+              logs={terminalLogs}
+              width={400}
+              height={270}
+            />
             <TextField
               value={command}
               onChange={(e) => setCommand(e.target.value)}

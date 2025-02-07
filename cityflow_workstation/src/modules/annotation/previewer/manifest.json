@@ -1,0 +1,13 @@
+{
+  "type": "annotation",
+  "module": "previewer",
+  "version": "0.0.1",
+  "config": {
+    "name": "Previewer",
+    "discription": "This module is useful for previewing an url",
+    "author": "Kai Hu",
+    "width": 300,
+    "height": 400,
+    "icon": "previewer.png"
+  }
+}
