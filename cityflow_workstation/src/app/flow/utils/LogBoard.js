@@ -15,7 +15,6 @@ import theme from '@/theme';
 import { runCommand } from '@/utils/executor';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { block } from 'sharp';
 
 const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
 
