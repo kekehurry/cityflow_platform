@@ -301,3 +301,25 @@ export const check = async (flowId) => {
     return await res.json();
   }
 };
+
+export const exportImage = async (flowId, imageName, tag) => {
+  const api = `${executorServer}/export_image`;
+  const userId = await initUserId();
+  const res = await fetch(basePath + api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      flowId,
+      userId,
+      imageName,
+      tag,
+    }),
+  }).catch((err) => {
+    console.error(err);
+  });
+  if (res && res.ok) {
+    return await res.json();
+  }
+};
