@@ -1,13 +1,34 @@
-import { Toolbar, AppBar, Typography, IconButton } from '@mui/material';
 import Link from 'next/link';
 import theme from '@/theme';
 import SearchIcon from '@mui/icons-material/Search';
 import AppsIcon from '@mui/icons-material/Apps';
 import HomeIcon from '@mui/icons-material/Home';
+import { useState, useEffect } from 'react';
+import {
+  Toolbar,
+  AppBar,
+  Menu,
+  Typography,
+  MenuItem,
+  IconButton,
+  ListItemText,
+  ListItemIcon,
+} from '@mui/material';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 const Header = (props) => {
+  const { actions, runButtons } = props;
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       <AppBar
@@ -33,21 +54,36 @@ const Header = (props) => {
             paddingLeft: 0,
           }}
         >
-          <Link
-            href="/flow"
-            style={{
-              color: theme.palette.text.primary,
-              textDecoration: 'none',
-            }}
-          >
-            <IconButton aria-label="workstation">
+          <>
+            <IconButton onClick={handleClick}>
               <img
                 src={`${basePath}/static/cflogo.png`}
                 alt="Community Logo"
                 style={{ width: '13px', height: '13px' }}
               />
             </IconButton>
-          </Link>
+            {actions && actions.length > 0 && (
+              <Menu
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                onClick={handleClose}
+                transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+                open={open}
+              >
+                {actions.map((action) => (
+                  <MenuItem
+                    key={action.name}
+                    sx={{ paddingRight: 5 }}
+                    onClick={action.onClick}
+                  >
+                    <ListItemIcon>{action.icon}</ListItemIcon>
+                    <ListItemText primary={action.name} />
+                  </MenuItem>
+                ))}
+              </Menu>
+            )}
+          </>
           <Link
             href="/author"
             style={{
@@ -79,11 +115,6 @@ const Header = (props) => {
           >
             <IconButton aria-label="community">
               <SearchIcon />
-              {/* <img
-                src="/networks_white.png"
-                alt="Dataset"
-                style={{ width: '15px', height: '15px' }}
-              /> */}
             </IconButton>
           </Link>
           <Typography
@@ -101,6 +132,7 @@ const Header = (props) => {
               CITY FLOW
             </Link>
           </Typography>
+          {runButtons && runButtons}
         </Toolbar>
       </AppBar>
     </div>

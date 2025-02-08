@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import theme from '@/theme';
-import { runCommand } from '@/utils/executor';
+import { runCommand, exportImage } from '@/utils/executor';
 import LogViewer from '@/components/Logger';
 
 const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
@@ -20,6 +20,7 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   const [loading, setLoading] = useState(false);
   const [command, setCommand] = useState('');
   const [terminalLogs, setTerminalLogs] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -35,6 +36,22 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   const handleClose = () => {
     setLogOpen(false);
     setCommand('');
+  };
+
+  const handleExport = async () => {
+    setSaving(true);
+    const imageName = prompt('Enter the image name');
+    if (imageName) {
+      exportImage(flowId, imageName, 'latest').then((res) => {
+        if (res?.message) {
+          alert('Image exported');
+        } else {
+          alert('Failed to export image');
+        }
+        setSaving(false);
+      });
+    }
+    setSaving(false);
   };
 
   useEffect(() => {
@@ -65,7 +82,7 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
               key="terminal"
               logs={terminalLogs}
               width={400}
-              height={270}
+              height={260}
             />
             <TextField
               value={command}
@@ -83,15 +100,42 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
           </Stack>
         </DialogContent>
         <DialogActions variant="outlined">
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              justifyContent: 'flex-start',
+              paddingLeft: 10,
+            }}
+          >
+            <Button
+              onClick={handleExport}
+              style={{
+                color: theme.palette.text.secondary,
+              }}
+            >
+              SAVE IMAGE
+            </Button>
+          </div>
+
           <LoadingButton
             loading={loading}
             onClick={handleSubmit}
             color="primary"
-            disabled={!isAlive || !enableCommand}
+            style={{
+              color: !isAlive
+                ? theme.palette.text.secondary
+                : theme.palette.primary.main,
+            }}
           >
             RUN
           </LoadingButton>
-          <Button onClick={handleClose} color="primary">
+          <Button
+            onClick={handleClose}
+            style={{
+              color: theme.palette.text.secondary,
+            }}
+          >
             CLOSE
           </Button>
         </DialogActions>

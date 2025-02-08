@@ -9,7 +9,7 @@ import os
 
 
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.INFO)
+log.setLevel(logging.WARNING)
 
 app = Flask(__name__)
 CORS(app)
@@ -164,6 +164,23 @@ def kill_executor():
             'exit_code': 1,
             'output': 'Container not found.'
         })
+
+@app.route('/export_image', methods=['POST'])
+def export_image():
+    image_name = request.json.get('imageName')
+    tag = request.json.get('tag') or 'latest'
+    user_id = request.json.get('userId')
+    id = request.json.get('flowId')
+    container_name = f"csflow-{user_id}-{id}"
+    executor = manager.get_executor(container_name)
+    if executor:
+        try:
+            executor.export_image(image_name, tag)
+            return jsonify({'success': 'Image has been exported.'})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Container not found.'}), 400
 
 @app.route('/logs', methods=['POST'])
 def get_logs():

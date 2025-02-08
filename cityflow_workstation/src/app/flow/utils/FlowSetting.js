@@ -90,7 +90,8 @@ const FlowSettings = (props) => {
   });
   const [defaultRunner, setDefaultRunner] = useLocalStorage(
     'DEFAULT_RUNNER',
-    process.env.NEXT_PUBLIC_DEFAULT_RUNNER || 'cityflow/cityflow-runner:light'
+    process.env.NEXT_PUBLIC_DEFAULT_RUNNER ||
+      'ghcr.io/kekehurry/cityflow_runner:latest'
   );
   const [logOpen, setLogOpen] = useState(false);
   const [autoCompletion, setAutoCompletion] = useState(true);

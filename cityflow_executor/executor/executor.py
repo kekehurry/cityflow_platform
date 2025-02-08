@@ -301,3 +301,8 @@ class CodeExecutor:
                 if container_path == os.getenv("EXECUTOR_WORK_DIR"):
                     return host_path
         return None
+    
+    def export_image(self, image_name: str, tag:str) -> None:
+        """Export the image."""
+        self._container.commit(repository=image_name, tag=tag)
+        return 
