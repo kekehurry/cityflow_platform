@@ -10,11 +10,11 @@ import SendIcon from '@mui/icons-material/Send';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Assistant from '@/utils/assistant';
-import { initUserId } from '@/utils/local';
-
+import { initUserId, useLocalStorage } from '@/utils/local';
 import { MessageLeft, MessageRight } from './utils/MessageBox';
 import MenuIcon from '@mui/icons-material/Menu';
 import theme from '@/theme';
+
 import LLMSetting from './utils/LLMSetting';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
@@ -29,7 +29,8 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   const [controller, setController] = useState(null);
   const [userId, setUserId] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [assistant, setAssistant] = useState(new Assistant(llmConfig));
+  const localLLMConfig = useLocalStorage('LLM_CONFIG');
+  const [assistant, setAssistant] = useState(new Assistant(localLLMConfig));
   const messageEndRef = useRef(null);
 
   const handleAbort = () => {
@@ -41,6 +42,10 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
       console.log(e);
     }
   };
+
+  useEffect(() => {
+    setAssistant(new Assistant({ ...llmConfig }));
+  }, [llmConfig]);
 
   useEffect(() => {
     initUserId().then((id) => {

@@ -97,6 +97,8 @@ export const getFlowData = async ({ rfInstance, state }) => {
             },
             config: {
               ...node.config,
+              basic: false,
+              local: false,
               icon:
                 node.config.icon && node.config.icon.includes('base64')
                   ? node.config.icon
@@ -292,10 +294,10 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
   }
 };
 
-export const deleteUserFlow = async (id) => {
-  const cs_data = JSON.parse(localStorage.getItem('cs_flow') || '{}');
-  let userFlows = cs_data['userFlows'] || [];
-  userFlows = userFlows.filter((item) => item.id !== id);
-  cs_data['userFlows'] = userFlows;
-  localStorage.setItem('cs_flow', JSON.stringify(cs_data));
-};
+// export const deleteUserFlow = async (id) => {
+//   const cs_data = JSON.parse(localStorage.getItem('cs_flow') || '{}');
+//   let userFlows = cs_data['userFlows'] || [];
+//   userFlows = userFlows.filter((item) => item.id !== id);
+//   cs_data['userFlows'] = userFlows;
+//   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+// };

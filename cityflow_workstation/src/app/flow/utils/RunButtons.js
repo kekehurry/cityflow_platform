@@ -4,6 +4,7 @@ import {
   Button,
   CircularProgress,
   Typography,
+  Stack,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
@@ -11,8 +12,12 @@ import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import theme from '@/theme';
 import { connect } from 'react-redux';
 import { setupExecutor, check } from '@/utils/executor';
-import { useState } from 'react';
-import { getLocalStorage } from '@/utils/local';
+import { useState, useEffect } from 'react';
+import { getLocalStorage, getFlowData } from '@/utils/local';
+import { saveWorkflow } from '@/utils/dataset';
+import { useReactFlow } from 'reactflow';
+import SaveIcon from '@mui/icons-material/Save';
+import Loading from '@/components/Loading';
 
 const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
 
@@ -37,9 +42,13 @@ const RunButtons = (props) => {
     setDialogOpen,
     setDialogName,
     share,
+    save,
     size,
   } = props;
   const [globalRun, setGlobalRun] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const rfInstance = useReactFlow();
+
   const initAndRunALL = async () => {
     setMeta({ loading: true });
     if (!props.state.isAlive && props.state?.flowId) {
@@ -63,11 +72,55 @@ const RunButtons = (props) => {
     }
   };
 
+  const handleSave = async () => {
+    setSaving(true);
+    const { nodes, edges, ...res } = props.state;
+    const flowData = await getFlowData({
+      rfInstance,
+      state: {
+        ...res,
+        private: true,
+        basic: false,
+        name: props.state?.name || 'Temp',
+      },
+    });
+    const flowId = await saveWorkflow(flowData).then((flowId) => {
+      setSaving(false);
+      return flowId;
+    });
+  };
+
+  useEffect(() => {
+    if (props.state?.autoSave) {
+      const intervalId = setInterval(() => {
+        handleSave();
+      }, 60000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [handleSave, props.state?.autoSave]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
+
   return (
-    <div style={{ zIndex: 1110 }}>
+    <Stack
+      direction="row"
+      spacing={1}
+      style={{ zIndex: 1110, display: 'flex', alignItems: 'center' }}
+    >
+      {saving && <Loading dotSize={5} />}
       <IconButton
         color="primary"
-        sx={{ zIndex: 1111 }}
+        sx={{ zIndex: 1111, ml: 1 }}
         onClick={() => {
           globalRun && props.state.isAlive ? stopAll() : initAndRunALL();
           setGlobalRun(!globalRun);
@@ -109,7 +162,13 @@ const RunButtons = (props) => {
             setDialogOpen(true);
             setDialogName('Share');
           }}
-          sx={{ width: 80, height: size || 30, borderRadius: 10, zIndex: 1111 }}
+          sx={{
+            width: 80,
+            minWidth: 80,
+            height: size || 30,
+            borderRadius: 10,
+            zIndex: 1111,
+          }}
         >
           <Typography
             sx={{ fontWeight: 'bold', fontSize: Math.floor(size || 30 * 0.4) }}
@@ -118,7 +177,7 @@ const RunButtons = (props) => {
           </Typography>
         </Button>
       )}
-    </div>
+    </Stack>
   );
 };
 

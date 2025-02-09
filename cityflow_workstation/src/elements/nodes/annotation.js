@@ -95,7 +95,13 @@ class AnnotationNode extends PureComponent {
           isVisible={this.state.resizable}
           color={theme.palette.secondary.main}
         />
-        <div style={{ transform: `rotate(${this.state.rotate}deg)` }}>
+        <div
+          style={{ transform: `rotate(${this.state.rotate}deg)` }}
+          onKeyDown={(event) => {
+            // Prevent this event from bubbling up to the parent
+            event.stopPropagation();
+          }}
+        >
           <NodeToolbar style={{ position: 'absolute', top: 1, left: 1, mr: 2 }}>
             <LoopIcon
               sx={{ fontSize, color: '#5c5d5d', mr: 2, cursor: 'pointer' }}

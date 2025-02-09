@@ -120,15 +120,11 @@ export default function CodeAssistant(props) {
     });
   }, [config, formValue, editor, language]);
 
-  const updateLLMConfig = (newConfig) => {
-    setConfig({ ...config, llmConfig: newConfig });
-  };
-
   return (
     llmConfig && (
       <ChatBot
         llmConfig={llmConfig}
-        setLLMConfig={updateLLMConfig}
+        setLLMConfig={setLLMConfig}
         height={height}
         sendCode={sendCode}
       />

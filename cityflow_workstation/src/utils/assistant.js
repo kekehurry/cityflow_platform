@@ -36,9 +36,11 @@ export default class Assistant {
     ];
     if (this.props.context) {
       messages.push({ role: 'user', content: this.props.context });
-    } else if (messageHistory) {
+    }
+    if (messageHistory) {
       messages.push(...parseMessage(messageHistory));
-    } else if (inputMessage) {
+    }
+    if (inputMessage) {
       messages.push(
         isBase64Image(inputMessage)
           ? {
@@ -49,10 +51,7 @@ export default class Assistant {
             }
           : { role: 'user', content: inputMessage || '' }
       );
-    } else {
-      return { error: 'No input message' };
     }
-
     try {
       const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -95,9 +94,11 @@ export default class Assistant {
     ];
     if (this.props.context) {
       messages.push({ role: 'user', content: this.props.context });
-    } else if (messageHistory) {
+    }
+    if (messageHistory) {
       messages.push(...parseMessage(messageHistory));
-    } else if (inputMessage) {
+    }
+    if (inputMessage) {
       messages.push(
         isBase64Image(inputMessage)
           ? {
@@ -108,8 +109,6 @@ export default class Assistant {
             }
           : { role: 'user', content: inputMessage || '' }
       );
-    } else {
-      return { error: 'No input message' };
     }
 
     try {

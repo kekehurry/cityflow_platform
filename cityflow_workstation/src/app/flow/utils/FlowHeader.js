@@ -1,14 +1,26 @@
-import React, { useState, useCallback } from 'react';
-import SaveIcon from '@mui/icons-material/Save';
+import React, { useState, useCallback, useEffect } from 'react';
+// import SaveIcon from '@mui/icons-material/Save';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useReactFlow } from 'reactflow';
 import { upload } from '@/utils/local';
 import ShareBoard from './ShareBoard';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SaveIcon from '@mui/icons-material/Save';
 
 import RunButtons from './RunButtons';
 import Header from '@/components/Header';
+
+import { initStore } from '@/store/actions';
+import { connect } from 'react-redux';
+
+const mapStateToProps = (state, ownProps) => ({
+  state: state,
+});
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  initStore: (state) => dispatch(initStore(state)),
+});
 
 const FlowHeader = (props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -21,6 +33,7 @@ const FlowHeader = (props) => {
       setDialogOpen={setDialogOpen}
       setDialogName={setDialogName}
       share={true}
+      save={true}
     />
   );
 
@@ -45,7 +58,7 @@ const FlowHeader = (props) => {
       icon: <FileUploadIcon />,
       name: 'Upload',
       onClick: useCallback(
-        () => upload(rfInstance, props.updateStore),
+        () => upload(rfInstance, props.initStore),
         [rfInstance, props.state]
       ),
     },

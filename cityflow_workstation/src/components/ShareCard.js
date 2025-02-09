@@ -10,8 +10,8 @@ import {
 import { useState } from 'react';
 import theme from '@/theme';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import { deleteWorkflow } from '@/utils/dataset';
-import { deleteUserFlow } from '@/utils/local';
+import { deleteWorkflow, searchWorkflow } from '@/utils/dataset';
+// import { deleteUserFlow } from '@/utils/local';
 
 export default function ShareCard({
   data,
@@ -34,13 +34,14 @@ export default function ShareCard({
   const [isVisible, setIsVisible] = useState(true);
 
   const handleDelete = () => {
-    local
-      ? deleteUserFlow(id).then(() => {
-          setIsVisible(false);
-        })
-      : deleteWorkflow(id).then(() => {
-          setIsVisible(false);
-        });
+    // local
+    //   ? deleteUserFlow(id).then(() => {
+    //       setIsVisible(false);
+    //     })
+    //   :
+    deleteWorkflow(id).then(() => {
+      setIsVisible(false);
+    });
   };
 
   return (

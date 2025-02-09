@@ -6,6 +6,7 @@ import { Box, IconButton, Card, Button } from '@mui/material';
 import theme from '@/theme';
 import { updateMeta } from '@/store/actions';
 import RunButtons from './RunButtons';
+import { over } from 'lodash';
 
 const NodeType = wrapper(PinNode);
 
@@ -129,16 +130,25 @@ const PinBoard = (props) => {
             transition: 'transform 1s ease-in-out',
           }}
         />
-        {scale &&
-          pinNodes &&
-          pinNodes.length > 0 &&
-          pinNodes.map((nodeData, index) => {
-            try {
-              return <NodeType key={index} {...nodeData} />;
-            } catch (e) {
-              console.log(e);
-            }
-          })}
+        <Box
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
+          }}
+        >
+          {scale &&
+            pinNodes &&
+            pinNodes.length > 0 &&
+            pinNodes.map((nodeData, index) => {
+              try {
+                return <NodeType key={index} {...nodeData} />;
+              } catch (e) {
+                console.log(e);
+              }
+            })}
+        </Box>
         {scale === 1 && (
           <div
             style={{

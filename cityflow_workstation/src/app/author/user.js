@@ -80,7 +80,7 @@ const UserPage = () => {
     if (data && data.length > 0) {
       const uniqueItems = data?.filter(
         (item, index, self) =>
-          index === self.findIndex((t) => t.name === item.name)
+          index === self.findIndex((t) => t?.name === item?.name)
       );
       setItems(uniqueItems);
     } else {
