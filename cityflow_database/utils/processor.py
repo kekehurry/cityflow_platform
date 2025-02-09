@@ -138,16 +138,11 @@ def get_workflow_info(id):
     result = query(cypher,params)
     if result:
         workflow = result['workflow']
-        workflow_info = {
-            "name":json.loads(workflow['name']),
-            "description":json.loads(workflow['description']),
-            "author":json.loads(workflow['author']),
-            "city":json.loads(workflow['city']),
-            "tag":json.loads(workflow['tag']),
-            "id":json.loads(workflow['id']),
-            "screenShot":json.loads(workflow['screenShot']),
-        }
-    return workflow_info
+        workflow_info = {}
+        for key in ['name','description','author','city','tag','id','screenShot']:
+            if key in workflow.keys():
+                workflow_info[key] = json.loads(workflow[key])
+        return workflow_info
 
 def search_workflows(params,limit=25):
     params = {k:json.dumps(v) for k,v in params.items()}

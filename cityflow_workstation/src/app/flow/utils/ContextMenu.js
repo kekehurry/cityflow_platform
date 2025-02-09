@@ -1,10 +1,11 @@
 // components/ContextMenu.js
 import React, { useState, useCallback, useEffect } from 'react';
-import { Menu, MenuItem } from '@mui/material';
+import { Menu, MenuItem, Typography } from '@mui/material';
 import { useOnSelectionChange } from 'reactflow';
 import { addNode } from '@/store/actions';
 import { connect } from 'react-redux';
 import { nanoid } from 'nanoid';
+import { saveModule } from '@/utils/dataset';
 
 const mapStateToProps = (state, ownProps) => ({
   nodes: state.nodes,
@@ -16,40 +17,82 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 const ContextMenu = (props) => {
   // get selected nodes
-  const [selectedNodeIds, setSelectedNodeIds] = useState([]);
+  const [selectedNodes, setSelectedNodes] = useState([]);
   const onChange = useCallback(({ nodes, edges }) => {
-    setSelectedNodeIds(nodes.map((node) => node.id));
+    setSelectedNodes(nodes);
   }, []);
   useOnSelectionChange({ onChange });
 
   // context menu
   const [anchorPosition, setAnchorPosition] = useState(null);
-  const addGroupNode = () => {
-    const groupId = nanoid();
-    const groupNode = {
-      id: groupId,
-      type: 'pack',
-      data: { label: null },
-      style: {
-        zIndex: 0,
-      },
-      position: {
-        x: 0,
-        y: 0,
-      },
-      config: {
-        title: 'Group',
-        width: null,
-        height: null,
-        input: ['input'],
-        output: ['output'],
-        run: true,
-      },
-      childNodeIds: selectedNodeIds,
-    };
-    props.addNode(groupNode);
+  const copySelectedNode = () => {
+    if (selectedNodes.length > 0) {
+      const nodesData = JSON.stringify(selectedNodes);
+      navigator.clipboard
+        .writeText(nodesData)
+        .then(() => {
+          setAnchorPosition(null);
+        })
+        .catch((err) => {
+          console.error('Failed to copy nodes: ', err);
+        });
+    }
   };
-  const options = [{ label: 'Group', onClick: () => addGroupNode() }];
+  const pasteSelectedNode = async () => {
+    try {
+      const clipboardData = await navigator.clipboard.readText();
+      const nodes = JSON.parse(clipboardData);
+      if (Array.isArray(nodes)) {
+        nodes.forEach((node) => {
+          const pastedNode = {
+            ...node,
+            id: nanoid(),
+            position: {
+              x: node.position.x + Math.floor(Math.random() * 50),
+              y: node.position.y + Math.floor(Math.random() * 50),
+            },
+            local: false,
+            basic: false,
+          };
+          props.addNode(pastedNode);
+        });
+      } else {
+        console.error('Clipboard data is not valid nodes array');
+      }
+      setAnchorPosition(null);
+    } catch (err) {
+      console.error('Failed to paste nodes: ', err);
+    }
+  };
+
+  const saveSelectedNode = () => {
+    if (!selectedNodes.length > 0) return;
+    const dateTime = new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    });
+    //save to  module Panel
+    const nodeData = {
+      ...selectedNodes[0],
+      run: false,
+      time: dateTime,
+      custom: true,
+      basic: false,
+      local: true,
+    };
+    saveModule(nodeData);
+    window.dispatchEvent(new CustomEvent('userModulesChange'));
+  };
+
+  const options = [
+    { label: 'Copy', onClick: () => copySelectedNode() },
+    { label: 'Paste', onClick: () => pasteSelectedNode() },
+    { label: 'Save', onClick: () => saveSelectedNode() },
+  ];
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -71,26 +114,43 @@ const ContextMenu = (props) => {
     };
   }, []);
 
+  // Add keyboard shortcuts for copy and paste
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+        event.preventDefault();
+        copySelectedNode();
+      } else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+        event.preventDefault();
+        pasteSelectedNode();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedNodes]);
+
   return (
     <>
-      {selectedNodeIds.length > 0 && (
-        <Menu
-          open={!!anchorPosition}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            anchorPosition !== null
-              ? { top: anchorPosition.mouseY, left: anchorPosition.mouseX }
-              : undefined
-          }
-        >
-          {options.map((option, index) => (
-            <MenuItem key={index} onClick={option.onClick}>
+      <Menu
+        open={!!anchorPosition}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          anchorPosition !== null
+            ? { top: anchorPosition.mouseY, left: anchorPosition.mouseX }
+            : undefined
+        }
+      >
+        {options.map((option, index) => (
+          <MenuItem key={index} onClick={option.onClick} sx={{ width: 80 }}>
+            <Typography variant="caption" color="text.secondary">
               {option.label}
-            </MenuItem>
-          ))}
-        </Menu>
-      )}
+            </Typography>
+          </MenuItem>
+        ))}
+      </Menu>
     </>
   );
 };

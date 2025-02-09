@@ -34,12 +34,12 @@ class PinNode extends PureComponent {
       localOutput: null,
       expanded: true,
       loading: false,
-      pinWidth: props.config.pinWidth,
-      pinHeight: props.config.pinHeight,
-      pinTop: props.config.pinTop,
-      pinLeft: props.config.pinLeft,
-      currentX: props.config.pinLeft || 100 + Math.floor(Math.random() * 200),
-      currentY: props.config.pinTop || 100 + Math.floor(Math.random() * 200),
+      pinWidth: props.config?.pinWidth,
+      pinHeight: props.config?.pinHeight,
+      pinTop: props.config?.pinTop,
+      pinLeft: props.config?.pinLeft,
+      currentX: props.config?.pinLeft || 100 + Math.floor(Math.random() * 200),
+      currentY: props.config?.pinTop || 100 + Math.floor(Math.random() * 200),
       isDragging: false,
       isAnimating: false,
       dragStartX: 0,
@@ -85,8 +85,8 @@ class PinNode extends PureComponent {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('mousemove', this.handleMouseMove);
-    document.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
   }
 
   handleResize = (e, direction, ref, d) => {
@@ -98,14 +98,14 @@ class PinNode extends PureComponent {
   };
 
   handleMouseDown(e) {
-    if (e.target.closest('.drag-handle')) {
+    if (e.target.closest(`.drag-handle-${this.props.id}`)) {
       this.setState({
         isDragging: true,
         dragStartX: e.clientX,
         dragStartY: e.clientY,
       });
-      document.addEventListener('mousemove', this.handleMouseMove);
-      document.addEventListener('mouseup', this.handleMouseUp);
+      window.addEventListener('mousemove', this.handleMouseMove);
+      window.addEventListener('mouseup', this.handleMouseUp);
       document.body.style.userSelect = 'none'; // 防止选中文本
     }
   }
@@ -141,8 +141,8 @@ class PinNode extends PureComponent {
     });
 
     this.setState({ isDragging: false });
-    document.removeEventListener('mousemove', this.handleMouseMove);
-    document.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
     document.body.style.userSelect = '';
   }
 
@@ -171,6 +171,10 @@ class PinNode extends PureComponent {
     return (
       <Box
         ref={targetRef}
+        onKeyDown={(event) => {
+          // Prevent this event from bubbling up to the parent
+          event.stopPropagation();
+        }}
         sx={{
           display: 'flex',
           background: theme.palette.pin.main,
@@ -220,7 +224,7 @@ class PinNode extends PureComponent {
             >
               <Typography variant="caption"> {config?.title || ''} </Typography>
               <DragHandleIcon
-                className="drag-handle"
+                className={`drag-handle-${this.props.id}`}
                 ref={(ref) => (this.handleRef = ref)}
                 // ref={handleRef}
                 fontSize="10px"
@@ -255,11 +259,11 @@ class PinNode extends PureComponent {
                     fontSize="1px"
                     onClick={() => {
                       this.setState({ error: false, warning: false });
-                      setConfig({ ...config, run: !config.run });
+                      setConfig({ ...config, run: !config?.run });
                     }}
                     sx={{
                       cursor: 'pointer',
-                      color: config.run ? '#4bec13' : '#5c5d5d',
+                      color: config?.run ? '#4bec13' : '#5c5d5d',
                       transform: 'scale(0.8)',
                     }}
                   />

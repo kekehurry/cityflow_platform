@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import typography from '@/theme/typography';
 import palette from '@/theme/palette';
 import theme from '@/theme';
@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 import { getLocalStorage } from '@/utils/local';
 
 const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
-  const [html, setHtml] = useState(config.html || null);
+  const [html, setHtml] = useState(config?.html || null);
   const [iframeId, setIframeId] = useState(nanoid());
   const [iframeConfig, setIframeConfig] = useState(config);
   const secrets = {
@@ -40,6 +40,10 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
       window.removeEventListener('message', handleIframeMessage);
     };
   }, [window]);
+
+  useEffect(() => {
+    setConfig && setConfig({ ...config, ...iframeConfig });
+  }, [iframeConfig]);
 
   // update when input change
   useEffect(() => {
@@ -107,21 +111,23 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   }, [config?.html, config?.name, config?.author, iframeId]);
 
   return (
-    <iframe
-      ref={iframeRef}
-      srcDoc={html}
-      style={{
-        border: 'none',
-        backgroundColor: theme.palette.node.main,
-        boxSizing: 'border-box',
-        width: '100%',
-        height: '100%',
-        minHeight: '50px',
-        minWidth: '50px',
-        zoom: zoom || 1,
-      }}
-    />
+    html && (
+      <iframe
+        ref={iframeRef}
+        srcDoc={html}
+        style={{
+          border: 'none',
+          backgroundColor: theme.palette.node.main,
+          boxSizing: 'border-box',
+          width: '100%',
+          height: '100%',
+          minHeight: '50px',
+          minWidth: '50px',
+          zoom: zoom || 1,
+        }}
+      />
+    )
   );
 };
 
-export default IframeComponent;
+export default memo(IframeComponent);

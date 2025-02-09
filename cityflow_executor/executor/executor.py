@@ -33,7 +33,7 @@ def _cmd(lang: str) -> str:
     if lang == "python":
         return "python /cityflow_runner/execute.py"
     elif lang == "javascript":
-        return "node /cityflow_runner/execute.js --compile"
+        return "node /cityflow_runner/compile.js"
     else:
         raise ValueError(f"Unsupported language {lang}")
     

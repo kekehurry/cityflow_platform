@@ -117,9 +117,10 @@ class BaseNode extends PureComponent {
             minWidth: 50,
             minHeight: 50,
             padding: `${margin}px`,
-            border: this.state.hover
-              ? `1px solid ${theme.palette.edge.dark}`
-              : `0.5px solid #424242`,
+            border:
+              this.state.hover || this.props.selected
+                ? `1px solid ${theme.palette.edge.dark}`
+                : `0.5px solid #424242`,
             borderRadius: '10px',
             background: theme.palette.node.main,
           }}
@@ -128,6 +129,10 @@ class BaseNode extends PureComponent {
           }}
           onMouseLeave={() => {
             this.setState({ hover: false });
+          }}
+          onKeyDown={(event) => {
+            // Prevent this event from bubbling up to the parent
+            event.stopPropagation();
           }}
         >
           <Box

@@ -211,6 +211,7 @@ const FlowSettings = (props) => {
       author: author || '',
       image: props.state?.image || defaultRunner,
       packages: props.state?.packages || '',
+      autoSave: props.state?.autoSave || true,
     });
   }, [props.state?.flowId]);
 
@@ -392,7 +393,7 @@ channels:
             Advance Settings
           </AccordionSummary>
           <AccordionDetails sx={{ m: 0, p: 0, height: '550px' }}>
-            <Stack spacing={2}>
+            <Stack spacing={1}>
               <Divider />
               <Stack direction={'row'}>
                 <InputLabel
@@ -476,6 +477,47 @@ channels:
                 />
               </Stack>
               <Divider />
+              <Stack
+                direction={'row'}
+                sx={{ pb: 2, pt: 2 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  paddingBottom: '16px',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <InputLabel
+                  htmlFor="AUTO_SAVE"
+                  style={{ fontSize: '10px', width: '50%' }}
+                >
+                  AUTO_SAVE
+                </InputLabel>
+                <input
+                  type="checkbox"
+                  id="AUTO_SAVE"
+                  size="small"
+                  checked={formValue?.autoSave || true}
+                  onChange={(e) =>
+                    setFormValue({
+                      ...formValue,
+                      autoSave: !formValue?.autoSave,
+                    })
+                  }
+                  style={{
+                    appearance: 'none',
+                    width: '12px',
+                    height: '12px',
+                    cursor: 'pointer',
+                    backgroundColor: formValue?.autoSave
+                      ? theme.palette.primary.main
+                      : '#f0f0f0', // Change colors based on checked state
+                    border: `0.5px solid ${theme.palette.secondary.gray}`,
+                    borderRadius: '50%',
+                    transition: 'background-color 0.3s ease', // Optional smooth transition
+                  }}
+                />
+              </Stack>
               <Stack
                 direction={'row'}
                 sx={{ pb: 2 }}

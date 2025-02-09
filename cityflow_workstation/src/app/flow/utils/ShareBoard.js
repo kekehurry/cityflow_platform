@@ -53,29 +53,26 @@ const ShareBoard = (props) => {
     setDialogOpen(false);
   }, [rfInstance, formValue]);
 
-  const handleSave = useCallback(
-    async ({ publish = false }) => {
-      setSaving(true);
-      setAuthor(formValue.author);
-      const { nodes, edges, ...res } = props.state;
-      const flowData = await getFlowData({
-        rfInstance,
-        state: { ...res, ...formValue, basic: false, private: true },
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    setAuthor(formValue.author);
+    const { nodes, edges, ...res } = props.state;
+    const flowData = await getFlowData({
+      rfInstance,
+      state: { ...res, ...formValue, basic: false, private: true },
+    });
+    const flowId = await saveWorkflow(flowData)
+      .then((flowId) => {
+        return flowId;
+      })
+      .finally(() => {
+        setSaving(false);
       });
-      const flowId = await saveWorkflow(flowData)
-        .then((flowId) => {
-          return flowId;
-        })
-        .finally(() => {
-          setSaving(false);
-        });
-      setDialogOpen(false);
-    },
-    [rfInstance, formValue]
-  );
+    setDialogOpen(false);
+  }, [rfInstance, formValue]);
 
   const handleShare = useCallback(
-    async ({ publish = false }) => {
+    async ({ publish }) => {
       publish ? setPublishing(true) : setSaving(true);
       setAuthor(formValue.author);
       const { nodes, edges, ...res } = props.state;
@@ -208,7 +205,7 @@ const ShareBoard = (props) => {
         </DialogContent>
 
         <DialogActions variant="outlined">
-          <Button onClick={handleClose} color="secondary">
+          <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
           <LoadingButton
@@ -220,14 +217,14 @@ const ShareBoard = (props) => {
                 ? handleSave
                 : handleShare
             }
-            color="secondary"
+            color="primary"
           >
             {name || 'Save'}
           </LoadingButton>
           <LoadingButton
             loading={publishing}
             onClick={() => handleShare({ publish: true })}
-            color="secondary"
+            color="primary"
           >
             Publish
           </LoadingButton>

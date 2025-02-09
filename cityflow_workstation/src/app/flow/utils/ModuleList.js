@@ -83,7 +83,6 @@ export const ModuleList = (props) => {
     getCoreModuleList().then((moduleList) => {
       Object.entries(moduleList).forEach(([category, moduleList]) => {
         fetchModules(category, moduleList).then((modules) => {
-          console.log('core modules', modules);
           setCoreModules((prevModules) => ({
             ...prevModules,
             [category]: modules,
@@ -116,7 +115,6 @@ export const ModuleList = (props) => {
           return 0;
         });
       setBasicModules(modules);
-      console.log('basic modules', modules);
       return modules;
     });
   };
@@ -134,7 +132,6 @@ export const ModuleList = (props) => {
           return module;
         });
         setUserModules(modules);
-        console.log('user modules', modules);
         return modules;
       });
     });

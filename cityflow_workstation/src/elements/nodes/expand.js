@@ -307,6 +307,10 @@ class ExpandNode extends PureComponent {
           direction="row"
           justifyContent="space-between"
           spacing={2}
+          onKeyDown={(event) => {
+            // Prevent this event from bubbling up to the parent
+            event.stopPropagation();
+          }}
           sx={{
             width: '100%',
             height: '100%',
@@ -328,9 +332,10 @@ class ExpandNode extends PureComponent {
                     16 +
                   20,
               padding: `${margin}px`,
-              border: this.state.hover
-                ? `1px solid ${theme.palette.edge.dark}`
-                : theme.palette.node.border,
+              border:
+                this.state.hover || this.props.selected
+                  ? `1px solid ${theme.palette.edge.dark}`
+                  : theme.palette.node.border,
               borderRadius: '10px',
               zIndex: 1,
               background: theme.palette.node.main,

@@ -33,21 +33,11 @@ export const saveWorkflow = async (flowData) => {
     },
     body: JSON.stringify({ flowData, userId }),
   })
-    .then(
-      //if success alert the user
-      (response) => {
-        if (response && response.ok) {
-          alert(
-            `Your workflow has been ${flowData?.private ? 'saved' : 'shared'}!`
-          );
-          return response.json();
-        } else {
-          alert(
-            `Failed to ${flowData?.private ? 'save' : 'share'} your workflow`
-          );
-        }
+    .then((response) => {
+      if (response && response.ok) {
+        return response.json();
       }
-    )
+    })
     .catch((error) => {
       console.error('Error:', error);
     });

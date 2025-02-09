@@ -12,7 +12,8 @@ import theme from '@/theme';
 import { addNode } from '@/store/actions';
 import { nanoid } from 'nanoid';
 import { useRef, useEffect, useState, memo } from 'react';
-import { useGetModule, deleteModule } from '@/utils/dataset';
+import { useGetModule, deleteModule, searchModule } from '@/utils/dataset';
+import { initUserId } from '@/utils/local';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -37,6 +38,7 @@ const ModuleIcon = (props) => {
     node.id = nanoid();
     node.config.category = 'custom';
     node.config.basic = false;
+    node.config.local = false;
     node.position = {
       x: Math.random() * window.innerWidth * 0.3,
       y: Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.1,
@@ -52,6 +54,7 @@ const ModuleIcon = (props) => {
     node.id = nanoid();
     node.config.category = 'custom';
     node.config.basic = false;
+    node.config.local = false;
     node.position = { x: newX, y: newY };
     props.setNode(node);
   };
@@ -59,8 +62,19 @@ const ModuleIcon = (props) => {
   // delete user module
   const handleDelete = (manifest) => {
     const moduleId = manifest.config?.id;
-    deleteModule(moduleId).then((res) => {
-      setUserModules(userModules.filter((module) => module.id !== moduleId));
+    const name = manifest.config?.name;
+    initUserId().then((userId) => {
+      searchModule({ user_id: userId, name: name }).then((res) => {
+        if (res?.length > 0) {
+          res.forEach((module) => {
+            deleteModule(res[0].id).then((res) => {
+              setUserModules(
+                userModules.filter((module) => module.id !== moduleId)
+              );
+            });
+          });
+        }
+      });
     });
   };
 

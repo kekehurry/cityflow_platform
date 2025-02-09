@@ -17,7 +17,7 @@ import StyledControls from '../utils/FlowControl';
 import GridBackground from '../utils/GridBackground';
 import RunButtons from '../utils/RunButtons';
 import FlowHeader from '../utils/FlowHeader';
-// import ContextMenu from '../utils/ContextMenu';
+import ContextMenu from '../utils/ContextMenu';
 
 import Header from '@/components/Header';
 
@@ -25,8 +25,6 @@ import BaseNode from '@/elements/nodes/base';
 import ExpandNode from '@/elements/nodes/expand';
 import AnnotationNode from '@/elements/nodes/annotation';
 import PinNode from '@/elements/nodes/pin';
-// import PackNode from '@/elements/nodes/pack';
-// import ConnectorNode from '@/elements/nodes/connector';
 import ButtonEdge from '@/elements/edges/base';
 import InvisibleEdge from '@/elements/edges/invisible';
 import wrapper from '@/elements/nodes/wrapper';
@@ -63,8 +61,6 @@ const nodeTypes = {
   expand: wrapper(ExpandNode),
   annotation: wrapper(AnnotationNode),
   pin: PinNode,
-  // "pack": PackNode,
-  // "connector": ConnectorNode
 };
 const edgeTypes = { base: ButtonEdge, invisible: InvisibleEdge };
 
@@ -173,7 +169,7 @@ const FlowStation = (props) => {
           }}
           deleteKeyCode={null}
           minZoom={0.1}
-          panOnDrag={[2]}
+          panOnDrag={[1]}
           selectionOnDrag
         >
           {embed || <FlowHeader />}
@@ -189,7 +185,7 @@ const FlowStation = (props) => {
               <RunButtons />
             </div>
           )}
-          {/* <ContextMenu /> */}
+          <ContextMenu />
           <StyledControls />
           <GridBackground />
         </ReactFlow>
