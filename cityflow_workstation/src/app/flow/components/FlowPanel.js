@@ -36,6 +36,10 @@ export const FlowPanel = (props) => {
     <>
       <Box
         id="FlowPanel"
+        onKeyDown={(event) => {
+          // Prevent this event from bubbling up to the parent
+          event.stopPropagation();
+        }}
         sx={{
           width: '100%',
           height: '100vh',
