@@ -84,4 +84,4 @@ const FlowHeader = (props) => {
   );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(FlowHeader);
+export default FlowHeader;
