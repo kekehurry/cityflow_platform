@@ -5,6 +5,8 @@ CityFlow is a low-code, AI-enhanced platform designed to help urban analysts, ci
 
 **[Demo website](https://cityflow.media.mit.edu/)**
 
+**[Documents](https://doc.cutyflow.cn)**
+
 ## Key Features
 
 ### A Low-code Tool for Urban Analyst
