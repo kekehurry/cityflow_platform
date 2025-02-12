@@ -9,11 +9,12 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   const [html, setHtml] = useState(config?.html || null);
   const [iframeId, setIframeId] = useState(nanoid());
   const [iframeConfig, setIframeConfig] = useState(config);
+  const llmConfig = getLocalStorage('LLM_CONFIG');
   const secrets = {
     MAPBOX_TOKEN: getLocalStorage('MAPBOX_TOKEN'),
-    LLM_API_KEY: getLocalStorage('LLM_API_KEY'),
-    LLM_BASE_URL: getLocalStorage('LLM_BASE_URL'),
-    LLM_MODEL: getLocalStorage('LLM_MODEL'),
+    LLM_API_KEY: llmConfig['apiKey'],
+    LLM_BASE_URL: llmConfig['baseUrl'],
+    LLM_MODEL: llmConfig['model'],
   };
 
   const iframeRef = useRef(null);
@@ -49,40 +50,27 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   useEffect(() => {
     if (config?.html) {
       sendToIframe({ id: iframeId, input, config });
+      config?.run || setOutput(null);
     }
   }, [input, config?.run, config?.html, iframeId]);
 
   // init
   useEffect(() => {
-    // Prepare styles for the iframe content
-    const innerHTML = config?.html
-      ? config?.html
-      : `<div style="text-align:center;color:${
-          theme.palette.text.secondary
-        };height:100%;align-items:center;display:flex;justify-content:center">
-        <p style="font-size:${15 / (zoom || 1)}px">${
-          config?.name || 'Unnamed Module'
-        }</p>
-      </div>`;
-
-    const iframeHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
+    const injectScript = `
     <style>
-        ::-webkit-scrollbar {
-            display: none;
-        }
-        html {
-            scrollbar-width: none; /* For Firefox */
-            -ms-overflow-style: none; /* For Internet Explorer and Edge */
-        }
-        body {
-          font-family: 'Roboto Mono', 'Arial', 'Kalam', sans-serif;
-        }
+      ::-webkit-scrollbar {
+          display: none;
+      }
+      html {
+          scrollbar-width: none; /* For Firefox */
+          -ms-overflow-style: none; /* For Internet Explorer and Edge */
+      }
+      body {
+      font-family: 'Roboto Mono', 'Arial', 'Kalam', sans-serif;
+      }
     </style>
     <script>
-        const secrets = ${JSON.stringify(secrets)};
+        window.secrets = ${JSON.stringify(secrets)};
         window.iframeId = "${iframeId}";
         window.zoom = ${zoom || 1};
         window.typography = ${JSON.stringify(typography)};
@@ -101,14 +89,36 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
           \`;
         });
     </script>
-    </head>
-    <body>
-    ${innerHTML}
-    </body>
-    </html>
     `;
-    setHtml(iframeHtml);
-  }, [config?.html, config?.name, config?.author, iframeId]);
+    if (config?.html) {
+      // Insert injected script before the first <script> tag in the head.
+      const newHtml = config.html.replace(
+        /<script(\b|>)/i,
+        `${injectScript}\n<script$1`
+      );
+      setHtml(newHtml);
+    } else {
+      const placehoderHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          ${injectScript}
+        </head>
+        <body>
+          <div style="text-align:center;color:${
+            theme.palette.text.secondary
+          };height:100%;align-items:center;display:flex;justify-content:center">
+              <p style="font-size:${15 / (zoom || 1)}px">${
+        config?.name || 'Unnamed Module'
+      }</p>
+          </div>
+        </body>
+      </html>
+    `;
+      setHtml(placehoderHtml);
+    }
+  }, [config?.html, config?.name, config?.author, iframeId, secrets]);
 
   return (
     html && (

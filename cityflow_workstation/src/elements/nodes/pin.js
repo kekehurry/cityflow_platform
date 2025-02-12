@@ -12,6 +12,7 @@ import DragHandleIcon from '@mui/icons-material/DragHandle';
 import Loading from '@/components/Loading';
 
 const mapStateToProps = (state, ownProps) => ({
+  state: state,
   input: state.nodes.find((node) => node.id === ownProps.id)?.data.input,
   output: state.nodes.find((node) => node.id === ownProps.id)?.data.output,
   config: state.nodes.find((node) => node.id === ownProps.id)?.config,
@@ -277,12 +278,13 @@ class PinNode extends PureComponent {
                 />
               </Box>
             </Box>
-            {/* {interfaceComponent && mapModule(interfaceComponent)}
-             */}
             {this.state.loading ? (
               <Loading dotSize={10} />
             ) : (
-              interfaceComponent && mapModule(interfaceComponent)
+              interfaceComponent &&
+              this.props.state.globalScale >= 0.5 &&
+              !this.state.isDragging &&
+              mapModule(interfaceComponent)
             )}
           </Paper>
         </Resizable>

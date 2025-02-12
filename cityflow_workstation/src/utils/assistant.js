@@ -17,6 +17,10 @@ const parseMessage = (messages) => {
   });
 };
 
+const isBase64Image = (str) => {
+  return /^data:image\/[a-zA-Z]+;base64,/.test(str);
+};
+
 export default class Assistant {
   constructor(props) {
     if (!props) return;
@@ -24,33 +28,46 @@ export default class Assistant {
   }
 
   async chat(inputMessage, messageHistory = null) {
-    const isBase64Image = (str) => {
-      return /^data:image\/[a-zA-Z]+;base64,/.test(str);
-    };
-
     const messages = [
       {
         role: 'system',
         content: this.props.systemPrompt || 'you are a helpful assistant',
       },
     ];
-    if (this.props.context) {
-      messages.push({ role: 'user', content: this.props.context });
-    }
     if (messageHistory) {
       messages.push(...parseMessage(messageHistory));
     }
+    if (this.props?.context) {
+      const contextToPush = Array.isArray(this.props?.context)
+        ? this.props?.context
+        : [this.props?.context];
+
+      contextToPush.forEach((msg) => {
+        messages.push(
+          isBase64Image(msg)
+            ? {
+                role: 'user',
+                content: [{ type: 'image_url', image_url: { url: msg } }],
+              }
+            : { role: 'user', content: msg || '' }
+        );
+      });
+    }
     if (inputMessage) {
-      messages.push(
-        isBase64Image(inputMessage)
-          ? {
-              role: 'user',
-              content: [
-                { type: 'image_url', image_url: { url: inputMessage } },
-              ],
-            }
-          : { role: 'user', content: inputMessage || '' }
-      );
+      const messagesToPush = Array.isArray(inputMessage)
+        ? inputMessage
+        : [inputMessage];
+
+      messagesToPush.forEach((msg) => {
+        messages.push(
+          isBase64Image(msg)
+            ? {
+                role: 'user',
+                content: [{ type: 'image_url', image_url: { url: msg } }],
+              }
+            : { role: 'user', content: msg || '' }
+        );
+      });
     }
     try {
       const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
@@ -92,23 +109,40 @@ export default class Assistant {
         content: this.props.systemPrompt || 'you are a helpful assistant',
       },
     ];
-    if (this.props.context) {
-      messages.push({ role: 'user', content: this.props.context });
-    }
     if (messageHistory) {
       messages.push(...parseMessage(messageHistory));
     }
+    if (this.props?.context) {
+      const contextToPush = Array.isArray(this.props?.context)
+        ? this.props?.context
+        : [this.props?.context];
+
+      contextToPush.forEach((msg) => {
+        messages.push(
+          isBase64Image(msg)
+            ? {
+                role: 'user',
+                content: [{ type: 'image_url', image_url: { url: msg } }],
+              }
+            : { role: 'user', content: msg || '' }
+        );
+      });
+    }
     if (inputMessage) {
-      messages.push(
-        isBase64Image(inputMessage)
-          ? {
-              role: 'user',
-              content: [
-                { type: 'image_url', image_url: { url: inputMessage } },
-              ],
-            }
-          : { role: 'user', content: inputMessage || '' }
-      );
+      const messagesToPush = Array.isArray(inputMessage)
+        ? inputMessage
+        : [inputMessage];
+
+      messagesToPush.forEach((msg) => {
+        messages.push(
+          isBase64Image(msg)
+            ? {
+                role: 'user',
+                content: [{ type: 'image_url', image_url: { url: msg } }],
+              }
+            : { role: 'user', content: msg || '' }
+        );
+      });
     }
 
     try {

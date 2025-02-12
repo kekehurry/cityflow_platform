@@ -6,7 +6,7 @@ import { Box, IconButton, Card, Button } from '@mui/material';
 import theme from '@/theme';
 import { updateMeta } from '@/store/actions';
 import RunButtons from './RunButtons';
-import { over } from 'lodash';
+import { set } from 'lodash';
 
 const NodeType = wrapper(PinNode);
 
@@ -16,7 +16,11 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({});
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  setGlobalScale: (scale) => {
+    dispatch(updateMeta({ globalScale: scale }));
+  },
+});
 
 const PinBoard = (props) => {
   const { nodes, demo } = props;
@@ -33,7 +37,7 @@ const PinBoard = (props) => {
         setScale(0.1);
       }
     };
-
+    props.setGlobalScale(scale);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [scale]);

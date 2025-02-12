@@ -26,7 +26,7 @@ cd cityflow_platform
 # Run the cityflow_platform container
 docker run -d \
     --name cityflow_platform \
-    -p 6666:3000 \
+    -p 3001:3000 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/temp:/cityflow_platform/cityflow_executor/code \
     ghcr.io/kekehurry/cityflow_platform:latest

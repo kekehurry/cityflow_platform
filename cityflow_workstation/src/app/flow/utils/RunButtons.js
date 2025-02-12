@@ -12,12 +12,8 @@ import { runAll, stopAll, initStore, updateMeta } from '@/store/actions';
 import theme from '@/theme';
 import { connect } from 'react-redux';
 import { setupExecutor, check } from '@/utils/executor';
-import { useState, useEffect } from 'react';
-import { getLocalStorage, getFlowData } from '@/utils/local';
-import { saveWorkflow } from '@/utils/dataset';
-import { useReactFlow } from 'reactflow';
-import SaveIcon from '@mui/icons-material/Save';
-import Loading from '@/components/Loading';
+import { useState } from 'react';
+import { getLocalStorage } from '@/utils/local';
 
 const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
 
@@ -42,12 +38,9 @@ const RunButtons = (props) => {
     setDialogOpen,
     setDialogName,
     share,
-    save,
     size,
   } = props;
   const [globalRun, setGlobalRun] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const rfInstance = useReactFlow();
 
   const initAndRunALL = async () => {
     setMeta({ loading: true });
@@ -72,52 +65,12 @@ const RunButtons = (props) => {
     }
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    const { nodes, edges, ...res } = props.state;
-    const flowData = await getFlowData({
-      rfInstance,
-      state: {
-        ...res,
-        private: true,
-        basic: false,
-        name: props.state?.name || 'Temp',
-      },
-    });
-    const flowId = await saveWorkflow(flowData).then((flowId) => {
-      setSaving(false);
-      return flowId;
-    });
-  };
-
-  useEffect(() => {
-    if (props.state?.autoSave) {
-      const intervalId = setInterval(() => {
-        handleSave();
-      }, 60000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [handleSave, props.state?.autoSave]);
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault();
-        handleSave();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave]);
-
   return (
     <Stack
       direction="row"
       spacing={1}
       style={{ zIndex: 1110, display: 'flex', alignItems: 'center' }}
     >
-      {saving && <Loading dotSize={5} />}
       <IconButton
         color="primary"
         sx={{ zIndex: 1111, ml: 1 }}
