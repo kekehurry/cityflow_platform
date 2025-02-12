@@ -131,25 +131,28 @@ export const getFlowData = async ({ rfInstance, state }) => {
     const clonedFlowContainer = flowContainer.cloneNode(true);
     clonedFlowContainer.style.background = theme.palette.flow.main;
     clonedFlowContainer.style.position = 'absolute';
+    clonedFlowContainer.style.top = '-10000px';
     document.body.appendChild(clonedFlowContainer);
     let screenShot;
-    await html2canvas(clonedFlowContainer).then((canvas) => {
-      screenShot = canvas.toDataURL();
-      // Resize the screenshot
-      const img = new Image();
-      img.src = screenShot;
-      img.onload = () => {
-        const maxWidth = 256;
-        const scale = maxWidth / img.width;
-        let canvasResized = document.createElement('canvas');
-        canvasResized.width = maxWidth;
-        canvasResized.height = img.height * scale;
-        const ctx = canvasResized.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvasResized.width, canvasResized.height);
-        screenShot = canvasResized.toDataURL();
-        canvasResized = null;
-      };
-    });
+    await html2canvas(clonedFlowContainer, { logging: false }).then(
+      (canvas) => {
+        screenShot = canvas.toDataURL();
+        // Resize the screenshot
+        const img = new Image();
+        img.src = screenShot;
+        img.onload = () => {
+          const maxWidth = 256;
+          const scale = maxWidth / img.width;
+          let canvasResized = document.createElement('canvas');
+          canvasResized.width = maxWidth;
+          canvasResized.height = img.height * scale;
+          const ctx = canvasResized.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvasResized.width, canvasResized.height);
+          screenShot = canvasResized.toDataURL();
+          canvasResized = null;
+        };
+      }
+    );
     document.body.removeChild(clonedFlowContainer);
     const savedData = {
       ...state,

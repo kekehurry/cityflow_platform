@@ -1,13 +1,28 @@
 #!/bin/bash
-#pull latest cityflow_runner
 
-docker pull ghcr.io/kekehurry/cityflow_runner:latest
-
-#setup env before start neo4j
+#setup env
 echo "Loading environment variables from /cityflow_platform/.env..."
 set -a
 source /cityflow_platform/.env
 set +a
+
+# if no cityflow runner image, pull latest cityflow_runner
+if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '^ghcr.io/kekehurry/cityflow_runner:'; then
+    echo "Image cityflow_runner not found, pulling latest..."
+    docker pull ghcr.io/kekehurry/cityflow_runner:latest
+else
+    echo "Image cityflow_runner found, skipping pull."
+fi
+
+# if no $LOCAL_MODEL_PATH/minilm.onnx, download it from Google Drive
+if [ ! -f "${LOCAL_MODEL_PATH}/minilm.onnx" ]; then
+    echo "minilm.onnx not found. Downloading from Google Drive..."
+    destination="${LOCAL_MODEL_PATH}/minilm.onnx"
+    mkdir -p "${LOCAL_MODEL_PATH}"
+    curl -L "https://drive.google.com/uc?export=download&id=1ahQMzx1kfzKVYXeNmmXqbe5ojzmHPwMz" -o "${destination}"
+else
+    echo "minilm.onnx already exists, skipping download."
+fi
 
 /startup/docker-entrypoint.sh neo4j &
 

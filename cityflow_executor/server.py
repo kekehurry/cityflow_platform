@@ -106,11 +106,16 @@ def compile():
         executor = CodeExecutor(container_name=container_name,image=image)
         manager.register_excutor(executor)
     
+    files = []
+    for file in code_block["files"]:
+        if "path" in file and "data" in file:
+            files.append(File(path=file["path"], data=file["data"]))
+    
     exeucte_block = CodeBlock(
         session_id = session_id,
         code=code_block["code"],
         language=code_block["language"],
-        files=[File(path=file["path"], data=file["data"]) for file in code_block["files"]] if "files" in code_block else None
+        files=files
     )
     code_result= executor.compile(exeucte_block)
     return jsonify({

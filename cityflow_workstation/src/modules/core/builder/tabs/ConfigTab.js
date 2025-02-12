@@ -7,6 +7,7 @@ import LogViewer from '@/components/Logger';
 
 export default function ConfigTab({
   tab,
+  expand,
   config,
   formValue,
   setFormValue,
@@ -62,17 +63,19 @@ export default function ConfigTab({
                 border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              <IframeComponent
-                config={config}
-                input={input}
-                setConfig={setConfig}
-                setOutput={setOutput}
-                zoom={
-                  config.width > config.height
-                    ? (config.expandWidth * 0.4 - 80) / config.width
-                    : 200 / (config.height || 600)
-                }
-              />
+              {expand && (
+                <IframeComponent
+                  config={config}
+                  input={input}
+                  setConfig={setConfig}
+                  setOutput={setOutput}
+                  zoom={
+                    config.width > config.height
+                      ? (config.expandWidth * 0.4 - 80) / config.width
+                      : 200 / (config.height || 600)
+                  }
+                />
+              )}
             </Box>
           </Box>
         </>

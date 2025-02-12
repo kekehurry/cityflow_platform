@@ -85,10 +85,14 @@ export default function ModuleBuilder(props) {
   // expand
   useEffect(() => {
     expand &&
-      setCenter(position.x + 70, position.y + 30, {
-        duration: 1000,
-        zoom: 1.1,
-      });
+      setCenter(
+        position.x + config.expandWidth / 2,
+        position.y + config.expandHeight / 2,
+        {
+          duration: 1000,
+          zoom: 1,
+        }
+      );
   }, [expand]);
 
   // reset
@@ -262,6 +266,7 @@ export default function ModuleBuilder(props) {
           <Box style={{ padding: 20 }} className="nowheel nodrag">
             <ConfigTab
               tab={tab}
+              expand={expand}
               config={config}
               formValue={formValue}
               setFormValue={setFormValue}

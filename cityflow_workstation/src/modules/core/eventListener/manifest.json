@@ -6,8 +6,8 @@
     "discription": "this module is useful to listen to a custom event",
     "author": "Kai Hu",
     "name": "Event Listener",
-    "width": 200,
-    "height": 60,
+    "width": 150,
+    "height": 50,
     "output": ["message"],
     "run": false,
     "icon": "recieve.png"

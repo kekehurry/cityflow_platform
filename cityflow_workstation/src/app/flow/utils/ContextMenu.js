@@ -6,8 +6,13 @@ import { addNode } from '@/store/actions';
 import { connect } from 'react-redux';
 import { nanoid } from 'nanoid';
 import { saveModule } from '@/utils/dataset';
+import { saveWorkflow } from '@/utils/dataset';
+import { getFlowData } from '@/utils/local';
+import { useReactFlow } from 'reactflow';
+import Loading from '@/components/Loading';
 
 const mapStateToProps = (state, ownProps) => ({
+  state: state,
   nodes: state.nodes,
 });
 
@@ -18,6 +23,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 const ContextMenu = (props) => {
   // get selected nodes
   const [selectedNodes, setSelectedNodes] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const rfInstance = useReactFlow();
+
   const onChange = useCallback(({ nodes, edges }) => {
     setSelectedNodes(nodes);
   }, []);
@@ -106,30 +114,62 @@ const ContextMenu = (props) => {
     setAnchorPosition(null);
   };
 
-  useEffect(() => {
-    const flowContainer = document.getElementById('react-flow');
-    flowContainer.addEventListener('contextmenu', handleContextMenu);
-    return () => {
-      flowContainer.removeEventListener('contextmenu', handleContextMenu);
-    };
-  }, []);
+  const handleSave = async () => {
+    setSaving(true);
+    const { nodes, edges, ...res } = props.state;
+    const flowData = await getFlowData({
+      rfInstance,
+      state: {
+        ...res,
+        private: true,
+        basic: false,
+        name: props.state?.name || 'Temp',
+      },
+    });
+    const flowId = await saveWorkflow(flowData).then((flowId) => {
+      setSaving(false);
+      return flowId;
+    });
+  };
 
-  // Add keyboard shortcuts for copy and paste
+  const handleKeyDown = (event) => {
+    // if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+    //   if (event.target.querySelector('.allow-copy')) {
+    //     event.preventDefault();
+    //     copySelectedNode();
+    //   }
+    // } else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+    //   if (event.target.querySelector('.allow-copy')) {
+    //     event.preventDefault();
+    //     pasteSelectedNode();
+    //   }
+    // } else
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      handleSave();
+    }
+  };
+
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
-        event.preventDefault();
-        copySelectedNode();
-      } else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
-        event.preventDefault();
-        pasteSelectedNode();
-      }
-    };
+    if (props.state?.autoSave) {
+      // autoSave every 5 minutes
+      const intervalId = setInterval(() => {
+        handleSave();
+      }, 60 * 1000 * 5);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [handleSave, props.state?.autoSave]);
+
+  useEffect(() => {
+    // const flowContainer = document.getElementById('react-flow');
+    window.addEventListener('contextmenu', handleContextMenu);
     window.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedNodes]);
+  }, []);
 
   return (
     <>
@@ -151,6 +191,19 @@ const ContextMenu = (props) => {
           </MenuItem>
         ))}
       </Menu>
+      {saving && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: '30px',
+            transform: 'translateX(-50%)',
+            zIndex: 1111,
+          }}
+        >
+          <Loading dotSize={5} />
+        </div>
+      )}
     </>
   );
 };

@@ -17,6 +17,16 @@ def base642file(file_path, data):
         print(e)
         return None
     
+def text2file(file_path, data):
+    try:
+        with open(file_path,'w') as f:
+            f.write(data)
+        request_path = file_path.split('source')[-1]
+        return '/api/dataset/source'+request_path
+    except Exception as e:
+        print(e)
+        return None
+    
 
 def delete_file(file_path):
     try:

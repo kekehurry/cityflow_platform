@@ -102,7 +102,6 @@ def delete_module(id):
 
 
 # Workflow
-
 def get_workflow(id):
     # workflow = get_node('Workflow',id)
     # nodes = []
@@ -170,6 +169,8 @@ def delete_workflow(id):
         source_folder = os.getenv('DATABASE_SOURCE_DIR')
         screenshot_path = os.path.join(source_folder,'images',os.path.basename(screenshot))
         delete_file(screenshot_path)
+        for node in workflow['nodes']:
+            delete_module(node.get('id'))
     return delete_node('Workflow',id)
 
 
@@ -258,7 +259,8 @@ def save_workflow(data,user_id):
         file_urls = []
         for file in files:
             file_data = file.get('data')
-            file_id = md5(file_data.encode()).hexdigest()
+            file_path = file.get('path')
+            file_id = md5(f"{module_id}/{file_path}".encode()).hexdigest()
             file_path = os.path.join(source_folder,f"files/{file_id}")
             if 'base64' in file_data:
                 file['data'] = base642file(file_path,file_data)
@@ -332,12 +334,13 @@ def save_module(config,user_id):
         icon_data = config['icon']
         if 'base64' in icon_data:
             config['icon'] = base642file(icon_path,icon)
-    
+
     files = config.get('files',[])
     file_urls = []
     for file in files:
         file_data = file.get('data')
-        file_id = md5(file_data.encode()).hexdigest()
+        file_path = file.get('path')
+        file_id = md5(f"{module_id}/{file_path}".encode()).hexdigest()
         file_path = os.path.join(source_folder,f"files/{file_id}")
         if 'base64' in file_data:
             file['data'] = base642file(file_path,file_data)

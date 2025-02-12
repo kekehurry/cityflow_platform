@@ -320,9 +320,11 @@ class ExpandNode extends PureComponent {
         >
           <Card
             sx={{
-              width: this.state.expand ? 50 : config.width + 4 * margin,
+              width: this.state.expand
+                ? config.expandWidth - 50
+                : config.width + 4 * margin,
               height: this.state.expand
-                ? 50
+                ? config.expandHeight - 50
                 : config.height +
                   6 * margin +
                   Math.max(
@@ -365,7 +367,9 @@ class ExpandNode extends PureComponent {
               }}
               className="nowheel nodrag"
             >
-              {interfaceComponent && mapModule(interfaceComponent)}
+              {interfaceComponent &&
+                !this.state.expand &&
+                mapModule(interfaceComponent)}
             </Paper>
           </Card>
           <Card
