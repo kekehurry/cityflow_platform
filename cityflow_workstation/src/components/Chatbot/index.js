@@ -14,6 +14,7 @@ import { initUserId, useLocalStorage } from '@/utils/local';
 import { MessageLeft, MessageRight } from './utils/MessageBox';
 import MenuIcon from '@mui/icons-material/Menu';
 import theme from '@/theme';
+import multiavatar from '@multiavatar/multiavatar/esm';
 
 import LLMSetting from './utils/LLMSetting';
 
@@ -164,10 +165,12 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                     key={index}
                     message={message['message']}
                     name="human"
-                    avatar={`https://api.multiavatar.com/${userId.slice(
-                      0,
-                      4
-                    )}.png`}
+                    avatar={
+                      userId &&
+                      `data:image/svg+xml;utf8,${encodeURIComponent(
+                        multiavatar(userId)
+                      )}`
+                    }
                   />
                 ) : (
                   <MessageLeft

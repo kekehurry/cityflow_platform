@@ -20,6 +20,7 @@ import { getAuthor, useSearchWorkflow, getWorkflow } from '@/utils/dataset';
 import { initUserId, useLocalStorage, download } from '@/utils/local';
 import Footer from '@/components/Footer';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import multiavatar from '@multiavatar/multiavatar/esm';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -157,7 +158,9 @@ const UserPage = () => {
                 style={{ width: 100, height: 100 }}
                 src={
                   authorId &&
-                  `https://api.multiavatar.com/${authorId.slice(0, 4)}.png`
+                  `data:image/svg+xml;utf8,${encodeURIComponent(
+                    multiavatar(authorId)
+                  )}`
                 }
               />
             </Avatar>
