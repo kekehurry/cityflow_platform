@@ -115,16 +115,17 @@ const ContextMenu = (props) => {
   };
 
   const handleSave = async () => {
+    const { name, nodes, edges, ...res } = props.state;
     setSaving(true);
-    const { nodes, edges, ...res } = props.state;
     const flowData = await getFlowData({
       rfInstance,
       state: {
         ...res,
         private: true,
         basic: false,
-        name: props.state?.name || 'Temp',
+        name: name || 'Temp',
       },
+      fetch: false,
     });
     const flowId = await saveWorkflow(flowData).then((flowId) => {
       setSaving(false);
@@ -169,7 +170,7 @@ const ContextMenu = (props) => {
       window.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [props.state]);
 
   return (
     <>

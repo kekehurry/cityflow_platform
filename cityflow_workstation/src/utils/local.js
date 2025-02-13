@@ -81,11 +81,11 @@ async function blobToBase64(blob) {
   });
 }
 
-export const getFlowData = async ({ rfInstance, state }) => {
+export const getFlowData = async ({ rfInstance, state, fetch = true }) => {
   if (rfInstance) {
     const flowData = rfInstance.toObject();
     const newFlowData = {
-      ...flowData,
+      // ...flowData,
       nodes: await Promise.all(
         flowData.nodes.map(async (node) => {
           return {
@@ -100,7 +100,8 @@ export const getFlowData = async ({ rfInstance, state }) => {
               basic: false,
               local: false,
               icon:
-                node.config.icon && node.config.icon.includes('base64')
+                node.config.icon &&
+                (node.config.icon.includes('base64') || !fetch)
                   ? node.config.icon
                   : await fetch(node.config.icon)
                       .then((res) => res.blob())
@@ -111,14 +112,20 @@ export const getFlowData = async ({ rfInstance, state }) => {
                   node.config.files.map(async (file) => {
                     return {
                       ...file,
-                      data: file.data.includes('base64')
-                        ? file.data
-                        : await fetch(file.data)
-                            .then((res) => res.blob())
-                            .then((blob) => blobToBase64(blob)),
+                      data:
+                        file.data.includes('base64') || !fetch
+                          ? file.data
+                          : await fetch(file.data)
+                              .then((res) => res.blob())
+                              .then((blob) => blobToBase64(blob)),
                     };
                   })
                 )),
+              html:
+                node.config.html &&
+                (node.config.html.startsWith('/api/dataset/source') && fetch
+                  ? await fetch(node.config.html).then((res) => res.text())
+                  : node.config.html),
               run: false,
             },
           };
@@ -155,8 +162,8 @@ export const getFlowData = async ({ rfInstance, state }) => {
     );
     document.body.removeChild(clonedFlowContainer);
     const savedData = {
-      ...state,
       ...newFlowData,
+      ...state,
       screenShot,
     };
     return savedData;

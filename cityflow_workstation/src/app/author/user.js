@@ -44,14 +44,12 @@ const UserPage = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [userId, setUserId] = useState(null);
-  const [userFlows, setUserFlows] = useLocalStorage('userFlows', []);
   const basicData = useSearchWorkflow({ tutorial: true });
-  const allFlows = useSearchWorkflow({ authorId: userId });
-  const { data, error, isLoading } = useSearchWorkflow({ authorId });
+  const { data, error, isLoading } = useSearchWorkflow({ author_id: userId });
 
   const handleDownload = () => {
-    if (!allFlows?.data) return;
-    allFlows.data.map((flow) => {
+    if (!data) return;
+    data.map((flow) => {
       getWorkflow(flow.id).then((flowData) => {
         flowData && download(flowData);
       });
@@ -88,9 +86,8 @@ const UserPage = () => {
       basicData?.data && setItems(basicData.data.slice(0, 1));
     }
     if (isLoading) {
-      const length = Math.max(4 - userFlows?.length || 0, 0);
       setItems(
-        Array.from({ length: length }, (_, i) => i + 1).map((i) => {
+        Array.from({ length: 4 }, (_, i) => i + 1).map((i) => {
           return {
             id: i,
             name: '',
