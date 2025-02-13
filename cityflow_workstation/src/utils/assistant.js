@@ -31,7 +31,7 @@ export default class Assistant {
     const messages = [
       {
         role: 'system',
-        content: this.props.systemPrompt || 'you are a helpful assistant',
+        content: this.props?.systemPrompt || 'you are a helpful assistant',
       },
     ];
     if (messageHistory) {
@@ -70,24 +70,24 @@ export default class Assistant {
       });
     }
     try {
-      const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
+      const response = await fetch(`${this.props?.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.props.apiKey}`,
+          Authorization: `Bearer ${this.props?.apiKey}`,
         },
         body: JSON.stringify({
-          model: this.props.model || 'gpt-4o-mini',
+          model: this.props?.model || 'gpt-4o-mini',
           messages: messages,
-          response_format: this.props.responseFormat
+          response_format: this.props?.responseFormat
             ? {
-                type: this.props.responseFormat,
+                type: this.props?.responseFormat,
               }
             : { type: 'text' },
-          max_tokens: this.props.maxTokens || 4096,
-          temperature: this.props.temperature || 0.8,
-          presence_penalty: this.props.presencePenalty || 0.0,
-          frequency_penalty: this.props.frequencyPenalty || 0.0,
+          max_tokens: this.props?.maxTokens || 4096,
+          temperature: this.props?.temperature || 0.8,
+          presence_penalty: this.props?.presencePenalty || 0.0,
+          frequency_penalty: this.props?.frequencyPenalty || 0.0,
         }),
       }).catch((error) => {
         throw new Error(error);
@@ -106,7 +106,7 @@ export default class Assistant {
     const messages = [
       {
         role: 'system',
-        content: this.props.systemPrompt || 'you are a helpful assistant',
+        content: this.props?.systemPrompt || 'you are a helpful assistant',
       },
     ];
     if (messageHistory) {
@@ -146,24 +146,24 @@ export default class Assistant {
     }
 
     try {
-      const response = await fetch(`${this.props.baseUrl}/chat/completions`, {
+      const response = await fetch(`${this.props?.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.props.apiKey}`,
+          Authorization: `Bearer ${this.props?.apiKey}`,
         },
         body: JSON.stringify({
-          model: this.props.model || 'gpt-4o-mini',
+          model: this.props?.model || 'gpt-4o-mini',
           messages: messages,
-          response_format: this.props.responseFormat
+          response_format: this.props?.responseFormat
             ? {
-                type: this.props.responseFormat,
+                type: this.props?.responseFormat,
               }
             : { type: 'text' },
-          max_tokens: this.props.maxTokens || 4096,
-          temperature: this.props.temperature || 0.8,
-          presence_penalty: this.props.presencePenalty || 0.0,
-          frequency_penalty: this.props.frequencyPenalty || 0.0,
+          max_tokens: this.props?.maxTokens || 4096,
+          temperature: this.props?.temperature || 0.8,
+          presence_penalty: this.props?.presencePenalty || 0.0,
+          frequency_penalty: this.props?.frequencyPenalty || 0.0,
           stream: true,
         }),
         signal,

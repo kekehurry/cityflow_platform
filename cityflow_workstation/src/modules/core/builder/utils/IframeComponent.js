@@ -16,9 +16,9 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   const llmConfig = getLocalStorage('LLM_CONFIG');
   const secrets = {
     MAPBOX_TOKEN: getLocalStorage('MAPBOX_TOKEN'),
-    LLM_API_KEY: llmConfig['apiKey'],
-    LLM_BASE_URL: llmConfig['baseUrl'],
-    LLM_MODEL: llmConfig['model'],
+    LLM_API_KEY: llmConfig?.apiKey,
+    LLM_BASE_URL: llmConfig?.baseUrl,
+    LLM_MODEL: llmConfig?.model,
   };
 
   const iframeRef = useRef(null);
