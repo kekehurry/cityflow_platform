@@ -4,9 +4,13 @@ import palette from '@/theme/palette';
 import theme from '@/theme';
 import { nanoid } from 'nanoid';
 import { getLocalStorage } from '@/utils/local';
+import Loading from '@/components/Loading';
+import useSWR from 'swr';
 
 const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
-  const [html, setHtml] = useState(config?.html || null);
+  const [html, setHtml] = useState(null);
+  const [newHtml, setNewHtml] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [iframeId, setIframeId] = useState(nanoid());
   const [iframeConfig, setIframeConfig] = useState(config);
   const llmConfig = getLocalStorage('LLM_CONFIG');
@@ -18,6 +22,18 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   };
 
   const iframeRef = useRef(null);
+  const fetcher = (url) => fetch(url).then((res) => res.text());
+  const {
+    data: fetchedHtml,
+    error,
+    isLoading,
+  } = useSWR(
+    config?.html && config.html.startsWith('/api/dataset/source')
+      ? config.html
+      : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   const sendToIframe = ({ id, input, config }) => {
     if (iframeRef.current) {
@@ -54,8 +70,43 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
     }
   }, [input, config?.run, config?.html, iframeId]);
 
+  useEffect(() => {
+    // fetch html from server if startswith /api/dataset/source
+    if (config?.html) {
+      if (config.html.startsWith('/api/dataset/source')) {
+        setLoading(isLoading);
+        if (fetchedHtml) {
+          setHtml(fetchedHtml);
+        }
+      } else {
+        setHtml(config?.html);
+      }
+    } else {
+      const placehoderHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <script />
+        </head>
+        <body>
+          <div style="text-align:center;color:${
+            theme.palette.text.secondary
+          };height:100%;align-items:center;display:flex;justify-content:center">
+              <p style="font-size:${15 / (zoom || 1)}px">${
+        config?.name || 'Unnamed Module'
+      }</p>
+          </div>
+        </body>
+      </html>
+    `;
+      setHtml(placehoderHtml);
+    }
+  }, [config?.html, config?.name, fetchedHtml, isLoading]);
+
   // init
   useEffect(() => {
+    if (!html) return;
     const injectScript = `
     <style>
       ::-webkit-scrollbar {
@@ -90,41 +141,17 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
         });
     </script>
     `;
-    if (config?.html) {
-      // Insert injected script before the first <script> tag in the head.
-      const newHtml = config.html.replace(
-        /<script(\b|>)/i,
-        `${injectScript}\n<script$1`
-      );
-      setHtml(newHtml);
-    } else {
-      const placehoderHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          ${injectScript}
-        </head>
-        <body>
-          <div style="text-align:center;color:${
-            theme.palette.text.secondary
-          };height:100%;align-items:center;display:flex;justify-content:center">
-              <p style="font-size:${15 / (zoom || 1)}px">${
-        config?.name || 'Unnamed Module'
-      }</p>
-          </div>
-        </body>
-      </html>
-    `;
-      setHtml(placehoderHtml);
-    }
-  }, [config?.html, config?.name, config?.author, iframeId, secrets]);
+    //inject scripts
+    setNewHtml(html.replace(/<script(\b|>)/i, `${injectScript}\n<script$1`));
+  }, [html, iframeId, secrets]);
 
-  return (
-    html && (
+  return loading ? (
+    <Loading dotSize={10} />
+  ) : (
+    newHtml && (
       <iframe
         ref={iframeRef}
-        srcDoc={html}
+        srcDoc={newHtml}
         style={{
           border: 'none',
           backgroundColor: theme.palette.node.main,

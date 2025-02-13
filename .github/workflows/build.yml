@@ -2,7 +2,7 @@ name: Build and Push to GHCR
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 
 jobs:
   build-and-push:
@@ -29,6 +29,6 @@ jobs:
       with:
         context: ./
         file: ./Dockerfile
-        tags: ghcr.io/kekehurry/cityflow_platform
+        tags: ghcr.io/kekehurry/cityflow_platform:dev
         platforms: linux/amd64,linux/arm64
         push: true

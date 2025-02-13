@@ -8,7 +8,7 @@ import os
 print('Initializing database...')
 
 source_dir = os.getenv('DATABASE_SOURCE_DIR','./cityflow_database/source')
-for folder in ['files','icons','images']:
+for folder in ['files','icons','images','html']:
     if not os.path.exists(os.path.join(source_dir,folder)): 
         os.makedirs(os.path.join(source_dir,folder))
 

@@ -8,12 +8,14 @@ from .core import (
     add_link
 )
 from .llm import get_embedding  
-from .util import base642file, delete_file
+from .util import base642file, text2file, delete_file
 from hashlib import md5
 import uuid
 import json
 import os
 import time
+import copy
+import shutil
 
 # Author
 def get_author(id):
@@ -91,13 +93,23 @@ def add_module(props):
     return add_node('Module', data)
 
 def delete_module(id):
+    source_folder = os.getenv('DATABASE_SOURCE_DIR')
     module = get_module(id)
     if module:
         icon = module.get('icon')
-        delete_file(icon)
+        if icon.startswith('/api/dataset/source'):
+            icon_path = os.path.join(source_folder,'icons',os.path.basename(icon))
+            delete_file(icon_path)
         files = module.get('files',[])
         for file in files:
-            delete_file(file['data'])
+            if file['data'].startswith('/api/dataset/source'):
+                file_path = os.path.join(source_folder,'files',os.path.basename(file['data']))
+                delete_file(file_path)
+        html = module.get('html')
+        if html:
+            if html.startswith('/api/dataset/source'):
+                html_path = os.path.join(source_folder,'html',os.path.basename(html))
+                delete_file(html_path)
     return delete_node('Module',id)
 
 
@@ -178,6 +190,87 @@ def add_workflow(props):
     return add_node('Workflow',props)
 
 
+def save_module(config,user_id,module=None):
+    if not module:
+        module = {}
+    name = config.get('name')
+    source_folder = os.getenv('DATABASE_SOURCE_DIR')
+    author = config.get('author')
+    author_id = config.get('author_id')
+    # if module author not exists, add author
+    if author_id:
+        if not get_author(author_id):
+            add_author({"name":author,"id":author_id})
+    else:
+        author_id = user_id
+        config['author_id'] = user_id
+    if not name:
+        name = uuid.uuid4().hex[:5]
+    module_id = md5(f"{user_id}/{config}".encode()).hexdigest()
+
+    icon = config.get('icon')
+    if icon:
+        icon_path = os.path.join(source_folder,f"icons/{module_id}.png")
+        icon_data = config['icon']
+        if 'base64' in icon_data:
+            config['icon'] = base642file(icon_path,icon)
+        else:
+            orig_icon_path = os.path.join(source_folder,"icons",os.path.basename(config['icon']))
+            if os.path.exists(orig_icon_path):
+                shutil.copy(orig_icon_path, icon_path)
+                config['icon']  = '/api/dataset/source/'+f"icons/{module_id}.png"
+
+    files = config.get('files',[])
+    file_urls = []
+    for file in files:
+        file_data = file.get('data')
+        file_path = file.get('path')
+        file_id = md5(f"{module_id}/{file_path}".encode()).hexdigest()
+        file_path = os.path.join(source_folder,f"files/{file_id}")
+        if 'base64' in file_data:
+            file['data'] = base642file(file_path,file_data)
+        else:
+            orig_file_path = os.path.join(source_folder,"files",os.path.basename(file['data']))
+            if os.path.exists(orig_file_path):
+                shutil.copy(orig_file_path,file_path)
+                file['data'] = '/api/dataset/source/'+f"files/{file_id}"
+        file_urls.append(file)
+    config['files'] = file_urls
+
+    html = config.get('html')
+    if html:
+        html_id = md5(f"{module_id}/{html}".encode()).hexdigest()
+        html_path = os.path.join(source_folder,f"html/{html_id}")
+        if not html.startswith('/api/dataset/source'):
+            config['html'] = text2file(html_path,html)
+        else:
+            orig_html_path = os.path.join(source_folder,"html",os.path.basename(html))
+            if os.path.exists(orig_html_path):
+                shutil.copy(orig_html_path,html_path)
+                config['html'] =  '/api/dataset/source/'+f"html/{html_id}"
+
+    # update the module id
+    module['id'] = module_id
+    module['user_id'] = user_id
+    module['config'] = config
+    module['name'] = name
+
+    add_module(module)
+    add_link("created_by", module_id, author_id)
+
+    # add embeddings
+    embeddings = get_embedding(f"""
+    "name":{config.get('name')},
+    "description":{config.get('description')},
+    "category":{config.get('description')},
+    "author":{config.get('description')},
+    """)
+    if len(embeddings)>0:
+        set_node('Module',module_id,{"embeddings":embeddings[0]})
+
+    return module_id
+
+
 def save_workflow(data,user_id):
 
     source_folder = os.getenv('DATABASE_SOURCE_DIR')
@@ -194,7 +287,7 @@ def save_workflow(data,user_id):
     source_id = workflow_data.get('source')
     previous_id = workflow_data.get('flowId')
     workflow_data['id'] = workflow_id 
-    workflow_data['authorId'] = user_id
+    workflow_data['author_id'] = user_id
     screenshot = workflow_data.get('screenShot') 
     if screenshot and 'base64' in screenshot:
         screenshot_path = os.path.join(source_folder,f"images/{workflow_id}_{time.strftime('%H-%M-%S')}.png")
@@ -232,59 +325,12 @@ def save_workflow(data,user_id):
     # add module links
     id_maps = {}
     for module in data['nodes']:
-        name = module.get('name')
         config = module.get('config')
-        author = config.get('author')
-        author_id = config.get('author_id')
-        # if module author not exists, add author
-        if author_id:
-            if not get_author(author_id):
-                add_author({"name":author,"id":author_id})
-        else:
-            author_id = user_id
-            module['config']['author_id'] = user_id
-        if not name:
-            name = uuid.uuid4().hex[:5]
-            module['name'] = name
-        module_id = md5(f"{user_id}/{config}".encode()).hexdigest()
-
-        icon = config.get('icon')
-        if icon:
-            icon_path = os.path.join(source_folder,f"icons/{module_id}.png")
-            icon_data = config['icon']
-            if 'base64' in icon_data:
-                config['icon'] = base642file(icon_path,icon)
-        
-        files = config.get('files',[])
-        file_urls = []
-        for file in files:
-            file_data = file.get('data')
-            file_path = file.get('path')
-            file_id = md5(f"{module_id}/{file_path}".encode()).hexdigest()
-            file_path = os.path.join(source_folder,f"files/{file_id}")
-            if 'base64' in file_data:
-                file['data'] = base642file(file_path,file_data)
-            file_urls.append(file)
-        config['files'] = file_urls
-
-        # save the mapping from old id to new id    
-        id_maps[module['id']] = module_id
-        # update the module id
-        module['id'] = module_id
-        module['user_id'] = user_id
-        module['name'] = config['name']
-        module['config'] = config
-        
-        query_list.append(f"""
-        "name":{module.get('name')},
-        "description":{config.get('description')},
-        "category":{config.get('description')},
-        "author":{config.get('description')},
-        """)
-        add_module(module)
+        orig_id = module['id']
+        module_id = save_module(config,user_id,module)
+        id_maps[orig_id] = module_id
         add_link("part_of", module_id, workflow_id)
-        add_link("created_by", module_id, author_id)
-
+        
     new_edges = []
     for edge in data['edges']:
         source_id = edge['source']
@@ -306,65 +352,6 @@ def save_workflow(data,user_id):
     embeddings = get_embedding(query_list)
     if len(embeddings)>1:
         set_node('Workflow',workflow_id,{"embeddings":embeddings[0]})
-        for i, node in enumerate(workflow_data['nodes']):
-            set_node('Module',node,{"embeddings":embeddings[i+1]})
     return workflow_id
-
-
-def save_module(config,user_id):
-    module = {}
-    source_folder = os.getenv('DATABASE_SOURCE_DIR')
-    name = config.get('name')
-    author = config.get('author')
-    author_id = config.get('author_id')
-    # if module author not exists, add author
-    if author_id:
-        if not get_author(author_id):
-            add_author({"name":author,"id":author_id})
-    else:
-        author_id = user_id
-        config['author_id'] = user_id
-    if not name:
-        name = uuid.uuid4().hex[:5]
-    module_id = md5(f"{user_id}/{config}".encode()).hexdigest()
-
-    icon = config.get('icon')
-    if icon:
-        icon_path = os.path.join(source_folder,f"icons/{module_id}.png")
-        icon_data = config['icon']
-        if 'base64' in icon_data:
-            config['icon'] = base642file(icon_path,icon)
-
-    files = config.get('files',[])
-    file_urls = []
-    for file in files:
-        file_data = file.get('data')
-        file_path = file.get('path')
-        file_id = md5(f"{module_id}/{file_path}".encode()).hexdigest()
-        file_path = os.path.join(source_folder,f"files/{file_id}")
-        if 'base64' in file_data:
-            file['data'] = base642file(file_path,file_data)
-        file_urls.append(file)
-    config['files'] = file_urls
-    # update the module id
-    module['id'] = module_id
-    module['user_id'] = user_id
-    module['config'] = config
-    module['name'] = name
-
-    add_module(module)
-    add_link("created_by", module_id, author_id)
-
-    # add embeddings
-    embeddings = get_embedding(f"""
-    "name":{config.get('name')},
-    "description":{config.get('description')},
-    "category":{config.get('description')},
-    "author":{config.get('description')},
-    """)
-    if len(embeddings)>0:
-        set_node('Module',module_id,{"embeddings":embeddings[0]})
-
-    return module_id
     
 
