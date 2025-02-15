@@ -15,8 +15,7 @@ import { getLocalStorage } from '@/utils/local';
 export const initCode = {
   interface: [
     `//entrypoint.js
-
-import {useState} from 'react';
+import React from 'react';
 
 // main function
 export default function CustomUI(props){
@@ -31,7 +30,6 @@ export default function CustomUI(props){
   ],
   module: [
     `#entrypoint.py
-
 import cityflow.module as cm
 
 # main function
