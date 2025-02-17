@@ -4,6 +4,7 @@ import LLMInterface from './interface';
 import LLMSetting from '@/components/Chatbot/utils/LLMSetting';
 import { useReactFlow } from 'reactflow';
 import { getLocalStorage } from '@/utils/local';
+import { SettingsAccessibility } from '@mui/icons-material';
 
 export default function LLM(props) {
   const {
@@ -37,23 +38,29 @@ export default function LLM(props) {
     frequencyPenalty: config.frequencyPenalty || 0.0,
   });
 
-  const [assistant, setAssistant] = useState(new Assistant(formValue));
+  const [assistant, setAssistant] = useState(
+    new Assistant({
+      ...localLLMConfig,
+      ...formValue,
+    })
+  );
 
   // expand
   useEffect(() => {
     expand &&
-      setCenter(position.x + 70, position.y + 30, {
-        duration: 1000,
-        zoom: 1,
-      });
+      setCenter(
+        position.x + config.expandWidth / 2,
+        position.y + config.expandHeight / 2,
+        {
+          duration: 1000,
+          zoom: 1,
+        }
+      );
   }, [expand]);
 
   // update config
   useEffect(() => {
-    setConfig({
-      ...config,
-      ...formValue,
-    });
+    setAssistant(new Assistant({ ...localLLMConfig, ...formValue }));
   }, [formValue]);
 
   useEffect(() => {
@@ -68,7 +75,7 @@ export default function LLM(props) {
       assistant
         .chat(input.input)
         .then((res) => {
-          if (res && formValue.responseFormat === 'json_object') {
+          if (formValue.responseFormat === 'json_object') {
             const jsonPattern = /\{(?:[^{}]*|(?:(?<=\{)[^{}]*(?=\})))*\}/;
             const match = res.match(jsonPattern);
             match
@@ -77,6 +84,9 @@ export default function LLM(props) {
           } else {
             setOutput({ output: res });
           }
+        })
+        .catch((e) => {
+          setOutput({ output: e });
         })
         .finally(() => {
           setLoading(false);
