@@ -13,17 +13,18 @@ for folder in ['files','icons','images','html']:
         os.makedirs(os.path.join(source_dir,folder))
 
 init_db()
-admin_passkey = 'admin/kai'
+admin_passkey = os.environ.get('NEO4J_AUTH','neo4j/neo4jgraph')
 admin_id = md5(admin_passkey.encode()).hexdigest()
 
 print('Admin ID:',admin_id)
 
-def load_flow_data(file,basic=False,showcase=False,user_id=admin_id):
+def load_flow_data(file,basic=False,showcase=False,admin=True):
     with open(file) as f:
         flow = json.load(f)
         flow['flowId'] = None
-        flow['author'] = 'admin'
-        flow['author_id'] = user_id
+        if admin:
+            flow['author'] = 'admin'
+            flow['author_id'] = admin_id
         flow['basic'] = basic
         flow['showcase'] = showcase
         for module in flow['nodes']:
@@ -49,8 +50,9 @@ folder = './cityflow_database/json/showcase'
 for file in os.listdir(folder):
     if file.endswith('.json'):
         file = os.path.join(folder,file)
-        flow = load_flow_data(file,basic=False,showcase=True)
-        save_workflow(flow,user_id=admin_id)
+        flow = load_flow_data(file,basic=False,showcase=True,admin=False)
+        flow['author_id'] = md5(flow['author'].encode()).hexdigest()
+        save_workflow(flow,user_id=flow['author_id'])
 
 folder = './cityflow_database/json/basic'
 for file in os.listdir(folder):

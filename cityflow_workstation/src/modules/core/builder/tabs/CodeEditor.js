@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import MonacoEditor from '@monaco-editor/react';
 import ControlButtons from '../utils/ControlButtons';
-import { useState, useEffect, useRef, use } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { registerLLMCompletions } from '../utils/CodeAssistant';
 import { getLocalStorage } from '@/utils/local';
 

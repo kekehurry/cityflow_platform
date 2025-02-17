@@ -56,8 +56,8 @@ const ContextMenu = (props) => {
             ...node,
             id: nanoid(),
             position: {
-              x: node.position.x + Math.floor(Math.random() * 50),
-              y: node.position.y + Math.floor(Math.random() * 50),
+              x: anchorPosition ? anchorPosition.mouseX : node.position.x,
+              y: anchorPosition ? anchorPosition.mouseY : node.position.y,
             },
             local: false,
             basic: false,
@@ -125,7 +125,7 @@ const ContextMenu = (props) => {
         basic: false,
         name: name || 'Temp',
       },
-      fetch: false,
+      fetchSource: false,
     });
     const flowId = await saveWorkflow(flowData).then((flowId) => {
       setSaving(false);

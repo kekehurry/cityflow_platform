@@ -81,7 +81,11 @@ async function blobToBase64(blob) {
   });
 }
 
-export const getFlowData = async ({ rfInstance, state, fetch = true }) => {
+export const getFlowData = async ({
+  rfInstance,
+  state,
+  fetchSource = true,
+}) => {
   if (rfInstance) {
     const flowData = rfInstance.toObject();
     const newFlowData = {
@@ -101,7 +105,7 @@ export const getFlowData = async ({ rfInstance, state, fetch = true }) => {
               local: false,
               icon:
                 node.config.icon &&
-                (node.config.icon.includes('base64') || !fetch)
+                (node.config.icon.includes('base64') || !fetchSource)
                   ? node.config.icon
                   : await fetch(node.config.icon)
                       .then((res) => res.blob())
@@ -113,7 +117,7 @@ export const getFlowData = async ({ rfInstance, state, fetch = true }) => {
                     return {
                       ...file,
                       data:
-                        file.data.includes('base64') || !fetch
+                        file.data.includes('base64') || !fetchSource
                           ? file.data
                           : await fetch(file.data)
                               .then((res) => res.blob())
@@ -123,7 +127,8 @@ export const getFlowData = async ({ rfInstance, state, fetch = true }) => {
                 )),
               html:
                 node.config.html &&
-                (node.config.html.startsWith('/api/dataset/source') && fetch
+                (node.config.html.startsWith('/api/dataset/source') &&
+                fetchSource
                   ? await fetch(node.config.html).then((res) => res.text())
                   : node.config.html),
               run: false,

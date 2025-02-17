@@ -22,7 +22,13 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   };
 
   const iframeRef = useRef(null);
-  const fetcher = (url) => fetch(url).then((res) => res.text());
+  const fetcher = (url) =>
+    fetch(url)
+      .then((res) => {
+        if (!res.ok || res.status === 404) return null;
+        return res.text();
+      })
+      .catch((e) => null);
   const {
     data: fetchedHtml,
     error,
@@ -71,18 +77,7 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
   }, [input, config?.run, config?.html, iframeId]);
 
   useEffect(() => {
-    // fetch html from server if startswith /api/dataset/source
-    if (config?.html) {
-      if (config.html.startsWith('/api/dataset/source')) {
-        setLoading(isLoading);
-        if (fetchedHtml) {
-          setHtml(fetchedHtml);
-        }
-      } else {
-        setHtml(config?.html);
-      }
-    } else {
-      const placehoderHtml = `
+    const placehoderHtml = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -94,12 +89,21 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
             theme.palette.text.secondary
           };height:100%;align-items:center;display:flex;justify-content:center">
               <p style="font-size:${15 / (zoom || 1)}px">${
-        config?.name || 'Unnamed Module'
-      }</p>
+      config?.name || 'Unnamed Module'
+    }</p>
           </div>
         </body>
       </html>
     `;
+    // fetch html from server if startswith /api/dataset/source
+    if (config?.html && config?.type == 'interface') {
+      if (config.html.startsWith('/api/dataset/source')) {
+        setLoading(isLoading);
+        fetchedHtml ? setHtml(fetchedHtml) : setHtml(placehoderHtml);
+      } else {
+        setHtml(config?.html);
+      }
+    } else {
       setHtml(placehoderHtml);
     }
   }, [config?.html, config?.name, fetchedHtml, isLoading]);

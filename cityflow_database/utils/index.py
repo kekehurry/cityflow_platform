@@ -3,6 +3,11 @@ from .core import query, write, get_node_by_id
 from .processor import get_workflow
 from .llm import get_embedding
 import json
+from hashlib import md5
+import os
+
+admin_passkey = os.environ.get('NEO4J_AUTH','neo4j/neo4jgraph')
+admin_id = md5(admin_passkey.encode()).hexdigest()
 
 def create_fulltext_index():
     cypher = '''
@@ -42,8 +47,9 @@ def create_module_vector_index():
 def get_sub_graph(nodeIds):
     cypher = f'''
         MATCH (n)-[l]-()
-        WHERE n.id IN {json.dumps(nodeIds)} 
+        WHERE n.id IN {json.dumps(nodeIds)}
         WITH startNode(l) as m1, endNode(l) as m2, l
+        WHERE NOT ((labels(m1)[0] <> "Author" AND m1.author = '"admin"') OR (labels(m2)[0] <> "Author" AND  m2.author = '"admin"'))
         WITH 
         COLLECT( DISTINCT{{
             id: m1.hash,
@@ -85,17 +91,18 @@ def get_sub_graph(nodeIds):
     hash_map = {node['id']:node['nodeId'] for node in result['values']}
     nodes = set()
     links = set()
-    admin_id = 'd29545ce164c0b53b65671d6c1ebe6ac'
     for node in result['nodes']:
         node['value'] = value_map[node['id']]
         node['nodeId'] = hash_map[node['id']]
         if admin_id not in node['nodeId']:
             nodes.add(tuple(node.items()))
+
     for link in result['links']:
         source = hash_map[link['source']]
         target = hash_map[link['target']]
         if (admin_id not in source) and (admin_id not in target):
             links.add(tuple(link.items()))
+
     result['nodes'] = [dict(node) for node in nodes]
     result['links'] = [dict(link) for link in links]
     return result
@@ -132,7 +139,7 @@ def semantic_query(query_string, limit=20):
     vector = get_embedding(query_string)[0]
     cypher =f'''
     CALL db.index.vector.queryNodes($index,10,{vector}) YIELD node, score
-    WHERE NOT (labels(node)[0] = 'Module' AND node.custom = "false") 
+    WHERE NOT (labels(node)[0] = 'Module' AND node.basic = "true") 
     WITH node.id AS id, node.name AS name, labels(node)[0] AS label,score,node
     ORDER BY score DESC
     LIMIT {limit}
@@ -146,7 +153,6 @@ def semantic_query(query_string, limit=20):
     ids = []
     workflow_result = query(cypher,{"index":"workflowVectorIndex"})
     module_result = query(cypher,{"index":"moduleVectorIndex"})
-    # print(len(workflow_result['ids']),len(module_result['ids']))
     for result in [workflow_result,module_result]:
         if result:
             for id,node,label,score in zip(result['ids'],result['nodes'],result['labels'],result['scores']):
