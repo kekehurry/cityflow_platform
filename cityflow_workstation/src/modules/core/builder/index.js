@@ -209,8 +209,8 @@ export default function ModuleBuilder(props) {
     };
 
     if (
-      (formValue.language == 'javascript' && codeSubmited) ||
-      (formValue.language == 'python' && config.run)
+      (formValue.type === 'interface' && codeSubmited) ||
+      (formValue.type === 'module' && config.run)
     ) {
       setLoading(true);
       getResults();

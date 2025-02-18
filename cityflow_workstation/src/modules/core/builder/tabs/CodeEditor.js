@@ -49,13 +49,38 @@ const getFileName = (code) => {
   const filename = code
     .trim()
     .split('\n')[0]
-    .replace(/^(#|\/\/)\s*/, '')
+    .trim()
+    .replace(/^(#|\/\/|\/\*)\s*/, '')
+    .replace(/\s*\*\/$/, '')
     .trim();
-  if (filename.lastIndexOf('.') !== -1) {
-    return filename.substring(0, filename.lastIndexOf('.'));
-  } else {
-    return filename;
+  return filename;
+};
+
+const getLanguage = (code) => {
+  const filename = code
+    .trim()
+    .split('\n')[0]
+    .trim()
+    .replace(/^(#|\/\/|\/\*)\s*/, '')
+    .replace(/\s*\*\/$/, '')
+    .trim();
+  let language = 'javascript';
+  if (filename.endsWith('.py')) {
+    language = 'python';
+  } else if (filename.endsWith('.js')) {
+    language = 'javascript';
+  } else if (filename.endsWith('.jsx')) {
+    language = 'javascript';
+  } else if (filename.endsWith('.css')) {
+    language = 'css';
+  } else if (filename.endsWith('.txt')) {
+    language = 'plaintext';
+  } else if (filename.endsWith('.md')) {
+    language = 'markdown';
+  } else if (filename.endsWith('.json')) {
+    language = 'json';
   }
+  return language;
 };
 
 export default function CodeEditor({
@@ -77,6 +102,7 @@ export default function CodeEditor({
   const AUTO_COMPLETION = getLocalStorage('CODE_COMPLETION') === 'true';
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
+  const [language, setLanguage] = useState('javascript');
 
   const handleEditorDidMount = (editor, monaco) => {
     monacoRef.current = monaco;
@@ -117,17 +143,25 @@ export default function CodeEditor({
 
   const handleCodeChange = (value, e) => {
     let newCode = formValue.code;
-    let tabs = [...editorTabs];
     newCode[editor] = value;
     setFormValue({
       ...formValue,
       code: newCode,
     });
-    const filename = editor === 0 ? 'entrypoint' : getFileName(value);
-    tabs[editor] = filename;
-    setEditor(editor);
-    setEditorTabs(tabs);
   };
+
+  useEffect(() => {
+    if (formValue.code && formValue.code.length > 0) {
+      let tabs = [...editorTabs];
+      const suffix = formValue.type == 'module' ? 'py' : 'js';
+      const code = formValue.code[editor];
+      const filename =
+        editor === 0 ? `entrypoint.${suffix}` : getFileName(code);
+      setLanguage(getLanguage(formValue.code[editor]));
+      tabs[editor] = filename;
+      setEditorTabs(tabs);
+    }
+  }, [formValue.code[editor]]);
 
   return (
     <Box sx={{ width: '100%', height: '100%' }}>
@@ -184,10 +218,10 @@ export default function CodeEditor({
         />
         {formValue.expandHeight && (
           <MonacoEditor
-            key={sessionId}
+            key={`${sessionId}-${editor}`}
             width="100%"
             height={formValue.expandHeight - 65}
-            language={formValue.language}
+            language={language}
             theme="vs-dark"
             value={formValue.code[editor]}
             onChange={(value, e) => handleCodeChange(value, e)}
