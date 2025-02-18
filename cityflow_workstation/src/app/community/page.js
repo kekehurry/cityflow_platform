@@ -36,10 +36,10 @@ const Community = () => {
   const [homeLoading, setHomeLoading] = useState(false);
   const [flowLoading, setFlowLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showFlow, setShowFlow] = useState(true);
+  const [tab, setTab] = useState(0);
 
   const handleTabChange = (event, newValue) => {
-    setShowFlow(newValue);
+    setTab(newValue);
   };
 
   useEffect(() => {
@@ -155,7 +155,7 @@ const Community = () => {
           </Stack>
           <CommunityShowcase />
         </Stack>
-        <Footer showBeiAn={!scrolled} />
+        <Footer />
         <IconButton
           sx={{
             position: 'absolute',
@@ -195,20 +195,24 @@ const Community = () => {
           justifyContent="center"
         >
           <ToggleButtonGroup
-            value={showFlow}
+            value={tab}
             exclusive
             onChange={handleTabChange}
             aria-label="text alignment"
           >
-            <ToggleButton value={true} aria-label="show flows">
+            <ToggleButton value={0} aria-label="show flows">
               Flows
             </ToggleButton>
-            <ToggleButton value={false} aria-label="show modules">
-              Modules
+            <ToggleButton value={1} aria-label="show modules">
+              Tutorials
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
-        {showFlow ? <CommunityFlows /> : <CommunityModules />}
+        {tab === 0 ? (
+          <CommunityFlows params={{ private: false }} />
+        ) : (
+          <CommunityFlows params={{ tutorial: true }} />
+        )}
       </Box>
     </>
   );

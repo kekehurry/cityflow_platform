@@ -8,15 +8,14 @@ import {
 } from '@mui/material';
 import MonacoEditor from '@monaco-editor/react';
 import ControlButtons from '../utils/ControlButtons';
-import { useState, useEffect, useRef, use } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { registerLLMCompletions } from '../utils/CodeAssistant';
 import { getLocalStorage } from '@/utils/local';
 
 export const initCode = {
   interface: [
     `//entrypoint.js
-
-import {useState} from 'react';
+import React from 'react';
 
 // main function
 export default function CustomUI(props){
@@ -31,7 +30,6 @@ export default function CustomUI(props){
   ],
   module: [
     `#entrypoint.py
-
 import cityflow.module as cm
 
 # main function

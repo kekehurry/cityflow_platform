@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,abort
 from flask import send_file,send_from_directory
 from flask_cors import CORS
 import os
@@ -143,6 +143,9 @@ def _get_graph_overview():
 
 @app.route('/api/dataset/source/<path:path>',methods=['GET'])
 def _get_source_file(path):
+    file_path = os.path.join(os.getenv('DATABASE_SOURCE_DIR'), path)
+    if not os.path.exists(file_path):
+        abort(404)
     return send_from_directory(os.getenv('DATABASE_SOURCE_DIR'), path)
     
 if __name__ == '__main__':

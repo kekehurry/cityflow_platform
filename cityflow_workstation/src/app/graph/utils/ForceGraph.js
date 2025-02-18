@@ -124,6 +124,11 @@ const createForceGraph2D = ({
     });
 
   simulation.on('tick', () => {
+    graphData.nodes.forEach((d) => {
+      const radius = Math.log(d.value + 1) * 15;
+      d.x = Math.max(radius, Math.min(width - radius, d.x));
+      d.y = Math.max(radius, Math.min(height - radius, d.y));
+    });
     link
       .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)

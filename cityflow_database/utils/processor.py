@@ -86,7 +86,7 @@ def add_module(props):
     name = props.get('name')    
     base = {k:v for k,v in props.items() if k != 'config'}
 
-    hash = md5(f"{author}/{name}".encode()).hexdigest()
+    hash = md5(f"{author}/{config}".encode()).hexdigest()
 
     data = {**config,"base": base, "id":id, "hash":hash, "name": name, "user_id": user_id,"basic":basic}
     
@@ -206,7 +206,7 @@ def save_module(config,user_id,module=None):
         config['author_id'] = user_id
     if not name:
         name = uuid.uuid4().hex[:5]
-    module_id = md5(f"{user_id}/{config}".encode()).hexdigest()
+    module_id = md5(f"{user_id}/{name}-{time.time()}".encode()).hexdigest()
 
     icon = config.get('icon')
     if icon:
@@ -350,7 +350,7 @@ def save_workflow(data,user_id):
 
     # add embeddings
     embeddings = get_embedding(query_list)
-    if len(embeddings)>1:
+    if len(embeddings)>0:
         set_node('Workflow',workflow_id,{"embeddings":embeddings[0]})
     return workflow_id
     

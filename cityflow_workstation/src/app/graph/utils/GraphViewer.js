@@ -13,10 +13,10 @@ export default function GraphViewer(props) {
   const { selectedNode, setSelectedNode, setResults } = props;
   const [graphData, setGraphdata] = useState(null);
   const [value, setValue] = useState(
-    'How to calculate accessibility in cambridge?'
+    'How to calculate amenity density in cambridge?'
   );
   const [query, setQuery] = useState(
-    'How to calculate accessibility in cambridge?'
+    'How to calculate amenity density in cambridge?'
   );
   const { data, error, isLoading } = useSemanticSearch(query);
 

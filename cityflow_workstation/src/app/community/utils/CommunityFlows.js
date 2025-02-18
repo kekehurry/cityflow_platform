@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchWorkflow } from '@/utils/dataset';
 
-const CommunityFlows = () => {
+const CommunityFlows = ({ params }) => {
   const [items, setItems] = useState([]);
-  const { data, error, isLoading } = useSearchWorkflow({ private: false });
+  const { data, error, isLoading } = useSearchWorkflow(params);
   const cardWidth = 300;
   const cardHeight = 200;
 
