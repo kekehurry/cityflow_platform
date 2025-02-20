@@ -7,6 +7,7 @@ import {
   Tab,
   IconButton,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import CommunityFlows from '@/app/community/utils/CommunityFlows';
@@ -14,6 +15,9 @@ import theme from '@/theme';
 import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
 import CachedIcon from '@mui/icons-material/Cached';
+import { getLocalStorage, useLocalStorage } from '@/utils/local';
+import { saveWorkflow } from '@/utils/dataset';
+import { set } from 'lodash';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -27,6 +31,12 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 const Community = () => {
   const [tab, setTab] = useState(0);
+  const [loading, setLoading] = useState(false);
+  // const communityURL = getLocalStorage('COMMUNITY_URL');
+  const [communityURL, setCommunityURL] = useLocalStorage(
+    'COMMUNITY_URL',
+    'https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/dev/cityflow_database/json/community_workflows.json'
+  );
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
@@ -34,7 +44,48 @@ const Community = () => {
   };
 
   const handleUpdate = () => {
-    window.location.reload();
+    if (!communityURL) return;
+    setLoading(true);
+    fetch(communityURL)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('fetch basic data');
+        Array.isArray(data?.basic) &&
+          data.basic.forEach((item) =>
+            fetch(item)
+              .then((res) => res.json())
+              .then((flow) => {
+                flow.basic = true;
+                flow.private = false;
+                saveWorkflow(flow);
+              })
+          );
+        console.log('fetch tutorial data');
+        Array.isArray(data?.tutorial) &&
+          data.tutorial.forEach((item) =>
+            fetch(item)
+              .then((res) => res.json())
+              .then((flow) => {
+                flow.tutorial = true;
+                flow.private = false;
+                saveWorkflow(flow);
+              })
+          );
+        console.log('fetch showcase data');
+        Array.isArray(data?.showcase) &&
+          data.showcase.forEach((item) =>
+            fetch(item)
+              .then((res) => res.json())
+              .then((flow) => {
+                flow.showcase = true;
+                flow.private = false;
+                saveWorkflow(flow);
+              })
+          );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -84,12 +135,16 @@ const Community = () => {
           }}
           onClick={handleUpdate}
         >
-          <CachedIcon
-            sx={{
-              width: 25,
-              height: 25,
-            }}
-          />
+          {loading ? (
+            <CircularProgress size={25} />
+          ) : (
+            <CachedIcon
+              sx={{
+                width: 25,
+                height: 25,
+              }}
+            />
+          )}
         </IconButton>
       </Tooltip>
     </Stack>

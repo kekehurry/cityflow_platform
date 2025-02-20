@@ -55,6 +55,10 @@ export default function MainSetting({ open, setOpen }) {
     codeCompletion == 'true'
   );
   const [autoSave, setAutoSave] = useLocalStorage('AUTO_SAVE', 'true');
+  const [communityURL, setCommunityURL] = useLocalStorage(
+    'COMMUNITY_URL',
+    'https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/dev/cityflow_database/json/community_workflows.json'
+  );
   const [edit, setEdit] = useState(false);
 
   useEffect(() => {
@@ -115,39 +119,44 @@ export default function MainSetting({ open, setOpen }) {
               </Avatar>
             </Box>
             <Stack
-              spacing={1}
-              direction="row"
-              sx={{ alignItems: 'center', cursor: 'pointer' }}
+              sx={{
+                width: '100%',
+                alignItems: 'left',
+                justifyContent: 'center',
+              }}
             >
-              {edit ? (
-                <Input
-                  id="USER_NAME"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  fullWidth
-                  inputProps={{
-                    style: {
+              <Stack spacing={1} direction="row" sx={{ cursor: 'pointer' }}>
+                {edit ? (
+                  <Input
+                    id="USER_NAME"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    fullWidth
+                    inputProps={{
+                      style: {
+                        fontWeight: 'bold',
+                        fontSize: 20,
+                      },
+                    }}
+                  />
+                ) : (
+                  <Typography
+                    sx={{
+                      display: 'center',
                       fontWeight: 'bold',
                       fontSize: 20,
-                    },
+                    }}
+                  >
+                    {userName}
+                  </Typography>
+                )}
+                <EditIcon
+                  onClick={() => {
+                    setEdit(!edit);
                   }}
                 />
-              ) : (
-                <Typography
-                  sx={{
-                    display: 'center',
-                    fontWeight: 'bold',
-                    fontSize: 20,
-                  }}
-                >
-                  {userName}
-                </Typography>
-              )}
-              <EditIcon
-                onClick={() => {
-                  setEdit(!edit);
-                }}
-              />
+              </Stack>
+              <Typography sx={{ fontSize: 10 }}>{userId}</Typography>
             </Stack>
           </Stack>
           <Divider />
@@ -375,6 +384,25 @@ export default function MainSetting({ open, setOpen }) {
               fullWidth
               inputProps={inputProps}
             />
+          </Stack>
+          <Stack sx={{ pt: 2, pb: 2, spacing: 2 }}>
+            <Divider />
+            <Stack direction={'row'} sx={{ pt: 2 }}>
+              <InputLabel
+                htmlFor="COMMUNITY_URL"
+                size="small"
+                sx={{ fontSize: 10, width: '50%' }}
+              >
+                COMMUNITY_URL
+              </InputLabel>
+              <Input
+                id="COMMUNITY_URL"
+                value={communityURL || ''}
+                onChange={(e) => setCommunityURL(e.target.value)}
+                fullWidth
+                inputProps={inputProps}
+              />
+            </Stack>
           </Stack>
         </Stack>
       </DialogContent>
