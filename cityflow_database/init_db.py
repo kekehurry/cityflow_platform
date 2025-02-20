@@ -23,7 +23,6 @@ def load_flow_data(file,basic=False,showcase=False,admin=True):
         flow = json.load(f)
         flow['flowId'] = None
         if admin:
-            flow['author'] = 'admin'
             flow['author_id'] = admin_id
         flow['basic'] = basic
         flow['showcase'] = showcase

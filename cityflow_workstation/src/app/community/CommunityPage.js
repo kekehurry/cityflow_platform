@@ -41,13 +41,13 @@ const Community = () => {
     setLoading(true);
     getCommunityFlows()
       .then((flows) => {
-        console.log(flows);
         flows &&
           Array.isArray(flows) &&
           flows.forEach((flow) => saveWorkflow(flow));
       })
       .finally(() => {
         setLoading(false);
+        window.location.href = '/';
       });
   };
 
@@ -99,7 +99,7 @@ const Community = () => {
           onClick={handleUpdate}
         >
           {loading ? (
-            <CircularProgress size={25} />
+            <CircularProgress size={25} sx={{ color: 'white' }} />
           ) : (
             <CachedIcon
               sx={{

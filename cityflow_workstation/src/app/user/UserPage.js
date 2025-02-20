@@ -17,7 +17,6 @@ import { initUserId } from '@/utils/local';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import Link from 'next/link';
-import { set } from 'lodash';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -36,6 +35,7 @@ const UserPage = () => {
   const basicData = useSearchWorkflow({ tutorial: true });
   const { data, error, isLoading, mutate } = useSearchWorkflow({
     author_id: userId,
+    private: true,
   });
 
   const handleUpload = () => {

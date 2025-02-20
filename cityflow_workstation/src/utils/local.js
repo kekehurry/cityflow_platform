@@ -139,38 +139,47 @@ export const getFlowData = async ({
       edges: [...flowData.edges],
       globalScale: 0.01,
     };
-    const flowContainer = document.getElementById('react-flow');
-    const clonedFlowContainer = flowContainer.cloneNode(true);
-    clonedFlowContainer.style.background = theme.palette.flow.main;
-    clonedFlowContainer.style.position = 'absolute';
-    clonedFlowContainer.style.top = '-10000px';
-    document.body.appendChild(clonedFlowContainer);
-    let screenShot;
-    await html2canvas(clonedFlowContainer, { logging: false }).then(
-      (canvas) => {
-        screenShot = canvas.toDataURL();
-        // Resize the screenshot
-        const img = new Image();
-        img.src = screenShot;
-        img.onload = () => {
-          const maxWidth = 256;
-          const scale = maxWidth / img.width;
-          let canvasResized = document.createElement('canvas');
-          canvasResized.width = maxWidth;
-          canvasResized.height = img.height * scale;
-          const ctx = canvasResized.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvasResized.width, canvasResized.height);
-          screenShot = canvasResized.toDataURL();
-          canvasResized = null;
-        };
-      }
-    );
-    document.body.removeChild(clonedFlowContainer);
-    const savedData = {
-      ...newFlowData,
-      ...state,
-      screenShot,
-    };
+
+    let savedData;
+    if (!state?.screenShot) {
+      const flowContainer = document.getElementById('react-flow');
+      const clonedFlowContainer = flowContainer.cloneNode(true);
+      clonedFlowContainer.style.background = theme.palette.flow.main;
+      clonedFlowContainer.style.position = 'absolute';
+      clonedFlowContainer.style.top = '-10000px';
+      document.body.appendChild(clonedFlowContainer);
+      let screenShot;
+      await html2canvas(clonedFlowContainer, { logging: false }).then(
+        (canvas) => {
+          screenShot = canvas.toDataURL();
+          // Resize the screenshot
+          const img = new Image();
+          img.src = screenShot;
+          img.onload = () => {
+            const maxWidth = 256;
+            const scale = maxWidth / img.width;
+            let canvasResized = document.createElement('canvas');
+            canvasResized.width = maxWidth;
+            canvasResized.height = img.height * scale;
+            const ctx = canvasResized.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvasResized.width, canvasResized.height);
+            screenShot = canvasResized.toDataURL();
+            canvasResized = null;
+          };
+        }
+      );
+      document.body.removeChild(clonedFlowContainer);
+      savedData = {
+        ...newFlowData,
+        ...state,
+        screenShot,
+      };
+    } else {
+      savedData = {
+        ...newFlowData,
+        ...state,
+      };
+    }
     return savedData;
   }
 };

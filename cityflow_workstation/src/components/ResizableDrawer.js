@@ -71,7 +71,7 @@ const ResizableDrawer = ({
           }}
           style={{
             overflow: 'hidden',
-            border: '1px solid #212121',
+            border: theme.palette.primary.border,
             borderLeft: '0',
             borderTop: '0',
             background: theme.palette.flow.main,

@@ -7,11 +7,7 @@ const UserFlows = ({ items }) => {
   const cardHeight = 250;
 
   return (
-    <ImageList
-      cols={4}
-      gap={20}
-      sx={{ height: cardHeight + 100, overflow: 'auto' }}
-    >
+    <ImageList cols={4} gap={20}>
       {items?.map(
         (item, index) =>
           item && (

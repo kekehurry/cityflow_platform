@@ -18,7 +18,10 @@ export default function Interface() {
   const searchPage = <SearchPage />;
   const userPage = <UserPage />;
   const assistantPage = (
-    <AssistantPage width="70%" background={theme.palette.flow.background} />
+    <AssistantPage
+      width="70%"
+      background={theme.palette.assistant.background}
+    />
   );
   const communityPage = <CommunityPage />;
 

@@ -7,10 +7,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
 import ArticleIcon from '@mui/icons-material/Article';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import GitHubIcon from '@mui/icons-material/Github';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuCard from './utils/MenuCard';
 import MainSetting from './utils/MainSetting';
+import CodeIcon from '@mui/icons-material/Code';
 
 export default function Navigation({ menu, setMenu }) {
   const [open, setOpen] = useState(false);
@@ -59,7 +59,7 @@ export default function Navigation({ menu, setMenu }) {
         <Link href="https://doc.cityflow.cn/" target="_blank">
           <MenuCard
             icon={<ArticleIcon />}
-            name="Document"
+            name="Documents"
             height={35}
             onClick={handleClick}
             menu={menu}
@@ -70,8 +70,8 @@ export default function Navigation({ menu, setMenu }) {
           target="_blank"
         >
           <MenuCard
-            icon={<GitHubIcon />}
-            name="Github"
+            icon={<CodeIcon />}
+            name="Repository"
             height={35}
             onClick={handleClick}
             menu={menu}

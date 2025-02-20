@@ -197,7 +197,6 @@ const FlowStation = (props) => {
             backgroundColor: theme.palette.flow.background,
           }}
         >
-          {embed || <Header />}
           <Loading dotSize={15} />
         </div>
       )}

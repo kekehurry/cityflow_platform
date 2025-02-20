@@ -14,6 +14,7 @@ export const POST = async (req) => {
             const flow = await r.json();
             flow.basic = true;
             flow.private = false;
+            flow.globalScale = 0.01;
             return flow;
           } catch (err) {
             console.error(err);
@@ -33,6 +34,7 @@ export const POST = async (req) => {
             flow.private = false;
             flow.showcase = false;
             flow.basic = false;
+            flow.globalScale = 0.01;
             return flow;
           } catch (err) {
             console.error(err);
@@ -44,13 +46,15 @@ export const POST = async (req) => {
     }
     if (Array.isArray(data?.showcase)) {
       const showcaseFlows = await Promise.all(
-        data.tutorial.map(async (item) => {
+        data.showcase.map(async (item) => {
           try {
             const r = await fetch(item);
             const flow = await r.json();
+            flow.tutorial = false;
             flow.showcase = true;
             flow.private = false;
             flow.basic = false;
+            flow.globalScale = 0.01;
             return flow;
           } catch (err) {
             console.error(err);

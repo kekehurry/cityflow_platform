@@ -68,14 +68,14 @@ export default function ShareCard({
             border:
               hover || selected
                 ? `2px solid ${theme.palette.primary.main}`
-                : '1px solid #282828',
+                : theme.palette.primary.border,
             cursor: 'pointer',
           }}
           style={{
             backgroundImage: screenShot && `url(${screenShot})`,
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'left',
+            backgroundPosition: 'center',
           }}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
