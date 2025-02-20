@@ -1,17 +1,18 @@
 import { ImageList } from '@mui/material';
 import ShareCard from '@/components/ShareCard';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchWorkflow } from '@/utils/dataset';
 
-const CommunityFlows = ({
+const FlowList = ({
   params,
-  cardWidth = 250,
-  cardHeight = 250,
-  cols = 4,
+  cardWidth = 200,
+  cardHeight = 200,
+  cols = 5,
   gap = 20,
 }) => {
   const [items, setItems] = useState([]);
   const { data, error, isLoading } = useSearchWorkflow(params);
+  const fallBackItems = useSearchWorkflow({ category: 'tutorial' });
 
   useEffect(() => {
     if (isLoading) {
@@ -40,9 +41,20 @@ const CommunityFlows = ({
         (item, index, self) =>
           index === self.findIndex((t) => t?.name === item?.name)
       );
-      setItems(uniqueItems);
+      if (uniqueItems.length === 0) {
+        fallBackItems?.data && setItems(fallBackItems.data.slice(0, 5));
+      } else {
+        setItems(uniqueItems);
+      }
     }
-  }, [data, error, isLoading]);
+  }, [
+    data,
+    error,
+    isLoading,
+    fallBackItems?.data,
+    fallBackItems?.error,
+    fallBackItems?.isLoading,
+  ]);
 
   return (
     <ImageList cols={cols} gap={gap}>
@@ -71,4 +83,4 @@ const CommunityFlows = ({
   );
 };
 
-export default CommunityFlows;
+export default FlowList;

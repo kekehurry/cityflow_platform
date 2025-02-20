@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import CommunityFlows from '@/app/community/utils/CommunityFlows';
+import FlowList from '@/components/FlowList';
 import theme from '@/theme';
 import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
@@ -21,7 +21,6 @@ import {
   useLocalStorage,
 } from '@/utils/local';
 import { saveWorkflow } from '@/utils/dataset';
-import { set } from 'lodash';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -74,15 +73,16 @@ const Community = () => {
       setMenu(menu);
       fetchFlows(menu).then(() => {
         setLoading(false);
+        window.location.href = '/';
       });
     });
   };
 
   useEffect(() => {
-    if (!menu) {
+    if (!menu && !loading) {
       handleUpdate();
     }
-  }, [menu]);
+  }, [menu, loading]);
 
   return (
     <Stack
@@ -95,12 +95,12 @@ const Community = () => {
       }}
     >
       <Box>
-        <Typography variant="h3" sx={{ mt: 2, mb: 3 }}>
+        <Typography variant="h3" sx={{ pl: 2 }}>
           Featured
         </Typography>
-        <CommunityFlows
+        <FlowList
           params={{ category: 'featured' }}
-          cardWidth={'36vw'}
+          cardWidth={'35vw'}
           cardHeight={200}
           cols={2}
         />
@@ -109,31 +109,32 @@ const Community = () => {
         value={tab}
         onChange={handleTabChange}
         aria-label="basic tabs example"
+        sx={{ pl: 2 }}
       >
-        {Object.keys(menu)
-          .filter((k) => k != 'basic' && k != 'featured')
-          .map((key, index) => (
-            <Tab key={key} label={key} />
-          ))}
+        {menu &&
+          Object.keys(menu)
+            .filter((k) => k != 'basic' && k != 'featured')
+            .map((key, index) => <Tab key={key} label={key} />)}
         <Tab key={'workflow'} label="Workflow" />
       </Tabs>
-      <Box sx={{ pt: 2 }}>
-        {Object.keys(menu)
-          .filter((k) => k != 'basic' && k != 'featured')
-          .map(
-            (key, index) =>
-              tab == index && (
-                <CommunityFlows
-                  key={index}
-                  params={{ category: key }}
-                  cardWidth={200}
-                  cardHeight={200}
-                  cols={5}
-                />
-              )
-          )}
-        {tab == Object.keys(menu).length + 1 && (
-          <CommunityFlows
+      <Box sx={{ pt: 1 }}>
+        {menu &&
+          Object.keys(menu)
+            .filter((k) => k != 'basic' && k != 'featured')
+            .map(
+              (key, index) =>
+                tab == index && (
+                  <FlowList
+                    key={index}
+                    params={{ category: key }}
+                    cardWidth={200}
+                    cardHeight={200}
+                    cols={5}
+                  />
+                )
+            )}
+        {menu && tab == Object.keys(menu).length + 1 && (
+          <FlowList
             params={{ private: false, category: null }}
             cardWidth={'36vw'}
             cardHeight={200}
@@ -142,7 +143,16 @@ const Community = () => {
         )}
       </Box>
       {loading ? (
-        <Stack direction="row" spacing={2}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            opacity: 0.5,
+          }}
+        >
           <Typography>{progress}</Typography>
           <CircularProgress size={25} sx={{ color: 'white' }} />
         </Stack>

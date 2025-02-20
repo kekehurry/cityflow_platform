@@ -70,6 +70,7 @@ export default function ShareCard({
                 ? `2px solid ${theme.palette.primary.main}`
                 : theme.palette.primary.border,
             cursor: 'pointer',
+            boxShadow: '4px 4px 10px 0px rgba(0,0,0,0.2)',
           }}
           style={{
             backgroundImage: screenShot && `url(${screenShot})`,

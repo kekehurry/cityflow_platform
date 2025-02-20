@@ -8,7 +8,7 @@ import {
   Stack,
   CircularProgress,
 } from '@mui/material';
-import UserFlows from './utils/UserFlows';
+
 import theme from '@/theme';
 import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
@@ -16,6 +16,7 @@ import { useSearchWorkflow, saveWorkflow } from '@/utils/dataset';
 import { initUserId } from '@/utils/local';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import FlowList from '@/components/FlowList';
 import Link from 'next/link';
 
 const mapStateToProps = (state, ownProps) => {
@@ -30,14 +31,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 const UserPage = () => {
   const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState([]);
   const [userId, setUserId] = useState(null);
-  const basicData = useSearchWorkflow({ category: 'tutorial' });
-  const { data, error, isLoading, mutate } = useSearchWorkflow({
-    author_id: userId,
-    private: true,
-  });
-
   const handleUpload = () => {
     const upload = new Promise((resolve, reject) => {
       const fileInput = document.createElement('input');
@@ -71,30 +65,6 @@ const UserPage = () => {
       setUserId(id);
     });
   });
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const uniqueItems = data?.filter(
-        (item, index, self) =>
-          index === self.findIndex((t) => t?.name === item?.name)
-      );
-      userId && setItems(uniqueItems);
-    } else {
-      basicData?.data && setItems(basicData.data.slice(0, 4));
-    }
-    if (isLoading) {
-      setItems(
-        Array.from({ length: 4 }, (_, i) => i + 1).map((i) => {
-          return {
-            id: i,
-            name: '',
-            description: '',
-            screenShot: '/static/fetching_large.gif',
-          };
-        })
-      );
-    }
-  }, [data, error, isLoading, basicData?.data, userId]);
 
   return (
     <Box
@@ -153,7 +123,7 @@ const UserPage = () => {
       <Typography variant="h3" sx={{ mt: 5, mb: 3 }}>
         My WorkFlows
       </Typography>
-      <UserFlows items={items} />
+      <FlowList params={{ author_id: userId, private: true }} />
     </Box>
   );
 };

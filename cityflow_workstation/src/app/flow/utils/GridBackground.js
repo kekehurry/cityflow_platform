@@ -130,7 +130,7 @@ const InfiniteGrid = () => {
             bottom: 15,
             right: 15,
             color: '#424242',
-            zIndex: 1111,
+            zIndex: 1000,
             fontSize: 10,
           }}
         >

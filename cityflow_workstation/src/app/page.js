@@ -1,10 +1,9 @@
 'use client';
-import UserPage from './user/UserPage';
-import SearchPage from './graph/SearchPage';
-import CommunityPage from './community/CommunityPage';
 import { useEffect, useState } from 'react';
-import Navigation from './navigation/Navigation';
-
+import UserPage from './utils/UserPage';
+import GraphPage from './utils/GraphPage';
+import CommunityPage from './utils/CommunityPage';
+import Navigation from './utils/Navigation';
 import ResizableDrawer from '@/components/ResizableDrawer';
 import AssistantPage from '@/components/Chatbot/AssistantPage';
 import theme from '@/theme';
@@ -15,7 +14,7 @@ export default function Interface() {
   const [childrenTwo, setChildrenTwo] = useState(null);
 
   const navigationBar = <Navigation menu={menu} setMenu={setMenu} />;
-  const searchPage = <SearchPage />;
+  const graphPage = <GraphPage />;
   const userPage = <UserPage />;
   const assistantPage = (
     <AssistantPage
@@ -37,7 +36,7 @@ export default function Interface() {
         break;
       case 'Search':
         setChildrenOne(navigationBar);
-        setChildrenTwo(searchPage);
+        setChildrenTwo(graphPage);
         break;
       case 'Assistant':
         setChildrenOne(navigationBar);

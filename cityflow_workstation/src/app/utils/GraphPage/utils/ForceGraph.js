@@ -96,7 +96,7 @@ const createForceGraph2D = ({
     .enter()
     .append('text')
     .text((d) => JSON.parse(d[nodeLabel]))
-    .attr('dx', (d) => JSON.parse(d[nodeLabel]).length * -2.5)
+    .attr('dx', (d) => JSON.parse(d[nodeLabel])?.length * -2.5)
     .attr('dy', '.35em')
     .attr('font-size', 10)
     .attr('fill', 'white')
