@@ -3,8 +3,8 @@ import ShareCard from '@/components/ShareCard';
 import Link from 'next/link';
 
 const UserFlows = ({ items }) => {
-  const cardWidth = 250;
-  const cardHeight = 250;
+  const cardWidth = 200;
+  const cardHeight = 200;
 
   return (
     <ImageList cols={4} gap={20}>

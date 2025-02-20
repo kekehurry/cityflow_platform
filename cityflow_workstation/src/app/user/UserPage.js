@@ -32,7 +32,7 @@ const UserPage = () => {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [userId, setUserId] = useState(null);
-  const basicData = useSearchWorkflow({ tutorial: true });
+  const basicData = useSearchWorkflow({ category: 'tutorial' });
   const { data, error, isLoading, mutate } = useSearchWorkflow({
     author_id: userId,
     private: true,

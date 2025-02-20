@@ -45,13 +45,13 @@ const createForceGraph2D = ({
       d3
         .forceLink(graphData.links)
         .id((d) => d.id)
-        .distance(100)
+        .distance(50)
     )
     .force('charge', d3.forceManyBody().strength(15))
     .force('center', d3.forceCenter(width / 2, height / 2))
     .force(
       'collision',
-      d3.forceCollide().radius((d) => Math.log(d.value + 1) * 25)
+      d3.forceCollide().radius((d) => Math.log(d.value + 1) * 20)
     );
 
   const link = svg
@@ -73,7 +73,7 @@ const createForceGraph2D = ({
     .data(graphData.nodes)
     .enter()
     .append('circle')
-    .attr('r', (d) => Math.log(d.value + 1) * 15)
+    .attr('r', (d) => Math.log(d.value + 1) * 12)
     .attr('fill', (d) => nodeFillColorMap[d[nodeAutoColorBy]])
     .attr('stroke', (d) => nodeStrokeColor)
     .attr('stroke-width', 1)

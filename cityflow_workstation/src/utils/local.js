@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import theme from '@/theme';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const defaultCommunityURL = process.env.NEXT_PUBLIC_COMMUNITY_URL || '';
 
 export const initUserId = async () => {
   if (typeof localStorage === 'undefined') {
@@ -326,10 +327,37 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
 //   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
 // };
 
+export const getCommunityMenu = async () => {
+  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
+  const res = await fetch(basePath + '/api/local/getCommunityMenu', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ communityURL }),
+  });
+  const { communityMenu } = await res.json();
+  return communityMenu;
+};
+
+export const getCommunityFlow = async (flowURL) => {
+  const res = await fetch(basePath + '/api/local/getCommunityFlow', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ flowURL }),
+  });
+  const { flow } = await res.json();
+  if (flow) {
+    flow.private = false;
+    flow.globalScale = 0.01;
+  }
+  return flow;
+};
+
 export const getCommunityFlows = async () => {
-  const communityURL =
-    getLocalStorage('communityURL') ||
-    'https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/dev/cityflow_database/json/community_workflows.json';
+  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
   const res = await fetch(basePath + '/api/local/getCommunityFlows', {
     method: 'POST',
     headers: {

@@ -6,6 +6,10 @@ const lightGray = 'rgba(117, 117, 117,1)';
 
 const palette = {
   mode: 'dark',
+  background: {
+    default: black,
+    paper: black,
+  },
   primary: {
     // linear gradient
     main: 'rgb(116, 63, 245)',

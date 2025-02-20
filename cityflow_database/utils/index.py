@@ -139,7 +139,7 @@ def semantic_query(query_string, limit=20):
     vector = get_embedding(query_string)[0]
     cypher =f'''
     CALL db.index.vector.queryNodes($index,10,{vector}) YIELD node, score
-    WHERE NOT (labels(node)[0] = 'Module' AND node.basic = "true") 
+    WHERE NOT (labels(node)[0] = 'Module' AND node.category = "basic") 
     WITH node.id AS id, node.name AS name, labels(node)[0] AS label,score,node
     ORDER BY score DESC
     LIMIT {limit}
