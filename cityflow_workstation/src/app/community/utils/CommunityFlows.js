@@ -1,7 +1,6 @@
-import { ImageList, Box } from '@mui/material';
+import { ImageList } from '@mui/material';
 import ShareCard from '@/components/ShareCard';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useSearchWorkflow } from '@/utils/dataset';
 
 const CommunityFlows = ({
@@ -54,19 +53,17 @@ const CommunityFlows = ({
               key={index}
               style={{ display: 'inline-block', width: cardWidth }}
             >
-              <Link
-                href={{ pathname: '/flow', query: { id: item.id } }}
-                style={{ textDecoration: 'none' }}
-                target="_blank"
-              >
-                <ShareCard
-                  data={item}
-                  width={cardWidth}
-                  height={cardHeight}
-                  minWidth={200}
-                  minHeight={200}
-                />
-              </Link>
+              <ShareCard
+                data={item}
+                width={cardWidth}
+                height={cardHeight}
+                minWidth={200}
+                minHeight={200}
+                edit={true}
+                onClick={() => {
+                  window.location.href = `/flow?id=${item.id}`;
+                }}
+              />
             </div>
           )
       )}

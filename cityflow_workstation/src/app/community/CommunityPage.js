@@ -15,7 +15,7 @@ import theme from '@/theme';
 import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
 import CachedIcon from '@mui/icons-material/Cached';
-import { getLocalStorage, useLocalStorage } from '@/utils/local';
+import { getCommunityFlows } from '@/utils/local';
 import { saveWorkflow } from '@/utils/dataset';
 import { set } from 'lodash';
 
@@ -32,56 +32,19 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 const Community = () => {
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  // const communityURL = getLocalStorage('COMMUNITY_URL');
-  const [communityURL, setCommunityURL] = useLocalStorage(
-    'COMMUNITY_URL',
-    'https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/dev/cityflow_database/json/community_workflows.json'
-  );
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
-    console.log(newValue);
   };
 
   const handleUpdate = () => {
-    if (!communityURL) return;
     setLoading(true);
-    fetch(communityURL)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('fetch basic data');
-        Array.isArray(data?.basic) &&
-          data.basic.forEach((item) =>
-            fetch(item)
-              .then((res) => res.json())
-              .then((flow) => {
-                flow.basic = true;
-                flow.private = false;
-                saveWorkflow(flow);
-              })
-          );
-        console.log('fetch tutorial data');
-        Array.isArray(data?.tutorial) &&
-          data.tutorial.forEach((item) =>
-            fetch(item)
-              .then((res) => res.json())
-              .then((flow) => {
-                flow.tutorial = true;
-                flow.private = false;
-                saveWorkflow(flow);
-              })
-          );
-        console.log('fetch showcase data');
-        Array.isArray(data?.showcase) &&
-          data.showcase.forEach((item) =>
-            fetch(item)
-              .then((res) => res.json())
-              .then((flow) => {
-                flow.showcase = true;
-                flow.private = false;
-                saveWorkflow(flow);
-              })
-          );
+    getCommunityFlows()
+      .then((flows) => {
+        console.log(flows);
+        flows &&
+          Array.isArray(flows) &&
+          flows.forEach((flow) => saveWorkflow(flow));
       })
       .finally(() => {
         setLoading(false);

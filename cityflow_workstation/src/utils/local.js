@@ -316,3 +316,18 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
 //   cs_data['userFlows'] = userFlows;
 //   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
 // };
+
+export const getCommunityFlows = async () => {
+  const communityURL =
+    getLocalStorage('communityURL') ||
+    'https://raw.githubusercontent.com/kekehurry/cityflow_platform/refs/heads/dev/cityflow_database/json/community_workflows.json';
+  const res = await fetch(basePath + '/api/local/getCommunityFlows', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ communityURL }),
+  });
+  const { communityFlows } = await res.json();
+  return communityFlows;
+};
