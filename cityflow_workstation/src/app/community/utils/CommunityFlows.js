@@ -4,11 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchWorkflow } from '@/utils/dataset';
 
-const CommunityFlows = ({ params }) => {
+const CommunityFlows = ({
+  params,
+  cardWidth = 250,
+  cardHeight = 250,
+  cols = 4,
+  gap = 20,
+}) => {
   const [items, setItems] = useState([]);
   const { data, error, isLoading } = useSearchWorkflow(params);
-  const cardWidth = 300;
-  const cardHeight = 200;
 
   useEffect(() => {
     if (isLoading) {
@@ -42,7 +46,7 @@ const CommunityFlows = ({ params }) => {
   }, [data, error, isLoading]);
 
   return (
-    <ImageList cols={4} gap={20}>
+    <ImageList cols={cols} gap={gap}>
       {items?.map(
         (item, index) =>
           item && (
@@ -53,13 +57,14 @@ const CommunityFlows = ({ params }) => {
               <Link
                 href={{ pathname: '/flow', query: { id: item.id } }}
                 style={{ textDecoration: 'none' }}
+                target="_blank"
               >
                 <ShareCard
                   data={item}
                   width={cardWidth}
                   height={cardHeight}
-                  minWidth={300}
-                  minHeight={300}
+                  minWidth={200}
+                  minHeight={200}
                 />
               </Link>
             </div>

@@ -11,6 +11,7 @@ import ControlButtons from '../utils/ControlButtons';
 import { useState, useEffect, useRef } from 'react';
 import { registerLLMCompletions } from '../utils/CodeAssistant';
 import { getLocalStorage } from '@/utils/local';
+import theme from '@/theme';
 
 export const initCode = {
   interface: [
@@ -186,7 +187,8 @@ export default function CodeEditor({
               fontSize: 12,
               minHeight: 10,
               height: 10,
-              backgroundColor: editor === index ? '#212121' : null,
+              backgroundColor:
+                editor === index ? theme.palette.flow.background : null,
             }}
             id={index}
             onDoubleClick={() => handleTabDelete(index)}

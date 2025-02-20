@@ -1,113 +1,62 @@
 'use client';
-import { Box, Button, Typography, Stack, Divider } from '@mui/material';
-import HomeBackground from '@/components/HomeBackgound';
-import Footer from '@/components/Footer';
-import Link from 'next/link';
-import { useState } from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
+import UserPage from './user/UserPage';
+import SearchPage from './graph/SearchPage';
+import CommunityPage from './community/CommunityPage';
+import { useEffect, useState } from 'react';
+import Navigation from './navigation/Navigation';
+
+import ResizableDrawer from '@/components/ResizableDrawer';
+import AssistantPage from '@/components/Chatbot/AssistantPage';
 import theme from '@/theme';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+export default function Interface() {
+  const [menu, setMenu] = useState('Home');
+  const [childrenOne, setChildrenOne] = useState(null);
+  const [childrenTwo, setChildrenTwo] = useState(null);
 
-const Home = () => {
-  const [flowLoading, setFlowLoading] = useState(false);
-  const [authorLoading, setAuthorLoading] = useState(false);
-  const [communityLoading, setCommunityLoading] = useState(false);
-  return (
-    <>
-      <Box
-        sx={{
-          background: theme.palette.home.background,
-        }}
-      >
-        <HomeBackground />
-      </Box>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          overflow: 'hidden',
-          zIndex: 1,
-          p: 4,
-        }}
-      >
-        <Stack spacing={4} sx={{ height: '95%' }}>
-          <Stack
-            spacing={4}
-            sx={{ width: '40%', position: 'absolute', top: '30%' }}
-          >
-            <Stack direction="row" spacing={4} alignItems="flex-end">
-              <img
-                src={`${basePath}/static/cflogo.png`}
-                alt="Community Logo"
-                style={{ width: '90px', height: '90px' }}
-              />
-              <Typography variant="h1">City Flow</Typography>
-            </Stack>
-            <Typography variant="h5">
-              CityFlow provides a low code environment for building your own
-              workflow to discover, evaluate and create solutions for city
-              problems.
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              <Link href="/flow" style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    setFlowLoading(true);
-                  }}
-                  sx={{ width: 150, height: 35, borderRadius: 10 }}
-                >
-                  {flowLoading ? (
-                    <CircularProgress size={20} sx={{ color: '#fff' }} />
-                  ) : (
-                    'Get Started'
-                  )}
-                </Button>
-              </Link>
-              <Link href="/author" style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    setAuthorLoading(true);
-                  }}
-                  sx={{ width: 150, height: 35, borderRadius: 10 }}
-                >
-                  {authorLoading ? (
-                    <CircularProgress size={20} sx={{ color: '#fff' }} />
-                  ) : (
-                    'Home Page'
-                  )}
-                </Button>
-              </Link>
-              <Link href="/community" style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    setCommunityLoading(true);
-                  }}
-                  sx={{ width: 200, height: 35, borderRadius: 10 }}
-                >
-                  {communityLoading ? (
-                    <CircularProgress size={20} sx={{ color: '#fff' }} />
-                  ) : (
-                    'Community WorkFlows'
-                  )}
-                </Button>
-              </Link>
-            </Stack>
-          </Stack>
-        </Stack>
-        <Footer />
-      </Box>
-    </>
+  const navigationBar = <Navigation menu={menu} setMenu={setMenu} />;
+  const searchPage = <SearchPage />;
+  const userPage = <UserPage />;
+  const assistantPage = (
+    <AssistantPage width="70%" background={theme.palette.flow.background} />
   );
-};
+  const communityPage = <CommunityPage />;
 
-export default Home;
+  useEffect(() => {
+    switch (menu) {
+      case 'Home':
+        setChildrenOne(navigationBar);
+        setChildrenTwo(userPage);
+        break;
+      case 'Community':
+        setChildrenOne(navigationBar);
+        setChildrenTwo(communityPage);
+        break;
+      case 'Search':
+        setChildrenOne(navigationBar);
+        setChildrenTwo(searchPage);
+        break;
+      case 'Assistant':
+        setChildrenOne(navigationBar);
+        setChildrenTwo(assistantPage);
+        break;
+      default:
+        break;
+    }
+  }, [menu]);
+
+  return (
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+      }}
+    >
+      <ResizableDrawer
+        direction="horizontal"
+        childrenOne={childrenOne}
+        childrenTwo={childrenTwo}
+      />
+    </div>
+  );
+}

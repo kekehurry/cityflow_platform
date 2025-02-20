@@ -137,7 +137,7 @@ export const getFlowData = async ({
         })
       ),
       edges: [...flowData.edges],
-      globalScale: 0.1,
+      globalScale: 0.01,
     };
     const flowContainer = document.getElementById('react-flow');
     const clonedFlowContainer = flowContainer.cloneNode(true);

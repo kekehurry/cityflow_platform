@@ -20,7 +20,13 @@ import LLMSetting from './utils/LLMSetting';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
+export default function ChatBot({
+  llmConfig,
+  setLLMConfig,
+  width,
+  height,
+  sendCode,
+}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [historyMessages, setHistoryMessages] = useState([]);
@@ -106,27 +112,31 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   }, [historyMessages, currentMessage]);
 
   return (
-    <Stack spacing={1} width="100%" height={height} overflow={'auto'}>
-      <Box
+    <Stack
+      spacing={1}
+      width={width || '100%'}
+      height={height || '100%'}
+      overflow={'auto'}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <IconButton
         sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
+          alignSelf: 'flex-end',
           position: 'absolute',
-          right: 20,
-          width: 30,
           height: 30,
+          width: 30,
+          p: 0,
           zIndex: 1,
         }}
+        onClick={() => setShowConfig(!showConfig)}
       >
-        <IconButton
-          sx={{ height: '100%', width: '100%', p: 0 }}
-          onClick={() => setShowConfig(!showConfig)}
-        >
-          <MenuIcon
-            sx={{ color: theme.palette.text.secondary, width: 15, height: 15 }}
-          />
-        </IconButton>
-      </Box>
+        <MenuIcon
+          sx={{ color: theme.palette.text.secondary, width: 15, height: 15 }}
+        />
+      </IconButton>
       {showConfig ? (
         <LLMSetting
           setAssistant={setAssistant}
@@ -194,8 +204,8 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
           </Stack>
           <OutlinedInput
             placeholder="Chat with CityFlow..."
-            multiline
-            rows={3}
+            // multiline
+            // rows={2}
             width="100%"
             size="small"
             value={inputMessage}
@@ -208,6 +218,16 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                 ]);
                 setInputMessage('');
               }
+            }}
+            sx={{
+              borderRadius: 5,
+              backgroundColor: theme.palette.secondary.gray,
+              opacity: 0.7,
+            }}
+            inputProps={{
+              style: {
+                height: 40,
+              },
             }}
             endAdornment={
               <InputAdornment position="end">

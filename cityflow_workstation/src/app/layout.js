@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '@/theme';
@@ -50,7 +50,9 @@ const RootLayout = ({ children }) => {
         <main>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Provider store={store}>{children}</Provider>
+            <Provider store={store}>
+              <Suspense fallback={<div>loading</div>}>{children}</Suspense>
+            </Provider>
           </ThemeProvider>
         </main>
       </body>

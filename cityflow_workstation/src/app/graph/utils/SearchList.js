@@ -1,9 +1,6 @@
-import { ImageList, Box, Typography } from '@mui/material';
+import { ImageList } from '@mui/material';
 import ShareCard from '@/components/ShareCard';
 import { useState, useEffect } from 'react';
-import { searchWorkflow } from '@/utils/dataset';
-import { set } from 'lodash';
-import AuthorPage from '@/app/author/page';
 
 const SearchList = ({
   results,

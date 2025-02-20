@@ -5,13 +5,7 @@ import {
   Stack,
   IconButton,
   Tooltip,
-  Accordion,
-  AccordionSummary,
   Typography,
-  AccordionDetails,
-  Divider,
-  Input,
-  InputLabel,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import React, { useState, useEffect, useRef } from 'react';
@@ -20,8 +14,7 @@ import { connect } from 'react-redux';
 import { setupExecutor, check, killExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
-import { useLocalStorage } from '@/utils/local';
-import { initUserId } from '@/utils/local';
+import { getLocalStorage, useLocalStorage } from '@/utils/local';
 import theme from '@/theme';
 
 import LogBoard from './LogBoard';
@@ -67,49 +60,18 @@ const FlowSettings = (props) => {
   const [formValue, setFormValue] = useState({});
   const latestPropsRef = useRef(props);
   const [loading, setLoading] = useState(false);
-  const [author, setAuthor] = useLocalStorage('author', null);
-  const [MAPBOX_TOKEN, setMapboxToken] = useLocalStorage('MAPBOX_TOKEN', '');
-  const [codeCompletion, saveCodeCompletion] = useLocalStorage(
-    'CODE_COMPLETION',
-    'false'
-  );
-  const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG', {
-    name: 'CityFlow',
-    assistantIcon: `${basePath}/static/favicon.ico`,
-    systemPrompt: `You are a helpful assistant for CityFlow Platform. You can help users to design, evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows.`,
-    context: '',
-    greeding: `What can I do for you?`,
-    model: 'gpt-4o-mini',
-    baseUrl: 'https://api.openai.com/v1',
-    temperature: 0.8,
-    maxTokens: 4192,
-    presencePenalty: 0.0,
-    frequencyPenalty: 0.0,
-    responseFormat: 'text',
-    apiKey: '',
-  });
+  const userName = getLocalStorage('USER_NAME');
+  const localLLMConfig = getLocalStorage('LLM_CONFIG');
   const [defaultRunner, setDefaultRunner] = useLocalStorage(
     'DEFAULT_RUNNER',
     process.env.NEXT_PUBLIC_DEFAULT_RUNNER ||
       'ghcr.io/kekehurry/cityflow_runner:latest'
   );
   const [logOpen, setLogOpen] = useState(false);
-  const [autoCompletion, setAutoCompletion] = useState(true);
-  const accordionRef = useRef(null);
-
-  const inputProps = {
-    style: {
-      background: 'none',
-      color: 'text.secondary',
-      border: 'none',
-      borderBottom: `1px solid text.secondary`,
-    },
-  };
 
   // sumbit workflow settings
   const hangleSubmit = async () => {
     setMeta({ ...formValue, loading: true });
-    setAuthor(formValue.author);
     setDefaultRunner(formValue.image);
     const logs = [];
     if (props.state?.isAlive) {
@@ -187,31 +149,17 @@ const FlowSettings = (props) => {
     });
   };
 
-  const handleAccordionChange = (event, expanded) => {
-    const parentContainer = accordionRef.current?.parentElement;
-    setTimeout(() => {
-      parentContainer.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }, 100);
-  };
-
   useEffect(() => {
     if (!props.state?.flowId) return;
-    initUserId().then((userId) => {
-      author || setAuthor(`user_${userId.slice(0, 4)}`);
-    });
     setFormValue({
       flowId: props.state?.flowId || '',
       name: props.state?.name || '',
       description: props.state?.description || '',
       tag: props.state?.tag || '',
       city: props.state?.city || '',
-      author: author || '',
+      author: props.state?.author || userName || '',
       image: props.state?.image || defaultRunner,
       packages: props.state?.packages || '',
-      autoSave: props.state?.autoSave || true,
     });
   }, [props.state?.flowId]);
 
@@ -230,22 +178,12 @@ const FlowSettings = (props) => {
   }, [formValue.flowId, props.state?.isAlive]);
 
   useEffect(() => {
-    setAutoCompletion(codeCompletion === 'true');
-  }, []);
-
-  useEffect(() => {
     latestPropsRef.current = props;
   }, [props]);
 
   return (
     <Box id="FlowSettings" hidden={tab !== 0}>
       <Stack spacing={2} sx={{ mt: 0 }}>
-        {/* <TextField
-              label="flowId"
-              id="flowId"
-              value={formValue?.flowId || ''}
-              disabled
-            /> */}
         <TextField
           label="name"
           id="name"
@@ -382,250 +320,6 @@ channels:
             Open Terminal
           </Typography>
         </Button>
-        <Accordion
-          sx={{ border: '0px', background: 'none' }}
-          variant="outlined"
-          disableGutters
-          slotProps={{ transition: { timeout: { enter: 100, exit: 500 } } }}
-          onChange={handleAccordionChange}
-        >
-          <AccordionSummary sx={{ m: 0, p: 0, color: 'text.secondary' }}>
-            Advance Settings
-          </AccordionSummary>
-          <AccordionDetails sx={{ m: 0, p: 0, height: '550px' }}>
-            <Stack spacing={1}>
-              <Divider />
-              <Stack direction={'row'}>
-                <InputLabel
-                  htmlFor="LLM_BASE_URL"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  BASE_URL
-                </InputLabel>
-                <Input
-                  id="LLM_BASE_URL"
-                  value={localLLMConfig?.baseUrl || ''}
-                  onChange={(e) =>
-                    setLocalLLMConfig({
-                      ...localLLMConfig,
-                      baseUrl: e.target.value,
-                    })
-                  }
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-              <Stack direction={'row'}>
-                <InputLabel
-                  htmlFor="LLM_MODEL"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  LLM_MODEL
-                </InputLabel>
-                <Input
-                  id="LLM_MODEL"
-                  value={localLLMConfig?.model || ''}
-                  onChange={(e) =>
-                    setLocalLLMConfig({
-                      ...localLLMConfig,
-                      model: e.target.value,
-                    })
-                  }
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-              <Stack direction={'row'}>
-                <InputLabel
-                  htmlFor="LLM_API_KEY"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  LLM_API_KEY
-                </InputLabel>
-                <Input
-                  type="password"
-                  id="LLM_API_KEY"
-                  value={localLLMConfig?.apiKey || ''}
-                  onChange={(e) =>
-                    setLocalLLMConfig({
-                      ...localLLMConfig,
-                      apiKey: e.target.value,
-                    })
-                  }
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-              <Stack direction={'row'} sx={{ pb: 2 }}>
-                <InputLabel
-                  htmlFor="MAPBOX_TOEKN"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  MAPBOX_TOKEN
-                </InputLabel>
-                <Input
-                  type="password"
-                  id="MAPBOX_TOEKN"
-                  value={MAPBOX_TOKEN || ''}
-                  onChange={(e) => setMapboxToken(e.target.value)}
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-              <Divider />
-              <Stack
-                direction={'row'}
-                sx={{ pb: 2, pt: 2 }}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  paddingBottom: '16px',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <InputLabel
-                  htmlFor="AUTO_SAVE"
-                  style={{ fontSize: '10px', width: '50%' }}
-                >
-                  AUTO_SAVE
-                </InputLabel>
-                <input
-                  type="checkbox"
-                  id="AUTO_SAVE"
-                  size="small"
-                  checked={formValue?.autoSave || true}
-                  onChange={(e) =>
-                    setFormValue({
-                      ...formValue,
-                      autoSave: !formValue?.autoSave,
-                    })
-                  }
-                  style={{
-                    appearance: 'none',
-                    width: '12px',
-                    height: '12px',
-                    cursor: 'pointer',
-                    backgroundColor: formValue?.autoSave
-                      ? theme.palette.primary.main
-                      : '#f0f0f0', // Change colors based on checked state
-                    border: `0.5px solid ${theme.palette.secondary.gray}`,
-                    borderRadius: '50%',
-                    transition: 'background-color 0.3s ease', // Optional smooth transition
-                  }}
-                />
-              </Stack>
-              <Stack
-                direction={'row'}
-                sx={{ pb: 2 }}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  paddingBottom: '16px',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <InputLabel
-                  htmlFor="CODE_COMPLETION"
-                  style={{ fontSize: '10px', width: '50%' }}
-                >
-                  CODE_COMPLETION
-                </InputLabel>
-                <input
-                  type="checkbox"
-                  id="CODE_COMPLETION"
-                  size="small"
-                  checked={autoCompletion}
-                  onChange={(e) => {
-                    const status = e.target.checked;
-                    setAutoCompletion(e.target.checked);
-                    saveCodeCompletion(JSON.stringify(status));
-                  }}
-                  style={{
-                    appearance: 'none',
-                    width: '12px',
-                    height: '12px',
-                    cursor: 'pointer',
-                    backgroundColor: autoCompletion
-                      ? theme.palette.primary.main
-                      : '#f0f0f0', // Change colors based on checked state
-                    border: `0.5px solid ${theme.palette.secondary.gray}`,
-                    borderRadius: '50%',
-                    transition: 'background-color 0.3s ease', // Optional smooth transition
-                  }}
-                />
-              </Stack>
-              <Stack direction={'row'}>
-                <InputLabel
-                  htmlFor="CODE_BASE_URL"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  CODE_BASE_URL
-                </InputLabel>
-                <Input
-                  id="CODE_BASE_URL"
-                  value={localLLMConfig?.codeBaseUrl || ''}
-                  onChange={(e) =>
-                    setLocalLLMConfig({
-                      ...localLLMConfig,
-                      codeBaseUrl: e.target.value,
-                    })
-                  }
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-              <Stack direction={'row'}>
-                <InputLabel
-                  htmlFor="CODE_MODEL"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  CODE_MODEL
-                </InputLabel>
-                <Input
-                  id="CODE_MODEL"
-                  value={localLLMConfig?.codeModel || ''}
-                  onChange={(e) =>
-                    setLocalLLMConfig({
-                      ...localLLMConfig,
-                      codeModel: e.target.value,
-                    })
-                  }
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-              <Stack direction={'row'}>
-                <InputLabel
-                  htmlFor="CODE_API_KEY"
-                  size="small"
-                  sx={{ fontSize: 10, width: '50%' }}
-                >
-                  CODE_API_KEY
-                </InputLabel>
-                <Input
-                  id="CODE_API_KEY"
-                  type="password"
-                  value={localLLMConfig?.codeApiKey || ''}
-                  onChange={(e) =>
-                    setLocalLLMConfig({
-                      ...localLLMConfig,
-                      codeApiKey: e.target.value,
-                    })
-                  }
-                  fullWidth
-                  inputProps={inputProps}
-                />
-              </Stack>
-            </Stack>
-            <div ref={accordionRef}></div>
-          </AccordionDetails>
-        </Accordion>
         <LogBoard
           flowId={formValue.flowId}
           logOpen={logOpen}

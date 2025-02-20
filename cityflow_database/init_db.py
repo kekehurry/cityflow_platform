@@ -27,6 +27,8 @@ def load_flow_data(file,basic=False,showcase=False,admin=True):
             flow['author_id'] = admin_id
         flow['basic'] = basic
         flow['showcase'] = showcase
+        flow['globalScale'] = 0.01
+        flow['private'] = False
         for module in flow['nodes']:
             if 'config' in module.keys():
                 module['config']['author'] = None

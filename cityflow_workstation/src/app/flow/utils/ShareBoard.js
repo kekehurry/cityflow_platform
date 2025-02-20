@@ -15,7 +15,7 @@ import { getFlowData, download } from '@/utils/local';
 import theme from '@/theme';
 import { saveWorkflow } from '@/utils/dataset';
 import { connect } from 'react-redux';
-import { useLocalStorage, getLocalStorage } from '@/utils/local';
+import { getLocalStorage } from '@/utils/local';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -28,11 +28,11 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 const ShareBoard = (props) => {
   const { dialogOpen, setDialogOpen, name } = props;
   const rfInstance = useReactFlow();
-  const [author, setAuthor] = useLocalStorage('author', null);
   const [formValue, setFormValue] = useState({});
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
+  const userName = getLocalStorage('USER_NAME');
 
   const handleClose = () => {
     setDialogOpen(false);
@@ -40,7 +40,6 @@ const ShareBoard = (props) => {
 
   const handleDownload = useCallback(async () => {
     setSaving(true);
-    setAuthor(formValue.author);
     const { nodes, edges, ...res } = props.state;
     const flowData = await getFlowData({
       rfInstance,
@@ -55,7 +54,6 @@ const ShareBoard = (props) => {
 
   const handleSave = useCallback(async () => {
     setSaving(true);
-    setAuthor(formValue.author);
     const { nodes, edges, ...res } = props.state;
     const flowData = await getFlowData({
       rfInstance,
@@ -75,7 +73,6 @@ const ShareBoard = (props) => {
   const handleShare = useCallback(
     async ({ publish }) => {
       publish ? setPublishing(true) : setSaving(true);
-      setAuthor(formValue.author);
       const { nodes, edges, ...res } = props.state;
       const flowData = await getFlowData({
         rfInstance,
@@ -105,16 +102,12 @@ const ShareBoard = (props) => {
   };
 
   useEffect(() => {
-    setFormValue({ author: author });
-  }, [author]);
-
-  useEffect(() => {
     setFormValue({
       name: props.state?.name || '',
       description: props.state?.description || '',
       tag: props.state?.tag || '',
       city: props.state?.city || '',
-      author: author || '',
+      author: userName || '',
       packages: props.state?.packages || '',
       image: props.state?.image || defaultRunner,
     });
@@ -123,7 +116,7 @@ const ShareBoard = (props) => {
     props.state?.description,
     props.state?.tag,
     props.state?.city,
-    author,
+    userName,
     props.state?.packages,
     props.state?.image,
   ]);

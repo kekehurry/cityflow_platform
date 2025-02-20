@@ -6,12 +6,15 @@ import {
   Stack,
   Fade,
   IconButton,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import { useState } from 'react';
 import theme from '@/theme';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import { deleteWorkflow, searchWorkflow } from '@/utils/dataset';
-// import { deleteUserFlow } from '@/utils/local';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { deleteWorkflow, getWorkflow } from '@/utils/dataset';
+import { download } from '@/utils/local';
 
 export default function ShareCard({
   data,
@@ -32,13 +35,20 @@ export default function ShareCard({
   const { id, name, author, description, screenShot, label, score } = data;
   const [hover, setHover] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const menuOpen = Boolean(menuAnchorEl);
+
+  const handleMenuClick = (event) => {
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = (event) => {
+    event.stopPropagation();
+    setMenuAnchorEl(null);
+  };
 
   const handleDelete = () => {
-    // local
-    //   ? deleteUserFlow(id).then(() => {
-    //       setIsVisible(false);
-    //     })
-    //   :
     deleteWorkflow(id).then(() => {
       setIsVisible(false);
     });
@@ -58,7 +68,7 @@ export default function ShareCard({
             border:
               hover || selected
                 ? `2px solid ${theme.palette.primary.main}`
-                : '1px solid #212121',
+                : '1px solid #282828',
             cursor: 'pointer',
           }}
           style={{
@@ -79,22 +89,30 @@ export default function ShareCard({
               flexDirection: 'column',
             }}
           >
-            <Box sx={{ position: 'relative' }}>
-              {edit && (
+            {edit && (
+              <Box sx={{ position: 'relative', height: '5%' }}>
                 <IconButton
-                  onClick={handleDelete}
-                  size="large"
+                  size="small"
                   sx={{
                     position: 'absolute',
-                    right: -10,
+                    right: -5,
                     top: -10,
                     zIndex: 1,
                   }}
+                  onClick={handleMenuClick}
                 >
-                  <RemoveCircleIcon fontSize="large" color="red" />
+                  <MoreHorizIcon fontSize="small" />
                 </IconButton>
-              )}
-            </Box>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                </Menu>
+              </Box>
+            )}
             <Typography variant={titleSize} sx={{ flexGrow: 1 }}>
               {name}
             </Typography>
