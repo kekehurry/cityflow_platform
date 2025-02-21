@@ -33,7 +33,7 @@ export default function MainSetting({ open, setOpen }) {
   const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG', {
     name: 'CityFlow',
     assistantIcon: `${basePath}/static/favicon.ico`,
-    systemPrompt: `You are a helpful assistant for CityFlow Platform. You can help users to design, evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows.`,
+    systemPrompt: `You are a helpful assistant for CityFlow Platform. This platform can evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows. When you are provided with a knowledge graph context, you need to analyse the context and generate accurate, clear, and helpful responses. Don't answer with graph context directly, but with the information that is relevant to the user's question.`,
     context: '',
     greeding: `What can I do for you?`,
     model: 'gpt-4o-mini',

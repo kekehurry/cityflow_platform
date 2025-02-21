@@ -72,7 +72,6 @@ const ShareBoard = (props) => {
     const flowData = await getFlowData({
       rfInstance,
       state: { ...res, ...formValue, basic: false, private: true },
-      fetchSource: false,
     });
     const flowId = await saveWorkflow(flowData)
       .then((flowId) => {

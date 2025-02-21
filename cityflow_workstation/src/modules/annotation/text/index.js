@@ -9,13 +9,15 @@ import 'katex/dist/katex.min.css'; // `rehype-katex` does not import the CSS for
 function TextNode(props) {
   const { config, setConfig } = props;
   const [edit, setEdit] = useState(false);
-  const [value, setValue] = useState(config.value || 'Double click to edit');
+  const [value, setValue] = useState(
+    config?.description || config?.value || 'Double click to edit'
+  );
 
   useEffect(() => {
     if (!value) {
       setValue('Double click to edit, Shift+Enter to save');
     } else {
-      setConfig({ ...config, value });
+      setConfig({ ...config, description: value });
     }
   }, [value]);
 

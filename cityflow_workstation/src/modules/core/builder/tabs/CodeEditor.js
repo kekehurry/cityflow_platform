@@ -162,7 +162,7 @@ export default function CodeEditor({
       tabs[editor] = filename;
       setEditorTabs(tabs);
     }
-  }, [formValue.code[editor]]);
+  }, [formValue.code && formValue.code[editor]]);
 
   return (
     <Box sx={{ width: '100%', height: '100%' }}>
@@ -225,7 +225,7 @@ export default function CodeEditor({
             height={formValue.expandHeight - 65}
             language={language}
             theme="vs-dark"
-            value={formValue.code[editor]}
+            value={formValue.code && formValue.code[editor]}
             onChange={(value, e) => handleCodeChange(value, e)}
             onMount={handleEditorDidMount}
             options={{

@@ -54,12 +54,14 @@ def get_sub_graph(nodeIds):
         COLLECT( DISTINCT{{
             id: m1.hash,
             name: m1.name, 
-            type: labels(m1)[0]
+            type: labels(m1)[0],
+            description: m1.description
         }}) + 
         COLLECT( DISTINCT{{
             id: m2.hash,
             name: m2.name, 
-            type: labels(m2)[0]
+            type: labels(m2)[0],
+            description: m2.description
         }})
         AS nodes,
         COLLECT( DISTINCT{{

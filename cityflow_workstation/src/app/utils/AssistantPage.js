@@ -1,15 +1,16 @@
 import ChatBot from '@/components/Chatbot';
 import { Box } from '@mui/material';
-import { useLocalStorage, getLocalStorage } from '@/utils/local';
+import { useLocalStorage } from '@/utils/local';
 import { useEffect, useState } from 'react';
-import theme from '@/theme';
 
 const AssistantPage = ({ width, height, background = 'none' }) => {
   const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG');
   const [llmConfig, setLLMConfig] = useState(null);
 
   useEffect(() => {
-    setLLMConfig({ ...localLLMConfig });
+    setLLMConfig({
+      ...localLLMConfig,
+    });
   }, [localLLMConfig]);
 
   return (
@@ -31,6 +32,7 @@ const AssistantPage = ({ width, height, background = 'none' }) => {
           setLLMConfig={setLocalLLMConfig}
           height={height || '100%'}
           width={width || '100%'}
+          useTool={true}
         />
       )}
     </Box>

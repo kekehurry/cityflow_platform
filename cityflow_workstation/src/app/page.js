@@ -4,8 +4,9 @@ import UserPage from './utils/UserPage';
 import GraphPage from './utils/GraphPage';
 import CommunityPage from './utils/CommunityPage';
 import Navigation from './utils/Navigation';
+import AssistantPage from './utils/AssistantPage';
+
 import ResizableDrawer from '@/components/ResizableDrawer';
-import AssistantPage from '@/components/Chatbot/AssistantPage';
 import theme from '@/theme';
 
 export default function Interface() {
@@ -18,7 +19,7 @@ export default function Interface() {
   const userPage = <UserPage />;
   const assistantPage = (
     <AssistantPage
-      width="70%"
+      width="60%"
       background={theme.palette.assistant.background}
     />
   );

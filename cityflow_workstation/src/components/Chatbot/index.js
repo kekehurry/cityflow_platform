@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
   Stack,
   IconButton,
   InputAdornment,
@@ -17,6 +16,7 @@ import theme from '@/theme';
 import multiavatar from '@multiavatar/multiavatar/esm';
 
 import LLMSetting from './utils/LLMSetting';
+import ToggleControls from './utils/ToggleControls';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
@@ -26,6 +26,7 @@ export default function ChatBot({
   width,
   height,
   sendCode,
+  useTool,
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,6 +39,8 @@ export default function ChatBot({
   const [showConfig, setShowConfig] = useState(false);
   const localLLMConfig = useLocalStorage('LLM_CONFIG');
   const [assistant, setAssistant] = useState(new Assistant(localLLMConfig));
+
+  const [tool, setTool] = useState(null);
   const messageEndRef = useRef(null);
 
   const handleAbort = () => {
@@ -72,11 +75,12 @@ export default function ChatBot({
       const readStream = async () => {
         let reply = '';
         try {
-          for await (const chunk of await assistant.stream(
-            '',
-            historyMessages,
-            signal
-          )) {
+          for await (const chunk of await assistant.stream({
+            inputMessage: historyMessages[historyMessages.length - 1]?.message,
+            historyMessages: historyMessages.slice(0, -1),
+            signal,
+            tool,
+          })) {
             reply += chunk;
             setCurrentMessage({ role: 'AI', message: reply });
           }
@@ -94,7 +98,7 @@ export default function ChatBot({
       };
       readStream();
     }
-  }, [historyMessages]);
+  }, [historyMessages, tool]);
 
   useEffect(() => {
     isLoading &&
@@ -202,10 +206,9 @@ export default function ChatBot({
             )}
             <div ref={messageEndRef} />
           </Stack>
+          {useTool && <ToggleControls tool={tool} setTool={setTool} />}
           <OutlinedInput
             placeholder="Chat with CityFlow..."
-            // multiline
-            // rows={2}
             width="100%"
             size="small"
             value={inputMessage}

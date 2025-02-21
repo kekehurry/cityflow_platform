@@ -18,7 +18,7 @@ export default function GraphViewer(props) {
   const [query, setQuery] = useState(
     'How to calculate amenity density in cambridge?'
   );
-  const { data, error, isLoading } = useSemanticSearch(query);
+  const { data, error, isLoading } = useSemanticSearch(query, 3);
 
   const nodeFillColorMap = {
     Author: '#80D8FF',

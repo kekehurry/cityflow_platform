@@ -49,7 +49,9 @@ export default function LLMSetting({
       sx={{
         width: '100%',
         height: '100%',
+        maxWidth: 600,
         overflow: 'auto',
+        left: '50%',
         p: 1,
         pt: 4,
       }}

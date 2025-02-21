@@ -120,7 +120,7 @@ def _fulltext_search():
 @app.route('/semantic_search', methods=['POST'])
 def _semantic_search():
     query_string = request.json.get('query')
-    limit = request.json.get('limit', 10)
+    limit = request.json.get('limit', 2)
     result = semantic_query(query_string, limit)
     return jsonify(result)
 

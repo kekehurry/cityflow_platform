@@ -5,8 +5,8 @@ import { useSearchWorkflow } from '@/utils/dataset';
 
 const FlowList = ({
   params,
-  cardWidth = 200,
-  cardHeight = 200,
+  cardWidth = '14vw',
+  cardHeight = '14vw',
   cols = 5,
   gap = 20,
 }) => {
@@ -69,8 +69,8 @@ const FlowList = ({
                 data={item}
                 width={cardWidth}
                 height={cardHeight}
-                minWidth={200}
-                minHeight={200}
+                minWidth={80}
+                minHeight={80}
                 edit={true}
                 onClick={() => {
                   window.location.href = `/flow?id=${item.id}`;

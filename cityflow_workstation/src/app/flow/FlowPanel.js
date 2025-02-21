@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import theme from '@/theme';
 import FlowSetting from './utils/FlowSetting';
 import ModuleList from './utils/ModuleList';
-import AssistantPage from '@/components/Chatbot/AssistantPage';
+import FlowAssistant from './utils/FlowAssistant';
 import WestIcon from '@mui/icons-material/West';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -69,7 +69,7 @@ export const FlowPanel = (props) => {
           <FlowSetting tab={tab} />
           <ModuleList tab={tab} />
           <Box hidden={tab != 2}>
-            <AssistantPage height="75vh" width="100%" />
+            <FlowAssistant height="75vh" width="100%" />
           </Box>
         </Box>
 

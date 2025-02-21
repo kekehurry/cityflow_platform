@@ -1,5 +1,5 @@
 const black = 'rgba(22, 22, 25, 1)';
-const secondaryBlack = 'rgba(22, 22, 25, 1)';
+const secondaryBlack = 'rgba(25, 25, 28, 1)';
 const thirdBlack = 'rgba(30, 31, 35, 1)';
 const gray = 'rgba(40, 41, 45,1)';
 const lightGray = 'rgba(117, 117, 117,1)';

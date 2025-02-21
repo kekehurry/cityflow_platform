@@ -118,7 +118,7 @@ const FlowSettings = (props) => {
       },
     ];
     setLoading(true);
-    assistant.chat(inputMessage, messageHistory).then((response) => {
+    assistant.chat({inputMessage, messageHistory}).then((response) => {
       setFormValue({ ...formValue, description: response });
       setLoading(false);
     });
@@ -143,7 +143,7 @@ const FlowSettings = (props) => {
       },
     ];
     setLoading(true);
-    assistant.chat(inputMessage, messageHistory).then((response) => {
+    assistant.chat({inputMessage, messageHistory}).then((response) => {
       setFormValue({ ...formValue, tag: response });
       setLoading(false);
     });

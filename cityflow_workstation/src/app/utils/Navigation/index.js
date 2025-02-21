@@ -1,6 +1,13 @@
 import theme from '@/theme';
-import { Box, Stack, Typography, Divider, IconButton } from '@mui/material';
-import React, { useState } from 'react';
+import {
+  Box,
+  Stack,
+  Typography,
+  Divider,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import HomeIcon from '@mui/icons-material/Home';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -8,12 +15,19 @@ import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
 import ArticleIcon from '@mui/icons-material/Article';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SearchIcon from '@mui/icons-material/Search';
+import CodeIcon from '@mui/icons-material/Code';
+
 import MenuCard from './utils/MenuCard';
 import MainSetting from './utils/MainSetting';
-import CodeIcon from '@mui/icons-material/Code';
+
+import { getLocalStorage } from '@/utils/local';
 
 export default function Navigation({ menu, setMenu }) {
   const [open, setOpen] = useState(false);
+  const llmConfig = getLocalStorage('LLM_CONFIG');
+  const [showTooltip, setShowTooltip] = useState(
+    llmConfig?.apiKey == '' || llmConfig?.apiKey == undefined
+  );
 
   const handleClick = (name) => {
     setMenu(name);
@@ -80,9 +94,27 @@ export default function Navigation({ menu, setMenu }) {
       </Stack>
       <Divider sx={{ pb: 2 }} />
       <Stack direction="row" sx={{ pt: 2, pl: 1, opacity: 0.8 }}>
-        <IconButton>
-          <SettingsIcon onClick={() => setOpen(true)} />
-        </IconButton>
+        <Tooltip
+          title="Set your API KEY here"
+          open={showTooltip}
+          onClose={() => setShowTooltip(false)}
+          arrow
+          placement="right"
+          componentsProps={{
+            arrow: { sx: { color: theme.palette.primary.main } },
+            tooltip: {
+              sx: {
+                height: 30,
+                backgroundColor: theme.palette.primary.main,
+                fontSize: 12,
+              },
+            },
+          }}
+        >
+          <IconButton>
+            <SettingsIcon onClick={() => setOpen(true)} />
+          </IconButton>
+        </Tooltip>
       </Stack>
       <MainSetting open={open} setOpen={setOpen} />
     </Stack>

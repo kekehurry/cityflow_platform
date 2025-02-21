@@ -66,7 +66,7 @@ export default function ConfigPanel({
       },
     ];
 
-    assistant.chat(inputMessage, messageHistory).then((response) => {
+    assistant.chat({ inputMessage, messageHistory }).then((response) => {
       setFormValue({ ...formValue, description: response });
     });
   };

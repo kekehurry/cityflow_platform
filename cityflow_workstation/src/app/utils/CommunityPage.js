@@ -37,6 +37,7 @@ const Community = () => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState('');
   const [menu, setMenu] = useLocalStorage('COMMUNITY_MENU', null);
+  const [showTooltop, setShowTooltip] = useState(true);
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
@@ -45,6 +46,7 @@ const Community = () => {
   const fetchFlows = async (menu) => {
     const flowPromises = [];
     let index = 0;
+    const community = true;
     const totalLength = Object.entries(menu).reduce(
       (acc, [key, value]) => acc + value.length,
       0
@@ -57,7 +59,7 @@ const Community = () => {
               flow.category = key;
               index += 1;
               setProgress(`Fetching ${index}/${totalLength} ...`);
-              return saveWorkflow(flow);
+              return saveWorkflow(flow, community);
             }
           });
           flowPromises.push(p);
@@ -78,11 +80,11 @@ const Community = () => {
     });
   };
 
-  useEffect(() => {
-    if (!menu && !loading) {
-      handleUpdate();
-    }
-  }, [menu, loading]);
+  // useEffect(() => {
+  //   if (!menu && !loading) {
+  //     handleUpdate();
+  //   }
+  // }, [menu, loading]);
 
   return (
     <Stack
@@ -100,8 +102,8 @@ const Community = () => {
         </Typography>
         <FlowList
           params={{ category: 'featured' }}
-          cardWidth={'35vw'}
-          cardHeight={200}
+          cardWidth={'36vw'}
+          cardHeight={'14vw'}
           cols={2}
         />
       </Box>
@@ -124,22 +126,11 @@ const Community = () => {
             .map(
               (key, index) =>
                 tab == index && (
-                  <FlowList
-                    key={index}
-                    params={{ category: key }}
-                    cardWidth={200}
-                    cardHeight={200}
-                    cols={5}
-                  />
+                  <FlowList key={index} params={{ category: key }} cols={5} />
                 )
             )}
         {menu && tab == Object.keys(menu).length + 1 && (
-          <FlowList
-            params={{ private: false, category: null }}
-            cardWidth={'36vw'}
-            cardHeight={200}
-            cols={2}
-          />
+          <FlowList params={{ private: false, category: null }} cols={2} />
         )}
       </Box>
       {loading ? (
@@ -156,8 +147,43 @@ const Community = () => {
           <Typography>{progress}</Typography>
           <CircularProgress size={25} sx={{ color: 'white' }} />
         </Stack>
-      ) : (
+      ) : menu ? (
         <Tooltip title="Update" aria-label="update">
+          <IconButton
+            sx={{
+              position: 'fixed',
+              bottom: 20,
+              right: 20,
+              opacity: 0.5,
+            }}
+            onClick={handleUpdate}
+          >
+            <CachedIcon
+              sx={{
+                width: 25,
+                height: 25,
+              }}
+            />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip
+          title="Update community workflows here"
+          open={showTooltop}
+          onClose={() => setShowTooltip(false)}
+          arrow
+          placement="left"
+          componentsProps={{
+            arrow: { sx: { color: theme.palette.primary.main } },
+            tooltip: {
+              sx: {
+                height: 30,
+                backgroundColor: theme.palette.primary.main,
+                fontSize: 12,
+              },
+            },
+          }}
+        >
           <IconButton
             sx={{
               position: 'fixed',

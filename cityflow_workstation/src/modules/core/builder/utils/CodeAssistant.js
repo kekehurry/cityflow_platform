@@ -164,14 +164,14 @@ export function registerLLMCompletions(
     let response;
     try {
       setLoading && setLoading(true);
-      response = await assistant.chat(
-        `
+      response = await assistant.chat({
+        inputMessage: `
           Provide code suggestions based on the following information:
           Language: ${language}
           Code: ${code}
           Current Line: ${currentLine}
-          `
-      );
+          `,
+      });
       setLoading && setLoading(false);
       const result = JSON.parse(response);
       return result.suggestions;
