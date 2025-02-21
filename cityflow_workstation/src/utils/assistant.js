@@ -7,7 +7,11 @@ const parseMessage = (messages) => {
   }
   return messages.map((msg) => {
     if (msg.role === 'AI') {
-      return { role: 'assistant', content: msg.message };
+      const messageWithoutThink = msg.message.replace(
+        /<think>(.*?)<\/think>/gs,
+        ''
+      );
+      return { role: 'assistant', content: messageWithoutThink };
     } else if (msg.role === 'system') {
       return { role: 'system', content: msg.message };
     } else {
@@ -109,8 +113,8 @@ export default class Assistant {
             : { type: 'text' },
           max_tokens: this.props?.maxTokens || 4096,
           temperature: this.props?.temperature || 0.8,
-          presence_penalty: this.props?.presencePenalty || 0.0,
-          frequency_penalty: this.props?.frequencyPenalty || 0.0,
+          // presence_penalty: this.props?.presencePenalty || 0.0,
+          // frequency_penalty: this.props?.frequencyPenalty || 0.0,
         }),
       }).catch((error) => {
         throw new Error(error);
@@ -152,7 +156,6 @@ export default class Assistant {
       });
     }
     if (tool == 'search') {
-      console.log('searching');
       const context = await getContext(inputMessage);
       messages.push({
         role: 'user',
@@ -191,10 +194,10 @@ export default class Assistant {
                 type: this.props?.responseFormat,
               }
             : { type: 'text' },
-          max_tokens: this.props?.maxTokens || 4096,
-          temperature: this.props?.temperature || 0.8,
-          presence_penalty: this.props?.presencePenalty || 0.0,
-          frequency_penalty: this.props?.frequencyPenalty || 0.0,
+          // max_tokens: this.props?.maxTokens || 4096,
+          // temperature: this.props?.temperature || 0.8,
+          // presence_penalty: this.props?.presencePenalty || 0.0,
+          // frequency_penalty: this.props?.frequencyPenalty || 0.0,
           stream: true,
         }),
         signal,
@@ -235,10 +238,10 @@ export default class Assistant {
             if (jsonData) {
               try {
                 const parsed = JSON.parse(jsonData);
+                const reasoning_content =
+                  parsed.choices[0]?.delta?.reasoning_content;
                 const content = parsed.choices[0]?.delta?.content;
-                if (content) {
-                  yield content; // Stream output to the caller
-                }
+                yield [reasoning_content, content];
               } catch (e) {}
             }
           }

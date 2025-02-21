@@ -73,6 +73,7 @@ export default function ChatBot({
       setController(newController);
       const signal = newController.signal;
       const readStream = async () => {
+        let think = '';
         let reply = '';
         try {
           for await (const chunk of await assistant.stream({
@@ -81,8 +82,13 @@ export default function ChatBot({
             signal,
             tool,
           })) {
-            reply += chunk;
-            setCurrentMessage({ role: 'AI', message: reply });
+            const [reasoning_content, content] = chunk;
+            reply += content ? content : '';
+            think += reasoning_content ? reasoning_content : '';
+            setCurrentMessage({
+              role: 'AI',
+              message: `<think>${think}</think> \n\n ${reply}`,
+            });
           }
           setIsLoading(false);
         } catch (e) {
@@ -91,7 +97,7 @@ export default function ChatBot({
         } finally {
           setHistoryMessages([
             ...historyMessages,
-            { role: 'AI', message: reply },
+            { role: 'AI', message: `<think>${think}</think> \n\n ${reply}` },
           ]);
           setCurrentMessage('');
         }

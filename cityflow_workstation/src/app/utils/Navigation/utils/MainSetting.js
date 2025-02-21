@@ -41,7 +41,8 @@ export default function MainSetting({ open, setOpen }) {
     
       - Don't answer with graph context directly, but with the information that is relevant to the user's question. 
     
-      - At the end of your answer, attach the "flow_id" that you think is the most relevant to the user's question. 
+      - At the end of your answer, attach the "flow_id" of workflows or modules that you think is the most relevant to the user's question. 
+      - Do not attach 'Text,Shape, Arrow, Preivewer' modules.
       - The maximun nember of attached workflows or modules is 3.
       - Wrap the id in a <workflow></worflow> tag. 
 

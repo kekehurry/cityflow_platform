@@ -6,7 +6,6 @@ import { Box, IconButton, Card, Button } from '@mui/material';
 import theme from '@/theme';
 import { updateMeta } from '@/store/actions';
 import RunButtons from './RunButtons';
-import { set } from 'lodash';
 
 const NodeType = wrapper(PinNode);
 
@@ -70,18 +69,14 @@ const PinBoard = (props) => {
         style={{
           width: '100%',
           height: '100%',
-          borderRadius: '20px',
+          borderRadius: '10px',
           background: theme.palette.flow.pinBoard,
           position: 'fixed',
-          bottom: scale === 1 ? '50%' : '3%',
-          right: scale === 1 ? '50%' : '40%',
-          zIndex: 1111,
-          border:
-            scale === 1
-              ? 'none'
-              : scale === 0.5
-              ? '2px solid #424242'
-              : '5px solid #424242',
+          bottom: '50%',
+          right: '50%',
+          opacity: scale === 1 ? 1 : 0,
+          zIndex: scale === 1 ? 1111 : 0,
+          border: scale === 1 ? 'none' : '2px solid #424242',
           transition: '1s',
           transform:
             scale === 1
@@ -98,8 +93,7 @@ const PinBoard = (props) => {
             overflow: 'auto',
           }}
         >
-          {scale &&
-            pinNodes &&
+          {pinNodes &&
             pinNodes.length > 0 &&
             pinNodes.map((nodeData, index) => {
               try {

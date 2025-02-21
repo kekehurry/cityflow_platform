@@ -9,6 +9,7 @@ import { useGetWorkflow, useGetModule } from '@/utils/dataset';
 const WorkflowCard = ({ id, type }) => {
   const { data, error, isLoading } =
     type == 'module' ? useGetModule(id) : useGetWorkflow(id);
+  const url = type == 'workflow' ? `/flow?id=${id}` : `/flow?module=${id}`;
   return isLoading ? (
     <div>{` Loading ${type} ${id} ... `}</div>
   ) : (
@@ -20,12 +21,7 @@ const WorkflowCard = ({ id, type }) => {
         borderRadius={2}
         showInfo={true}
         titleSize="h6"
-        onClick={() =>
-          window.open(
-            '/flow?' + type == 'workflow' ? `id=${id}` : `module=${id}`,
-            '_self'
-          )
-        }
+        onClick={() => window.open(url, '_self')}
         // selected={selectedNode === item.id}
       />
     </div>
