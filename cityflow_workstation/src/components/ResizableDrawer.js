@@ -12,8 +12,8 @@ const ResizableDrawer = ({
   childrenOne,
   childrenTwo,
   direction = 'horizontal',
-  drawerWidth = 350,
-  drawerHeight = 350,
+  drawerWidth = '22vw',
+  drawerHeight = '22vh',
 }) => {
   const handleWidth = 20;
   const [open, setOpen] = useState(true);
@@ -29,10 +29,10 @@ const ResizableDrawer = ({
   useEffect(() => {
     switch (direction) {
       case 'horizontal':
-        width > handleWidth ? setOpen(true) : setOpen(false);
+        parseInt(width) > handleWidth ? setOpen(true) : setOpen(false);
         break;
       case 'vertical':
-        height > 0 ? setOpen(true) : setOpen(false);
+        parseInt(height) > 0 ? setOpen(true) : setOpen(false);
         break;
     }
   }, [direction, width, height]);
@@ -49,8 +49,8 @@ const ResizableDrawer = ({
 
   const handleResizeStop = (event, dragDirection, ref, d) => {
     direction === 'horizontal'
-      ? setWidth(parseInt(ref.style.width))
-      : setHeight(parseInt(ref.style.height));
+      ? setWidth(`${parseInt(ref.style.width)}vw`)
+      : setHeight(`${parseInt(ref.style.height)}vh`);
   };
 
   return (
@@ -71,7 +71,7 @@ const ResizableDrawer = ({
           }}
           style={{
             overflow: 'hidden',
-            border: '1px solid #212121',
+            border: theme.palette.primary.border,
             borderLeft: '0',
             borderTop: '0',
             background: theme.palette.flow.main,
@@ -93,12 +93,14 @@ const ResizableDrawer = ({
                 direction === 'horizontal' ? 0 : `${handleWidth}px`,
             }}
           >
-            <IconButton
+            <Box
               sx={{
                 position: 'absolute',
-                right: direction === 'horizontal' ? -handleWidth / 2 : '50%',
+                right: direction === 'horizontal' ? 0 : '50%',
                 top: direction === 'horizontal' ? '50%' : 'auto',
-                bottom: direction === 'horizontal' ? 'auto' : -handleWidth / 2,
+                bottom: direction === 'horizontal' ? 'auto' : 0,
+                cursor: 'pointer',
+                opacity: 0.2,
               }}
               onClick={open ? handleDrawerClose : handleDrawerOpen}
             >
@@ -113,7 +115,7 @@ const ResizableDrawer = ({
               ) : (
                 <KeyboardDoubleArrowDownIcon size="small" />
               )}
-            </IconButton>
+            </Box>
             {childrenOne}
           </Box>
         </Resizable>

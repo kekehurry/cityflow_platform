@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useState, useCallback, useEffect } from 'react';
@@ -15,7 +16,8 @@ import { getFlowData, download } from '@/utils/local';
 import theme from '@/theme';
 import { saveWorkflow } from '@/utils/dataset';
 import { connect } from 'react-redux';
-import { useLocalStorage, getLocalStorage } from '@/utils/local';
+import { getLocalStorage } from '@/utils/local';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const mapStateToProps = (state, ownProps) => ({
   state: state,
@@ -28,19 +30,30 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 const ShareBoard = (props) => {
   const { dialogOpen, setDialogOpen, name } = props;
   const rfInstance = useReactFlow();
-  const [author, setAuthor] = useLocalStorage('author', null);
   const [formValue, setFormValue] = useState({});
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const defaultRunner = getLocalStorage('DEFAULT_RUNNER');
+  const userName = getLocalStorage('USER_NAME');
 
   const handleClose = () => {
     setDialogOpen(false);
   };
 
+  const handleCoverChange = (event) => {
+    setImageLoading(true);
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setFormValue({ ...formValue, screenShot: e.target.result });
+      setImageLoading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleDownload = useCallback(async () => {
     setSaving(true);
-    setAuthor(formValue.author);
     const { nodes, edges, ...res } = props.state;
     const flowData = await getFlowData({
       rfInstance,
@@ -55,12 +68,10 @@ const ShareBoard = (props) => {
 
   const handleSave = useCallback(async () => {
     setSaving(true);
-    setAuthor(formValue.author);
     const { nodes, edges, ...res } = props.state;
     const flowData = await getFlowData({
       rfInstance,
       state: { ...res, ...formValue, basic: false, private: true },
-      fetchSource: false,
     });
     const flowId = await saveWorkflow(flowData)
       .then((flowId) => {
@@ -75,7 +86,6 @@ const ShareBoard = (props) => {
   const handleShare = useCallback(
     async ({ publish }) => {
       publish ? setPublishing(true) : setSaving(true);
-      setAuthor(formValue.author);
       const { nodes, edges, ...res } = props.state;
       const flowData = await getFlowData({
         rfInstance,
@@ -105,16 +115,12 @@ const ShareBoard = (props) => {
   };
 
   useEffect(() => {
-    setFormValue({ author: author });
-  }, [author]);
-
-  useEffect(() => {
     setFormValue({
       name: props.state?.name || '',
       description: props.state?.description || '',
       tag: props.state?.tag || '',
       city: props.state?.city || '',
-      author: author || '',
+      author: userName || '',
       packages: props.state?.packages || '',
       image: props.state?.image || defaultRunner,
     });
@@ -123,7 +129,7 @@ const ShareBoard = (props) => {
     props.state?.description,
     props.state?.tag,
     props.state?.city,
-    author,
+    userName,
     props.state?.packages,
     props.state?.image,
   ]);
@@ -202,6 +208,42 @@ const ShareBoard = (props) => {
               onChange={handleValueChange}
               InputLabelProps={{ shrink: true }}
             />
+          </Stack>
+          <Stack sx={{ width: '100%', pt: 2 }}>
+            <LoadingButton
+              sx={{
+                fontSize: 8,
+                width: '100%',
+                height: 40,
+                color: 'gray',
+                borderColor: 'gray',
+              }}
+              loading={imageLoading}
+              component="label"
+              variant="outlined"
+              fullWidth
+              startIcon={<CloudUploadIcon />}
+            >
+              <input
+                type="file"
+                onChange={handleCoverChange}
+                style={{
+                  clip: 'rect(0 0 0 0)',
+                  clipPath: 'inset(50%)',
+                  height: 1,
+                  overflow: 'hidden',
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  whiteSpace: 'nowrap',
+                  width: 1,
+                }}
+                accept=".png,.jpg"
+              />
+              <Typography variant="caption" sx={{ ontSize: 8 }}>
+                Upload Cover Image
+              </Typography>
+            </LoadingButton>
           </Stack>
         </DialogContent>
 

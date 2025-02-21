@@ -318,6 +318,8 @@ def save_workflow(data,user_id):
 
     # add author link
     author = workflow_data.get('author')
+    if not user_id:
+        user_id = md5(f"{author}".encode()).hexdigest()
     author_props = {"name":author,"id":user_id}
     add_author(author_props)
     add_link("created_by", workflow_data['id'], user_id)

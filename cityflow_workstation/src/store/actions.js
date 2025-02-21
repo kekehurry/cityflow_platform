@@ -21,7 +21,7 @@ export const initStore = (state) => {
         edges: [],
         viewport: { x: 0, y: 0, zoom: 1 },
         flowId: 'temp' + nanoid(),
-        author: `test_user_${random(1000)}`,
+        author: null,
         flowInited: false,
         logs: '',
         isAlive: false,

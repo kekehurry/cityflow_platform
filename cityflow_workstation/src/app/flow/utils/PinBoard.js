@@ -6,13 +6,13 @@ import { Box, IconButton, Card, Button } from '@mui/material';
 import theme from '@/theme';
 import { updateMeta } from '@/store/actions';
 import RunButtons from './RunButtons';
-import { set } from 'lodash';
 
 const NodeType = wrapper(PinNode);
 
 const mapStateToProps = (state, ownProps) => {
   return {
     nodes: state.nodes,
+    globalScale: state.globalScale,
   };
 };
 
@@ -23,9 +23,13 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 });
 
 const PinBoard = (props) => {
-  const { nodes, demo } = props;
+  const { nodes, demo, globalScale } = props;
   const [pinNodes, setPinNodes] = useState([]);
-  const [scale, setScale] = useState(demo ? 1 : 0.1);
+  const [scale, setScale] = useState(demo ? 1 : 0.01);
+
+  useEffect(() => {
+    setScale(globalScale);
+  }, [globalScale]);
 
   useEffect(() => {
     setPinNodes(nodes.filter((node) => node.config.pin));
@@ -34,10 +38,10 @@ const PinBoard = (props) => {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        setScale(0.1);
+        setScale(0);
+        props.setGlobalScale(0.01);
       }
     };
-    props.setGlobalScale(scale);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [scale]);
@@ -65,18 +69,14 @@ const PinBoard = (props) => {
         style={{
           width: '100%',
           height: '100%',
-          borderRadius: '20px',
+          borderRadius: '10px',
           background: theme.palette.flow.pinBoard,
           position: 'fixed',
-          bottom: scale === 1 ? '50%' : '2%',
-          right: scale === 1 ? '50%' : '1%',
-          zIndex: 1111,
-          border:
-            scale === 1
-              ? 'none'
-              : scale === 0.5
-              ? '2px solid #424242'
-              : '5px solid #424242',
+          bottom: '50%',
+          right: '50%',
+          opacity: scale === 1 ? 1 : 0,
+          zIndex: scale === 1 ? 1111 : 0,
+          border: scale === 1 ? 'none' : '2px solid #424242',
           transition: '1s',
           transform:
             scale === 1
@@ -85,55 +85,6 @@ const PinBoard = (props) => {
           transformOrigin: 'bottom right',
         }}
       >
-        {scale === 1 || (
-          <>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setScale(1);
-              }}
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                cursor: 'pointer',
-                transform: `scale(${1.5 / (scale * 0.2)})`,
-                zIndex: 1,
-              }}
-            />
-            {scale < 0.5 && (
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setScale(0.5);
-                }}
-                sx={{
-                  position: 'absolute',
-                  bottom: '50%',
-                  right: '50%',
-                  cursor: 'pointer',
-                  transform: `scale(${1.5 / (scale * 0.5)})`,
-                  zIndex: 1,
-                }}
-              />
-            )}
-          </>
-        )}
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            setScale(0.1);
-          }}
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            cursor: 'pointer',
-            transform: `scale(${1.5 / (scale * 0.2)})`,
-            zIndex: 1,
-            transition: 'transform 1s ease-in-out',
-          }}
-        />
         <Box
           style={{
             position: 'relative',
@@ -142,8 +93,7 @@ const PinBoard = (props) => {
             overflow: 'auto',
           }}
         >
-          {scale &&
-            pinNodes &&
+          {pinNodes &&
             pinNodes.length > 0 &&
             pinNodes.map((nodeData, index) => {
               try {

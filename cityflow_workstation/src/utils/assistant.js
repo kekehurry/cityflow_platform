@@ -1,6 +1,5 @@
-import { getLocalStorage } from './local';
-
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+import { get } from 'lodash';
+import { semanticSearch } from './dataset';
 
 const parseMessage = (messages) => {
   if (!messages) {
@@ -8,7 +7,11 @@ const parseMessage = (messages) => {
   }
   return messages.map((msg) => {
     if (msg.role === 'AI') {
-      return { role: 'assistant', content: msg.message };
+      const messageWithoutThink = msg.message.replace(
+        /<think>(.*?)<\/think>/gs,
+        ''
+      );
+      return { role: 'assistant', content: messageWithoutThink };
     } else if (msg.role === 'system') {
       return { role: 'system', content: msg.message };
     } else {
@@ -21,13 +24,37 @@ const isBase64Image = (str) => {
   return /^data:image\/[a-zA-Z]+;base64,/.test(str);
 };
 
+const getContext = async (query) => {
+  const searchResults = await semanticSearch(query, 3);
+  const [graph, ids, nodes] = searchResults;
+  const triples = graph.links.map((link) => {
+    const sourceNode = graph.nodes.find((node) => node.id === link.source);
+    if (sourceNode && sourceNode.hasOwnProperty('value')) {
+      delete sourceNode.value;
+    }
+    const targetNode = graph.nodes.find((node) => node.id === link.target);
+    if (targetNode && targetNode.hasOwnProperty('value')) {
+      delete targetNode.value;
+    }
+    return {
+      source: sourceNode,
+      target: targetNode,
+      relation: link.type,
+    };
+  });
+  const context = `This is the knowledge graph context might related to the question: ${JSON.stringify(
+    triples
+  )}`;
+  return context;
+};
+
 export default class Assistant {
   constructor(props) {
     if (!props) return;
     this.props = props;
   }
 
-  async chat(inputMessage, messageHistory = null) {
+  async chat({ inputMessage, messageHistory }) {
     const messages = [
       {
         role: 'system',
@@ -86,8 +113,8 @@ export default class Assistant {
             : { type: 'text' },
           max_tokens: this.props?.maxTokens || 4096,
           temperature: this.props?.temperature || 0.8,
-          presence_penalty: this.props?.presencePenalty || 0.0,
-          frequency_penalty: this.props?.frequencyPenalty || 0.0,
+          // presence_penalty: this.props?.presencePenalty || 0.0,
+          // frequency_penalty: this.props?.frequencyPenalty || 0.0,
         }),
       }).catch((error) => {
         throw new Error(error);
@@ -102,7 +129,7 @@ export default class Assistant {
     }
   }
 
-  async *stream(inputMessage, messageHistory, signal) {
+  async *stream({ inputMessage, messageHistory, signal, tool }) {
     const messages = [
       {
         role: 'system',
@@ -126,6 +153,13 @@ export default class Assistant {
               }
             : { role: 'user', content: msg || '' }
         );
+      });
+    }
+    if (tool == 'search') {
+      const context = await getContext(inputMessage);
+      messages.push({
+        role: 'user',
+        content: context,
       });
     }
     if (inputMessage) {
@@ -160,10 +194,10 @@ export default class Assistant {
                 type: this.props?.responseFormat,
               }
             : { type: 'text' },
-          max_tokens: this.props?.maxTokens || 4096,
-          temperature: this.props?.temperature || 0.8,
-          presence_penalty: this.props?.presencePenalty || 0.0,
-          frequency_penalty: this.props?.frequencyPenalty || 0.0,
+          // max_tokens: this.props?.maxTokens || 4096,
+          // temperature: this.props?.temperature || 0.8,
+          // presence_penalty: this.props?.presencePenalty || 0.0,
+          // frequency_penalty: this.props?.frequencyPenalty || 0.0,
           stream: true,
         }),
         signal,
@@ -204,10 +238,10 @@ export default class Assistant {
             if (jsonData) {
               try {
                 const parsed = JSON.parse(jsonData);
+                const reasoning_content =
+                  parsed.choices[0]?.delta?.reasoning_content;
                 const content = parsed.choices[0]?.delta?.content;
-                if (content) {
-                  yield content; // Stream output to the caller
-                }
+                yield [reasoning_content, content];
               } catch (e) {}
             }
           }

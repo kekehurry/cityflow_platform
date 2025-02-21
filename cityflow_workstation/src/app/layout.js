@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '@/theme';
@@ -15,6 +15,7 @@ const RootLayout = ({ children }) => {
         <link rel="icon" href="/favicon.ico" />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#161619"></meta>
 
         {/* Open Graph Meta Tags */}
         <meta property="og:type" content="website" />
@@ -29,7 +30,7 @@ const RootLayout = ({ children }) => {
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:url" content="http://cityflow.media.mit.edu/" />
+        <meta property="og:url" content="https://cityflow.media.mit.edu/" />
 
         {/* Twitter Card Meta Tags for social sharing */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -44,13 +45,15 @@ const RootLayout = ({ children }) => {
         />
 
         {/* Canonical Link */}
-        <link rel="canonical" href="http://cityflow.media.mit.edu/" />
+        <link rel="canonical" href="https://cityflow.media.mit.edu/" />
       </head>
       <body>
         <main>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Provider store={store}>{children}</Provider>
+            <Provider store={store}>
+              <Suspense fallback={<div>loading</div>}>{children}</Suspense>
+            </Provider>
           </ThemeProvider>
         </main>
       </body>

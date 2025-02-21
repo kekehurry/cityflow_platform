@@ -3,6 +3,30 @@ import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ShareCard from '@/components/ShareCard';
+import { useGetWorkflow, useGetModule } from '@/utils/dataset';
+
+const WorkflowCard = ({ id, type }) => {
+  const { data, error, isLoading } =
+    type == 'module' ? useGetModule(id) : useGetWorkflow(id);
+  const url = type == 'workflow' ? `/flow?id=${id}` : `/flow?module=${id}`;
+  return isLoading ? (
+    <div>{` Loading ${type} ${id} ... `}</div>
+  ) : (
+    <div style={{ display: 'flex', margin: '10px', justifyContent: 'center' }}>
+      <ShareCard
+        data={{ ...data, label: type }}
+        width={'80%'}
+        height={60}
+        borderRadius={2}
+        showInfo={true}
+        titleSize="h6"
+        onClick={() => window.open(url, '_self')}
+        // selected={selectedNode === item.id}
+      />
+    </div>
+  );
+};
 
 const buttonStyle = {
   marginRight: '8px',
@@ -115,6 +139,14 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
             >
               {children}
             </span>
+          );
+        },
+        workflow({ node, children }) {
+          return (
+            <WorkflowCard
+              id={node.properties.flow_id}
+              type={node.properties.type}
+            />
           );
         },
       }}

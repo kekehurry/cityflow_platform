@@ -12,6 +12,7 @@ import base64
 import requests
 import json
 import time
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -171,11 +172,9 @@ class CodeExecutor:
             if idx == 0:
                 filename = f'entrypoint.{_suffix(lang)}'
             else:
-                filename = code.strip().split("\n")[0].replace("#", "").replace("//", "").strip()
-                filename = filename.rsplit('.', 1)[0]
-                if not filename:
-                    filename = f"new{idx}"
-                filename = f"{filename}.{_suffix(lang)}"
+                line = code.strip().split("\n")[0]
+                filename = re.sub(r'^(#|//|/\*)\s*', '', line).strip()
+                filename = re.sub(r'\s*\*/$', '', filename).strip()
             code_path = os.path.join(self._work_dir, foldername, filename)
             with open(code_path, "w") as fcode:
                 fcode.write(code)

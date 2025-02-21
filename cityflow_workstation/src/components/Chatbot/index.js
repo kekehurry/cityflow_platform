@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
   Stack,
   IconButton,
   InputAdornment,
@@ -17,10 +16,18 @@ import theme from '@/theme';
 import multiavatar from '@multiavatar/multiavatar/esm';
 
 import LLMSetting from './utils/LLMSetting';
+import ToggleControls from './utils/ToggleControls';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
-export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
+export default function ChatBot({
+  llmConfig,
+  setLLMConfig,
+  width,
+  height,
+  sendCode,
+  useTool,
+}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [historyMessages, setHistoryMessages] = useState([]);
@@ -32,6 +39,8 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   const [showConfig, setShowConfig] = useState(false);
   const localLLMConfig = useLocalStorage('LLM_CONFIG');
   const [assistant, setAssistant] = useState(new Assistant(localLLMConfig));
+
+  const [tool, setTool] = useState(null);
   const messageEndRef = useRef(null);
 
   const handleAbort = () => {
@@ -64,15 +73,22 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
       setController(newController);
       const signal = newController.signal;
       const readStream = async () => {
+        let think = '';
         let reply = '';
         try {
-          for await (const chunk of await assistant.stream(
-            '',
-            historyMessages,
-            signal
-          )) {
-            reply += chunk;
-            setCurrentMessage({ role: 'AI', message: reply });
+          for await (const chunk of await assistant.stream({
+            inputMessage: historyMessages[historyMessages.length - 1]?.message,
+            historyMessages: historyMessages.slice(0, -1),
+            signal,
+            tool,
+          })) {
+            const [reasoning_content, content] = chunk;
+            reply += content ? content : '';
+            think += reasoning_content ? reasoning_content : '';
+            setCurrentMessage({
+              role: 'AI',
+              message: `<think>${think}</think> \n\n ${reply}`,
+            });
           }
           setIsLoading(false);
         } catch (e) {
@@ -81,14 +97,14 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
         } finally {
           setHistoryMessages([
             ...historyMessages,
-            { role: 'AI', message: reply },
+            { role: 'AI', message: `<think>${think}</think> \n\n ${reply}` },
           ]);
           setCurrentMessage('');
         }
       };
       readStream();
     }
-  }, [historyMessages]);
+  }, [historyMessages, tool]);
 
   useEffect(() => {
     isLoading &&
@@ -106,27 +122,31 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
   }, [historyMessages, currentMessage]);
 
   return (
-    <Stack spacing={1} width="100%" height={height} overflow={'auto'}>
-      <Box
+    <Stack
+      spacing={1}
+      width={width || '100%'}
+      height={height || '100%'}
+      overflow={'auto'}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <IconButton
         sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
+          alignSelf: 'flex-end',
           position: 'absolute',
-          right: 20,
-          width: 30,
           height: 30,
+          width: 30,
+          p: 0,
           zIndex: 1,
         }}
+        onClick={() => setShowConfig(!showConfig)}
       >
-        <IconButton
-          sx={{ height: '100%', width: '100%', p: 0 }}
-          onClick={() => setShowConfig(!showConfig)}
-        >
-          <MenuIcon
-            sx={{ color: theme.palette.text.secondary, width: 15, height: 15 }}
-          />
-        </IconButton>
-      </Box>
+        <MenuIcon
+          sx={{ color: theme.palette.text.secondary, width: 15, height: 15 }}
+        />
+      </IconButton>
       {showConfig ? (
         <LLMSetting
           setAssistant={setAssistant}
@@ -192,12 +212,13 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
             )}
             <div ref={messageEndRef} />
           </Stack>
+          {useTool && <ToggleControls tool={tool} setTool={setTool} />}
           <OutlinedInput
             placeholder="Chat with CityFlow..."
-            multiline
-            rows={3}
             width="100%"
             size="small"
+            multiline
+            rows={2}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -208,6 +229,11 @@ export default function ChatBot({ llmConfig, setLLMConfig, height, sendCode }) {
                 ]);
                 setInputMessage('');
               }
+            }}
+            sx={{
+              borderRadius: 5,
+              backgroundColor: theme.palette.secondary.gray,
+              opacity: 0.7,
             }}
             endAdornment={
               <InputAdornment position="end">

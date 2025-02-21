@@ -98,27 +98,15 @@ def _get_author():
 def _delete_workflow():
     id = request.json.get('flowId')
     user_id = request.json.get('userId')
-    workflow = get_workflow(id)
-    workflow_author_id = workflow['author_id']
-    if user_id == workflow_author_id:
-        workflow = delete_workflow(id)
-        return jsonify(f'workflow {id} deleted')
-    else:
-        print('Unauthorized Access',)
-        return jsonify({'error': 'Unauthorized  Access'}, 500)
+    delete_workflow(id)
+    return jsonify(f'workflow {id} deleted')
     
 @app.route('/delete_module', methods=['POST'])
 def _delete_module():
     id = request.json.get('moduleId')
     user_id = request.json.get('userId')
-    module = get_module(id)
-    module_user = module['user_id']
-    if user_id == module_user:
-        module = delete_module(id)
-        return jsonify(f'module {id} deleted')
-    else:
-        print('Unauthorized Access')
-        return jsonify({'error': 'Unauthorized  Access'}, 500)
+    delete_module(id)
+    return jsonify(f'module {id} deleted')
     
 
 # Search
@@ -132,7 +120,7 @@ def _fulltext_search():
 @app.route('/semantic_search', methods=['POST'])
 def _semantic_search():
     query_string = request.json.get('query')
-    limit = request.json.get('limit', 10)
+    limit = request.json.get('limit', 2)
     result = semantic_query(query_string, limit)
     return jsonify(result)
 

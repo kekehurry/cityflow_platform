@@ -101,7 +101,7 @@ const RunButtons = (props) => {
             <PlayArrowIcon
               sx={{
                 color: 'white',
-                fontSize: Math.floor(size || 30 * 0.9),
+                fontSize: Math.floor(size * 0.9 || 30 * 0.9),
               }}
             />
           </Box>
@@ -124,7 +124,10 @@ const RunButtons = (props) => {
           }}
         >
           <Typography
-            sx={{ fontWeight: 'bold', fontSize: Math.floor(size || 30 * 0.4) }}
+            sx={{
+              fontWeight: 'bold',
+              fontSize: Math.floor(size * 0.45 || 30 * 0.45),
+            }}
           >
             Share
           </Typography>

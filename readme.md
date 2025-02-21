@@ -42,5 +42,3 @@ docker pull ghcr.io/kekehurry/cityflow_runner:latest
 
 CityFlow was first conceptualized and developed during my visiting period at MIT. I sincerely thank MIT City Science for their support and inspiration during my work on the CityFlow Platform. I’m also deeply grateful to my supervisor at SCUT Design Future Lab for their guidance and encouragement throughout this journey.
 
-![cityscience](assets/CSxDFL.png)
-

@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import theme from '@/theme';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const defaultCommunityURL = process.env.NEXT_PUBLIC_COMMUNITY_URL || '';
 
 export const initUserId = async () => {
   if (typeof localStorage === 'undefined') {
@@ -137,40 +138,49 @@ export const getFlowData = async ({
         })
       ),
       edges: [...flowData.edges],
-      globalScale: 0.1,
+      globalScale: 0.01,
     };
-    const flowContainer = document.getElementById('react-flow');
-    const clonedFlowContainer = flowContainer.cloneNode(true);
-    clonedFlowContainer.style.background = theme.palette.flow.main;
-    clonedFlowContainer.style.position = 'absolute';
-    clonedFlowContainer.style.top = '-10000px';
-    document.body.appendChild(clonedFlowContainer);
-    let screenShot;
-    await html2canvas(clonedFlowContainer, { logging: false }).then(
-      (canvas) => {
-        screenShot = canvas.toDataURL();
-        // Resize the screenshot
-        const img = new Image();
-        img.src = screenShot;
-        img.onload = () => {
-          const maxWidth = 256;
-          const scale = maxWidth / img.width;
-          let canvasResized = document.createElement('canvas');
-          canvasResized.width = maxWidth;
-          canvasResized.height = img.height * scale;
-          const ctx = canvasResized.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvasResized.width, canvasResized.height);
-          screenShot = canvasResized.toDataURL();
-          canvasResized = null;
-        };
-      }
-    );
-    document.body.removeChild(clonedFlowContainer);
-    const savedData = {
-      ...newFlowData,
-      ...state,
-      screenShot,
-    };
+
+    let savedData;
+    if (!state?.screenShot) {
+      const flowContainer = document.getElementById('react-flow');
+      const clonedFlowContainer = flowContainer.cloneNode(true);
+      clonedFlowContainer.style.background = theme.palette.flow.main;
+      clonedFlowContainer.style.position = 'absolute';
+      clonedFlowContainer.style.top = '-10000px';
+      document.body.appendChild(clonedFlowContainer);
+      let screenShot;
+      await html2canvas(clonedFlowContainer, { logging: false }).then(
+        (canvas) => {
+          screenShot = canvas.toDataURL();
+          // Resize the screenshot
+          const img = new Image();
+          img.src = screenShot;
+          img.onload = () => {
+            const maxWidth = 256;
+            const scale = maxWidth / img.width;
+            let canvasResized = document.createElement('canvas');
+            canvasResized.width = maxWidth;
+            canvasResized.height = img.height * scale;
+            const ctx = canvasResized.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvasResized.width, canvasResized.height);
+            screenShot = canvasResized.toDataURL();
+            canvasResized = null;
+          };
+        }
+      );
+      document.body.removeChild(clonedFlowContainer);
+      savedData = {
+        ...newFlowData,
+        ...state,
+        screenShot,
+      };
+    } else {
+      savedData = {
+        ...newFlowData,
+        ...state,
+      };
+    }
     return savedData;
   }
 };
@@ -316,3 +326,45 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
 //   cs_data['userFlows'] = userFlows;
 //   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
 // };
+
+export const getCommunityMenu = async () => {
+  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
+  const res = await fetch(basePath + '/api/local/getCommunityMenu', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ communityURL }),
+  });
+  const { communityMenu } = await res.json();
+  return communityMenu;
+};
+
+export const getCommunityFlow = async (flowURL) => {
+  const res = await fetch(basePath + '/api/local/getCommunityFlow', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ flowURL }),
+  });
+  const { flow } = await res.json();
+  if (flow) {
+    flow.private = false;
+    flow.globalScale = 0.01;
+  }
+  return flow;
+};
+
+export const getCommunityFlows = async () => {
+  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
+  const res = await fetch(basePath + '/api/local/getCommunityFlows', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ communityURL }),
+  });
+  const { communityFlows } = await res.json();
+  return communityFlows;
+};

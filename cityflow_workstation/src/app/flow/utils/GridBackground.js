@@ -1,6 +1,8 @@
 import theme from '@/theme';
 import { useCallback, useEffect, useRef } from 'react';
 import { useReactFlow } from 'reactflow';
+import { Typography } from '@mui/material';
+import Link from 'next/link';
 
 const InfiniteGrid = () => {
   const canvasRef = useRef();
@@ -120,18 +122,34 @@ const InfiniteGrid = () => {
   }, [drawGrid]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        backgroundColor: theme.palette.flow.background,
-      }}
-    />
+    <>
+      <Link href="https://reactflow.dev/">
+        <Typography
+          sx={{
+            position: 'fixed',
+            bottom: 15,
+            right: 15,
+            color: '#424242',
+            zIndex: 1000,
+            fontSize: 10,
+          }}
+        >
+          React Flow
+        </Typography>
+      </Link>
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          backgroundColor: theme.palette.flow.background,
+        }}
+      />
+    </>
   );
 };
 

@@ -23,9 +23,9 @@ export const checkNode = async (nodeId) => {
     });
 };
 
-export const saveWorkflow = async (flowData) => {
+export const saveWorkflow = async (flowData, community = false) => {
   const api = `${datasetServer}/save_workflow`;
-  const userId = await initUserId();
+  const userId = community ? null : await initUserId();
   return fetch(basePath + api, {
     method: 'POST',
     headers: {
@@ -60,7 +60,7 @@ export const searchWorkflow = async (params, limit = 25) => {
 };
 
 export const useSearchWorkflow = (params, limit = 25) => {
-  const { data, error } = useSWR(
+  const { data, error, mutate } = useSWR(
     [`${datasetServer}/search_workflow`, params, limit],
     () => searchWorkflow(params, limit)
   );
@@ -69,6 +69,7 @@ export const useSearchWorkflow = (params, limit = 25) => {
     data,
     error,
     isLoading: !data && !error,
+    mutate,
   };
 };
 

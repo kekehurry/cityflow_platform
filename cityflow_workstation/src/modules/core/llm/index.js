@@ -73,7 +73,7 @@ export default function LLM(props) {
     } else {
       setLoading(true);
       assistant
-        .chat(input.input)
+        .chat({ inputMessage: input.input })
         .then((res) => {
           if (formValue.responseFormat === 'json_object') {
             const jsonPattern = /\{(?:[^{}]*|(?:(?<=\{)[^{}]*(?=\})))*\}/;
