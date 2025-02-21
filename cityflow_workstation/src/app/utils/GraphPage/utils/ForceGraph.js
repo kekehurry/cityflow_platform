@@ -205,15 +205,15 @@ const createForceGraph2D = ({
       switch (nodeType) {
         case 'Module':
           typeof window !== 'undefined' &&
-            window.open(`/flow?module=${JSON.parse(d.nodeId)}`, '_blank');
+            window.open(`/flow?module=${JSON.parse(d.nodeId)}`, '_self');
           break;
         case 'Workflow':
           typeof window !== 'undefined' &&
-            window.open(`/flow?id=${JSON.parse(d.nodeId)}`, '_blank');
+            window.open(`/flow?id=${JSON.parse(d.nodeId)}`, '_self');
           break;
         case 'Author':
           typeof window !== 'undefined' &&
-            window.open(`/author?id=${JSON.parse(d.nodeId)}`, '_blank');
+            window.open(`/author?id=${JSON.parse(d.nodeId)}`, '_self');
           break;
         default:
           break;

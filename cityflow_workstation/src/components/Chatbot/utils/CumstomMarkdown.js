@@ -23,7 +23,7 @@ const WorkflowCard = ({ id, type }) => {
         onClick={() =>
           window.open(
             '/flow?' + type == 'workflow' ? `id=${id}` : `module=${id}`,
-            '_blank'
+            '_self'
           )
         }
         // selected={selectedNode === item.id}

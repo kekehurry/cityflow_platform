@@ -14,9 +14,8 @@ const SearchList = ({
   const handleNodeClick = (e, id, label) => {
     setSelectedNode(id);
     if (typeof window !== 'undefined' && id === selectedNode) {
-      label === 'Module'
-        ? window.open(`/flow?module=${id}`, '_blank')
-        : window.open(`/flow?id=${id}`, '_blank');
+      const url = label === 'Module' ? `/flow?module=${id}` : `/flow?id=${id}`;
+      window.open(url, '_self');
     }
   };
 
