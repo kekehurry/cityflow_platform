@@ -54,8 +54,8 @@ const UserPage = () => {
     });
     upload.then((flow) => {
       saveWorkflow(flow).then((res) => {
-        mutate();
         setLoading(false);
+        window.open('/', '_self');
       });
     });
   };
