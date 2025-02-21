@@ -1,0 +1,3 @@
+download 'minilm.onnx' from :
+
+https://drive.google.com/uc?export=download&id=1ahQMzx1kfzKVYXeNmmXqbe5ojzmHPwMz

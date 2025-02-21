@@ -14,16 +14,6 @@ else
     echo "Image cityflow_runner found, skipping pull."
 fi
 
-# if no $LOCAL_MODEL_PATH/minilm.onnx, download it from Google Drive
-if [ ! -f "${LOCAL_MODEL_PATH}/minilm.onnx" ]; then
-    echo "minilm.onnx not found. Downloading from Google Drive..."
-    destination="${LOCAL_MODEL_PATH}/minilm.onnx"
-    mkdir -p "${LOCAL_MODEL_PATH}"
-    curl -L "https://drive.google.com/uc?export=download&id=1ahQMzx1kfzKVYXeNmmXqbe5ojzmHPwMz" -o "${destination}"
-else
-    echo "minilm.onnx already exists, skipping download."
-fi
-
 /startup/docker-entrypoint.sh neo4j &
 
 # Wait for Neo4j to be ready

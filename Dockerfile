@@ -45,6 +45,8 @@ RUN apt-get update && \
       tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     apt-get update && \
     apt-get install -y docker-ce docker-ce-cli containerd.io && \
+    # download minilm.onnx
+    curl -L "https://drive.google.com/uc?export=download&id=1ahQMzx1kfzKVYXeNmmXqbe5ojzmHPwMz" -o "./cityflow_database/models/minilm.onnx" && \
     # prepare for init
     chmod +x ./start-services.sh && \
     pip3 install -r ./requirements.txt && \

@@ -4,3 +4,4 @@ notebook
 __pycache__
 .env
 source
+models/minilm.onnx
