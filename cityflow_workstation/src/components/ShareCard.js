@@ -32,7 +32,8 @@ export default function ShareCard({
   edit,
   local,
 }) {
-  const { id, name, author, description, screenShot, label, score } = data;
+  const { id, name, author, description, screenShot, label, score, icon } =
+    data;
   const [hover, setHover] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -73,8 +74,8 @@ export default function ShareCard({
             boxShadow: '4px 4px 10px 0px rgba(0,0,0,0.2)',
           }}
           style={{
-            backgroundImage: screenShot && `url(${screenShot})`,
-            backgroundSize: 'cover',
+            backgroundImage: screenShot ? `url(${screenShot})` : `url(${icon})`,
+            backgroundSize: screenShot ? 'cover' : 50,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
           }}

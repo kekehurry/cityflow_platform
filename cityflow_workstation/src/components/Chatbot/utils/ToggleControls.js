@@ -37,7 +37,7 @@ export default function ToggleControls({ tool, setTool }) {
       >
         <Stack direction="row" spacing={1}>
           <BubbleChartIcon />
-          <Typography variant="caption">Search</Typography>
+          <Typography variant="caption">Knowledge Graph</Typography>
         </Stack>
       </ToggleButton>
     </ToggleButtonGroup>

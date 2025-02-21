@@ -211,6 +211,8 @@ export default function ChatBot({
             placeholder="Chat with CityFlow..."
             width="100%"
             size="small"
+            multiline
+            rows={2}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -226,11 +228,6 @@ export default function ChatBot({
               borderRadius: 5,
               backgroundColor: theme.palette.secondary.gray,
               opacity: 0.7,
-            }}
-            inputProps={{
-              style: {
-                height: 40,
-              },
             }}
             endAdornment={
               <InputAdornment position="end">

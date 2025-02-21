@@ -33,10 +33,25 @@ export default function MainSetting({ open, setOpen }) {
   const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG', {
     name: 'CityFlow',
     assistantIcon: `${basePath}/static/favicon.ico`,
-    systemPrompt: `You are a helpful assistant for CityFlow Platform. This platform can evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows. When you are provided with a knowledge graph context, you need to analyse the context and generate accurate, clear, and helpful responses. Don't answer with graph context directly, but with the information that is relevant to the user's question.`,
+    systemPrompt: `You are a helpful assistant for CityFlow Platform. This platform can evaluate, and visualize urban solutions through Python and JavaScript modules and creating customized workflows. 
+    
+    - If no knowledge graph context is provided, you need to answer the question as best as you can.
+
+    - When you are provided with a knowledge graph context, you need to analyse the context and generate accurate, clear, and helpful responses. 
+    
+      - Don't answer with graph context directly, but with the information that is relevant to the user's question. 
+    
+      - At the end of your answer, attach the "flow_id" that you think is the most relevant to the user's question. 
+      - The maximun nember of attached workflows or modules is 3.
+      - Wrap the id in a <workflow></worflow> tag. 
+
+      For example:  
+      <workflow flow_id="1234" type="module"></workflow>
+      <workflow flow_id="1234" type="workflow"></workflow>
+    `,
     context: '',
     greeding: `What can I do for you?`,
-    model: 'gpt-4o-mini',
+    model: 'gpt-4o',
     baseUrl: 'https://api.openai.com/v1',
     temperature: 0.8,
     maxTokens: 4192,
