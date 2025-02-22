@@ -53,8 +53,8 @@ const Community = () => {
     );
     Object.entries(menu).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        value.forEach((flowURL) => {
-          const p = getCommunityFlow(flowURL).then((flow) => {
+        value.forEach((url) => {
+          const p = getCommunityFlow(url).then((flow) => {
             if (flow) {
               flow.category = key;
               index += 1;
