@@ -9,7 +9,7 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import FlowList from '@/components/FlowList';
 import theme from '@/theme';
 import { initStore } from '@/store/actions';
@@ -20,7 +20,6 @@ import {
   getCommunityFlow,
   useLocalStorage,
 } from '@/utils/local';
-import { saveWorkflow } from '@/utils/dataset';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -46,7 +45,6 @@ const Community = () => {
   const fetchFlows = async (menu) => {
     const flowPromises = [];
     let index = 0;
-    const community = true;
     const totalLength = Object.entries(menu).reduce(
       (acc, [key, value]) => acc + value.length,
       0
@@ -56,7 +54,6 @@ const Community = () => {
         value.forEach((url) => {
           const p = getCommunityFlow(url).then((data) => {
             if (data) {
-              console.log(data);
               index += 1;
               setProgress(`Fetching ${index}/${totalLength} ...`);
             }
@@ -74,7 +71,7 @@ const Community = () => {
       setMenu(menu);
       fetchFlows(menu).then(() => {
         setLoading(false);
-        // window.location.href = '/';
+        window.location.href = '/';
       });
     });
   };

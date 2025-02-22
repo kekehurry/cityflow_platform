@@ -144,7 +144,7 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
         workflow({ node, children }) {
           return (
             <WorkflowCard
-              id={node.properties.flow_id}
+              id={node.properties.nodeid}
               type={node.properties.type}
             />
           );

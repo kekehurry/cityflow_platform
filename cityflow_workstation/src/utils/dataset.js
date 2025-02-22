@@ -23,9 +23,9 @@ export const checkNode = async (nodeId) => {
     });
 };
 
-export const saveWorkflow = async (flowData, community = false) => {
+export const saveWorkflow = async (flowData) => {
   const api = `${datasetServer}/save_workflow`;
-  const userId = community ? null : await initUserId();
+  const userId = await initUserId();
   return fetch(basePath + api, {
     method: 'POST',
     headers: {

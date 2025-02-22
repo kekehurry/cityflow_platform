@@ -27,24 +27,33 @@ const isBase64Image = (str) => {
 const getContext = async (query) => {
   const searchResults = await semanticSearch(query, 3);
   const [graph, ids, nodes] = searchResults;
-  const triples = graph.links.map((link) => {
+  const knowledgeNodes = graph.nodes.map((node) => {
+    const { id, value, ...res } = node;
+    return res;
+  });
+  const knowledgeLinks = graph.links.map((link) => {
     const sourceNode = graph.nodes.find((node) => node.id === link.source);
-    if (sourceNode && sourceNode.hasOwnProperty('value')) {
-      delete sourceNode.value;
-    }
     const targetNode = graph.nodes.find((node) => node.id === link.target);
-    if (targetNode && targetNode.hasOwnProperty('value')) {
-      delete targetNode.value;
-    }
     return {
-      source: sourceNode,
-      target: targetNode,
+      source: {
+        nodeId: sourceNode?.nodeId,
+        name: sourceNode?.name,
+      },
+      target: {
+        nodeId: targetNode?.nodeId,
+        name: targetNode?.name,
+      },
       relation: link.type,
     };
   });
+  const knowledgeGraph = {
+    nodes: knowledgeNodes,
+    links: knowledgeLinks,
+  };
   const context = `This is the knowledge graph context might related to the question: ${JSON.stringify(
-    triples
+    knowledgeGraph
   )}`;
+  console.log(knowledgeGraph);
   return context;
 };
 
@@ -194,8 +203,8 @@ export default class Assistant {
                 type: this.props?.responseFormat,
               }
             : { type: 'text' },
-          // max_tokens: this.props?.maxTokens || 4096,
-          // temperature: this.props?.temperature || 0.8,
+          max_tokens: this.props?.maxTokens || 4096,
+          temperature: this.props?.temperature || 0.8,
           // presence_penalty: this.props?.presencePenalty || 0.0,
           // frequency_penalty: this.props?.frequencyPenalty || 0.0,
           stream: true,
