@@ -54,12 +54,11 @@ const Community = () => {
     Object.entries(menu).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((url) => {
-          const p = getCommunityFlow(url).then((flow) => {
-            if (flow) {
-              flow.category = key;
+          const p = getCommunityFlow(url).then((data) => {
+            if (data) {
+              console.log(data);
               index += 1;
               setProgress(`Fetching ${index}/${totalLength} ...`);
-              return saveWorkflow(flow, community);
             }
           });
           flowPromises.push(p);
@@ -75,7 +74,7 @@ const Community = () => {
       setMenu(menu);
       fetchFlows(menu).then(() => {
         setLoading(false);
-        window.location.href = '/';
+        // window.location.href = '/';
       });
     });
   };

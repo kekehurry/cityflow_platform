@@ -353,12 +353,8 @@ export const getCommunityFlow = async (url) => {
     },
     body: JSON.stringify({ flowURL }),
   });
-  const { flow } = await res.json();
-  if (flow) {
-    flow.private = false;
-    flow.globalScale = 0.01;
-  }
-  return flow;
+  const data = await res.json();
+  return data;
 };
 
 export const getCommunityFlows = async () => {
