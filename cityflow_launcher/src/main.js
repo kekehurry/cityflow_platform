@@ -1,8 +1,15 @@
-const { ipcMain, app, BrowserWindow, dialog, Tray, Menu } = require('electron');
+const {
+  ipcMain,
+  app,
+  BrowserWindow,
+  dialog,
+  Tray,
+  Menu,
+  globalShortcut,
+} = require('electron');
 const { exec, spawn } = require('child_process');
 const path = require('path');
 const {
-  checkDockerAvailability,
   checkDockerInstallation,
   runDockerCommand,
   dockerImageExists,
@@ -10,12 +17,16 @@ const {
   dockerContainerIsRunning,
   cleanDockerContainers,
   loadPlatform,
-} = require('./helper.js');
+} = require('./helper');
+
+const ViewManager = require('./view');
 
 // Global variables to keep track of the docker images
 let runnerDockerImage = null;
 let platformDockerImage = null;
 let cleanup = false;
+
+let viewManager = null;
 
 // Create the browser window
 function createWindow() {
@@ -29,6 +40,7 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
+  viewManager = new ViewManager(win);
 
   win.loadFile(path.join(__dirname, '../dist/index.html'));
   win.webContents.on('did-finish-load', async () => {
@@ -39,14 +51,23 @@ function createWindow() {
     }
   });
 
-  // Intercept new window creation
-  win.webContents.setWindowOpenHandler((details) => {
-    // Only intercept window.open calls, not anchor tag clicks (target="_blank")
-    if (details.disposition === 'new-window') {
-      win.webContents.send('new-window-open', { url: details.url });
+  win.webContents.setWindowOpenHandler(({ url, frameName, disposition }) => {
+    // Only intercept window.open() calls
+    if (disposition === 'new-window') {
+      console.log('window.open intercepted:', url);
+      win.webContents.send('new-window-open', url);
       return { action: 'deny' };
     }
-    return { action: 'allow' };
+    // Allow target="_blank" links
+    if (disposition === 'foreground-tab') {
+      return { action: 'allow' };
+    }
+    return { action: 'deny' };
+  });
+
+  // Register a global shortcut to open DevTools
+  globalShortcut.register('CmdOrCtrl+Shift+C', () => {
+    win.webContents.openDevTools({ mode: 'detach' });
   });
 }
 
@@ -93,6 +114,15 @@ app.whenReady().then(() => {
             label: app.name,
             submenu: [
               { role: 'toggleDevTools', accelerator: 'Cmd+Alt+I' },
+              {
+                label: 'Inspect Element',
+                accelerator: 'Cmd+Shift+C',
+                click: (menuItem, browserWindow) => {
+                  if (browserWindow) {
+                    browserWindow.webContents.inspectElement(0, 0);
+                  }
+                },
+              },
               { type: 'separator' },
               { role: 'quit' },
             ],
@@ -101,7 +131,18 @@ app.whenReady().then(() => {
       : [
           {
             label: 'View',
-            submenu: [{ role: 'toggleDevTools', accelerator: 'Cmd+Alt+I' }],
+            submenu: [
+              { role: 'toggleDevTools', accelerator: 'Cmd+Alt+I' },
+              {
+                label: 'Inspect Element',
+                accelerator: 'Ctrl+Shift+C',
+                click: (menuItem, browserWindow) => {
+                  if (browserWindow) {
+                    browserWindow.webContents.inspectElement(0, 0);
+                  }
+                },
+              },
+            ],
           },
         ]),
   ];
@@ -163,37 +204,50 @@ ipcMain.on(
 
       // Pull platform docker image
       const platformExists = await dockerImageExists(platformImage);
+      const platformRunning = await dockerContainerIsRunning(
+        'cityflow_platform'
+      );
+
       if (!platformExists) {
         await runDockerCommand(['pull', platformImage], 'pull platform', event);
-      } else {
-        const platformRunning = await dockerContainerIsRunning(
+      } else if (update) {
+        const containerExists = await dockerContainerExists(
           'cityflow_platform'
         );
-        if (platformRunning) {
-          console.log('Platform is already running');
-          return loadPlatform(port);
-        } else {
-          update
-            ? await runDockerCommand(
-                ['pull', platformImage],
-                'pull platform',
-                event
-              )
-            : event.reply(
-                'install-log',
-                `Platform image ${platformImage} already exists, skipping pull.`
-              );
-        }
+        containerExists &&
+          (await runDockerCommand(
+            ['rm', 'cityflow_platform'],
+            'remove container',
+            event
+          ));
+        await runDockerCommand(['pull', platformImage], 'pull platform', event);
+      } else if (platformRunning) {
+        console.log('Platform is already running');
+        event.reply('install-log', 'Platform is already running');
+        return loadPlatform(port);
+      } else {
+        console.log(
+          `Platform image ${platformImage} already exists, skipping pull.`
+        );
+        event.reply(
+          'install-log',
+          `Platform image ${platformImage} already exists, skipping pull.`
+        );
       }
-
       // Pull runner docker image
       const runnerExists = await dockerImageExists(runnerImage);
-      runnerExists && !update
-        ? event.reply(
-            'install-log',
-            `Runner image ${runnerImage} already exists, skipping pull.`
-          )
-        : await runDockerCommand(['pull', runnerImage], 'pull runner', event);
+
+      if (runnerExists && !update) {
+        console.log(
+          `Runner image ${runnerImage} already exists, skipping pull.`
+        );
+        event.reply(
+          'install-log',
+          `Runner image ${runnerImage} already exists, skipping pull.`
+        );
+      } else {
+        await runDockerCommand(['pull', runnerImage], 'pull runner', event);
+      }
 
       // Build docker run arguments
       const dockerArgs = [
@@ -217,24 +271,52 @@ ipcMain.on(
       // Check if the container exists
       const containerExists = await dockerContainerExists('cityflow_platform');
       if (containerExists) {
-        runDockerCommand(
-          ['start', 'cityflow_platform'],
-          'start cityflow',
-          event
-        ).then(() => {
-          // Attach to the logs inside the container
-          return runDockerCommand(
-            ['logs', '-f', 'cityflow_platform'],
-            'container logs',
-            event,
-            port
+        console.log('Platform container already exists, starting...');
+        event.reply(
+          'install-log',
+          'Platform container already exists, starting...'
+        );
+        try {
+          await runDockerCommand(
+            ['start', 'cityflow_platform'],
+            'start cityflow',
+            event
+          ).then(() => {
+            return runDockerCommand(
+              ['logs', '-f', 'cityflow_platform'],
+              'container logs',
+              event,
+              port
+            );
+          });
+        } catch (error) {
+          console.log('Error starting platform container:', error);
+          console.log('Starting new container...');
+          event.reply(
+            'install-log',
+            'Container existence check failed, creating new container...'
           );
-        });
+          await runDockerCommand(dockerArgs, 'start cityflow', event, port);
+        }
       } else {
-        runDockerCommand(dockerArgs, 'start cityflow', event);
+        console.log('Creating new container...');
+        event.reply('install-log', 'creating new container...');
+        runDockerCommand(dockerArgs, 'start cityflow', event, port);
       }
     } catch (error) {
       dialog.showErrorBox('Error', error.message);
     }
   }
 );
+
+ipcMain.handle('create-tab', async (event, { id, url }) => {
+  viewManager.createView(id, url);
+});
+
+ipcMain.handle('switch-tab', async (event, { id }) => {
+  viewManager.switchView(id);
+});
+
+ipcMain.handle('close-tab', async (event, { id }) => {
+  viewManager.removeView(id);
+});

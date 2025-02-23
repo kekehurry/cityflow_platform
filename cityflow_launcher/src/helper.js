@@ -114,7 +114,7 @@ function loadPlatform(port) {
     http
       .get(url, (res) => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          win.webContents.send('new-window-open', { url });
+          win.webContents.send('new-window-open', url);
         } else {
           console.log(`Server responded with status ${res.statusCode}`);
         }
@@ -134,15 +134,15 @@ function runDockerCommand(args, logPrefix, event, port = null) {
     proc.stdout.on('data', (data) => {
       const log = data.toString();
       console.log(`[${logPrefix} stdout] ${log}`);
-      event.reply('install-log', `[${logPrefix} stdout] ${log}`);
+      event.reply('install-log', `[${logPrefix}] ${log}`);
       if (log.includes('Ready')) {
         port && loadPlatform(port);
       }
     });
     proc.stderr.on('data', (data) => {
       const log = data.toString();
-      console.log(`[${logPrefix} stderr] ${log}`);
-      event.reply('install-log', `[${logPrefix} stderr] ${log}`);
+      console.log(`[${logPrefix}] ${log}`);
+      event.reply('install-log', `[${logPrefix}] ${log}`);
     });
     proc.on('close', (code) => {
       if (code !== 0) {
@@ -170,11 +170,15 @@ function dockerImageExists(image) {
 // check if a docker container exists
 function dockerContainerExists(name) {
   const dockerPath = getDockerPath();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     exec(
-      `${dockerPath} ps -a --filter "name=${name}"`,
+      `${dockerPath} ps -a --filter "name=^/${name}$" --format "{{.Names}}"`,
       (err, stdout, stderr) => {
-        resolve(stdout.trim() !== '');
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(stdout.trim() === name);
       }
     );
   });

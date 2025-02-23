@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import theme from './theme';
 import HomeIcon from '@mui/icons-material/Home';
+import { Divider } from '@mui/material';
 
 const TitleBar = ({ setNewTabOpen }) => {
   // Each tab now includes a url property
@@ -22,7 +22,7 @@ const TitleBar = ({ setNewTabOpen }) => {
   };
 
   // Updated addTab accepts an optional URL parameter
-  const addTab = (url = `http://localhost:${port}/flow`) => {
+  const addTab = (url) => {
     const newTab = {
       id: Date.now(),
       title: getTitle(url),
@@ -31,30 +31,41 @@ const TitleBar = ({ setNewTabOpen }) => {
     setTabs([...tabs, newTab]);
     setActiveTab(newTab.id);
     setNewTabOpen(true);
+    // create a new tab in the main process
+    window?.electronAPI?.invoke('create-tab', { id: newTab.id, url });
   };
 
   const closeTab = (id) => {
     const newTabs = tabs.filter((tab) => tab.id !== id);
     setTabs(newTabs);
+    // remove the tab in the main process
+    window.electronAPI.invoke('close-tab', { id });
     // If the closed tab was active, switch activeTab to the last tab (if any)
     if (activeTab === id && newTabs.length > 0) {
-      setActiveTab(newTabs[newTabs.length - 1].id);
+      const newActiveId = newTabs[newTabs.length - 1].id;
+      setActiveTab(newActiveId);
+      // switch to the new active tab in the main process
+      window?.electronAPI?.invoke('switch-tab', { id: newActiveId });
     }
+  };
+
+  const handleTabClick = (id) => {
+    setActiveTab(id);
+    window?.electronAPI?.invoke('switch-tab', { id });
   };
 
   useEffect(() => {
     if (tabs.length === 0) {
-      setNewTabOpen(false);
+      setActiveTab(false);
     }
   }, [tabs, setNewTabOpen]);
 
-  //   Listen to electron new-window-open
+  // Listen for new-window events from the main process
   useEffect(() => {
-    if (window?.electronAPI) {
-      window.electronAPI.onNewWindowOpen((event, { url }) => {
-        addTab(url);
-      });
-    }
+    window?.electronAPI?.onNewWindow((url) => {
+      console.log(url);
+      addTab(url);
+    });
   }, []);
 
   // Override window.open
@@ -66,10 +77,7 @@ const TitleBar = ({ setNewTabOpen }) => {
     return () => {
       window.open = originalWindowOpen;
     };
-  }, [addTab]);
-
-  // Get the currently active tab
-  const currentTab = tabs.find((tab) => tab.id === activeTab);
+  }, []);
 
   return (
     <div className="titlebar-container">
@@ -90,45 +98,36 @@ const TitleBar = ({ setNewTabOpen }) => {
         </div>
         <div className="tabs">
           {tabs.map((tab) => (
-            <div
-              className={`tab ${tab.id === activeTab ? 'active' : ''}`}
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.title == 'Home' ? (
-                <HomeIcon sx={{ width: 15, height: 15 }} />
-              ) : (
-                <>
-                  <span>{tab.title}</span>
-                  <button
-                    className="tab-close"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeTab(tab.id);
-                    }}
-                  >
-                    ✕
-                  </button>
-                </>
-              )}
-            </div>
+            <>
+              <div
+                className={`tab ${tab.id === activeTab ? 'active' : ''}`}
+                key={tab.id}
+                onClick={() => handleTabClick(tab.id)}
+              >
+                {tab.title == 'Home' ? (
+                  <>
+                    <HomeIcon sx={{ width: 15, height: 15 }} />
+                  </>
+                ) : (
+                  <>
+                    <span>{tab.title}</span>
+                    <button
+                      className="tab-close"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </>
+                )}
+              </div>
+              <Divider orientation="vertical" flexItem />
+            </>
           ))}
         </div>
       </div>
-      {currentTab && (
-        <div className="tab-content">
-          <iframe
-            title={currentTab.title}
-            src={currentTab.url}
-            style={{
-              width: '100vw',
-              height: '100vh',
-              border: 'none',
-              background: theme.palette.flow.background,
-            }}
-          ></iframe>
-        </div>
-      )}
     </div>
   );
 };

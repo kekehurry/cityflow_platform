@@ -35,7 +35,6 @@ export default function Footer() {
             Videos
           </Typography>
           <Divider orientation="vertical" flexItem />
-          <Divider orientation="vertical" flexItem />
           <a
             href="https://github.com/kekehurry"
             target="_blank"

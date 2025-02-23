@@ -118,7 +118,7 @@ const FlowSettings = (props) => {
       },
     ];
     setLoading(true);
-    assistant.chat({inputMessage, messageHistory}).then((response) => {
+    assistant.chat({ inputMessage, messageHistory }).then((response) => {
       setFormValue({ ...formValue, description: response });
       setLoading(false);
     });
@@ -143,7 +143,7 @@ const FlowSettings = (props) => {
       },
     ];
     setLoading(true);
-    assistant.chat({inputMessage, messageHistory}).then((response) => {
+    assistant.chat({ inputMessage, messageHistory }).then((response) => {
       setFormValue({ ...formValue, tag: response });
       setLoading(false);
     });
@@ -222,7 +222,7 @@ const FlowSettings = (props) => {
             onChange={handleFormChange}
             value={formValue?.description || ''}
             multiline
-            rows={3}
+            rows={4}
             placeholder="breifly describe your workflow"
             InputLabelProps={{ shrink: true }}
           ></TextField>
@@ -279,7 +279,7 @@ const FlowSettings = (props) => {
           onChange={handleFormChange}
           value={formValue?.packages}
           multiline
-          rows={5}
+          rows={6}
           placeholder={`conda:
   - package1
   - package2
