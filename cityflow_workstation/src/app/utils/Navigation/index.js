@@ -70,15 +70,13 @@ export default function Navigation({ menu, setMenu }) {
           menu={menu}
         />
         <Box sx={{ paddingTop: 1, flexGrow: 1 }} />
-        <Link href="https://doc.cityflow.cn/" target="_blank">
-          <MenuCard
-            icon={<ArticleIcon />}
-            name="Documents"
-            height={35}
-            onClick={handleClick}
-            menu={menu}
-          />
-        </Link>
+        <MenuCard
+          icon={<ArticleIcon />}
+          name="Documents"
+          height={35}
+          onClick={() => window.open('http://doc.cityflow.cn/', '_blank')}
+          menu={menu}
+        />
         <Link
           href="https://github.com/kekehurry/cityflow_platform/"
           target="_blank"

@@ -19,8 +19,6 @@ import RunButtons from './utils/RunButtons';
 import FlowHeader from './utils/FlowHeader';
 import ContextMenu from './utils/ContextMenu';
 
-import Header from '@/components/Header';
-
 import BaseNode from '@/elements/nodes/base';
 import ExpandNode from '@/elements/nodes/expand';
 import AnnotationNode from '@/elements/nodes/annotation';

@@ -65,6 +65,46 @@
       "presentation": {
         "group": "dev"
       }
+    },
+    {
+      "label": "Start Cityflow Lancher",
+      "type": "shell",
+      "command": "cd cityflow_launcher && npm run start",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Start Cityflow Lancher (Electron)",
+      "type": "shell",
+      "command": "cd cityflow_launcher && npm run electron",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Build Cityflow Lancher Icons",
+      "type": "shell",
+      "command": "cd cityflow_launcher && npm run build-icons",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Build Cityflow Lancher App",
+      "type": "shell",
+      "command": "cd cityflow_launcher && npm run dist",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "dev"
+      }
     }
   ]
 }

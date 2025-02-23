@@ -1,0 +1,116 @@
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+html {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+body {
+  background: #161619;
+}
+
+.titlebar {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  background: #161619;
+  color: white;
+  align-items: center;
+  border: 'none';
+  -webkit-app-region: drag; /* 允许拖动 */
+}
+
+.titlebar-title {
+  flex: 1;
+  text-align: center;
+  position: absolute; 
+  left: 50%;         
+  transform: translateX(-50%);
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.window-button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.window-button.close {
+  background-color: #ff5f57;
+}
+
+.window-button.minimize {
+  background-color: #ffbd2e;
+}
+
+.window-button.maximize {
+  background-color: #28c940;
+}
+
+/* Optional: add hover effect */
+.window-button:hover {
+  opacity: 0.85;
+}
+
+.tabs {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  -webkit-app-region: no-drag;
+  overflow-x: auto;
+  padding: 5px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  background: 'none';
+  border-right: 1px solid #424242;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.tab:hover {
+  background: #424242;
+}
+
+.tab span {
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+.tab-close {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.new-tab {
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.new-tab:hover {
+  background: #424242;
+}

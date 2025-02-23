@@ -73,7 +73,7 @@ const FlowList = ({
                 minHeight={80}
                 edit={true}
                 onClick={() => {
-                  window.location.href = `/flow?id=${item.id}`;
+                  window.open(`/flow?id=${item.id}`, '_blank');
                 }}
               />
             </div>

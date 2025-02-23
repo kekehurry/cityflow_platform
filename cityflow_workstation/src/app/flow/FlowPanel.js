@@ -36,7 +36,7 @@ export const FlowPanel = (props) => {
   return (
     <>
       <Box sx={{ pl: 2, pt: 2 }}>
-        <IconButton onClick={() => (window.location.href = '/')}>
+        <IconButton onClick={() => window.close()}>
           <WestIcon />
         </IconButton>
       </Box>

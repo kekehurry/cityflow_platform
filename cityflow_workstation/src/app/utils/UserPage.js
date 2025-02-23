@@ -12,7 +12,7 @@ import {
 import theme from '@/theme';
 import { initStore } from '@/store/actions';
 import { connect } from 'react-redux';
-import { useSearchWorkflow, saveWorkflow } from '@/utils/dataset';
+import { saveWorkflow } from '@/utils/dataset';
 import { initUserId } from '@/utils/local';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
@@ -81,23 +81,24 @@ const UserPage = () => {
         Create New Workflow
       </Typography>
       <Stack spacing={2} direction={'row'}>
-        <Link href="/flow" style={{ textDecoration: 'none' }}>
-          <Button
-            variant="contained"
-            sx={{
-              background: theme.palette.secondary.gray,
-              width: 150,
-              height: 80,
-              border: '1px solid #313131',
-              borderRadius: 4,
-            }}
-          >
-            <Stack direction="row" spacing={1}>
-              <AddToPhotosIcon sx={{ width: 25, height: 25 }} />
-              <Typography variant="caption">New Workflow</Typography>
-            </Stack>
-          </Button>
-        </Link>
+        <Button
+          variant="contained"
+          sx={{
+            background: theme.palette.secondary.gray,
+            width: 150,
+            height: 80,
+            border: '1px solid #313131',
+            borderRadius: 4,
+          }}
+          onClick={() => {
+            window.open('/flow', '_blank');
+          }}
+        >
+          <Stack direction="row" spacing={1}>
+            <AddToPhotosIcon sx={{ width: 25, height: 25 }} />
+            <Typography variant="caption">New Workflow</Typography>
+          </Stack>
+        </Button>
         <Button
           variant="contained"
           color="primary"
