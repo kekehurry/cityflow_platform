@@ -31,6 +31,7 @@ ENV HOSTNAME='0.0.0.0'
 ENV NODE_ENV=production
 
 RUN apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y apt-utils ca-certificates curl python3 python3-pip && \
     # install nodejs
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \  
