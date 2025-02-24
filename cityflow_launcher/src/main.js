@@ -212,7 +212,7 @@ ipcMain.on(
         );
         containerExists &&
           (await runDockerCommand(
-            ['rm', 'cityflow_platform'],
+            ['rm', '-f', 'cityflow_platform'],
             'remove container',
             event
           ));
