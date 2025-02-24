@@ -25,7 +25,7 @@ from utils.search import (
 )
 
 from utils.index import fulltext_query,semantic_query
-
+from hashlib import md5
 
 app = Flask(__name__)
 CORS(app)
@@ -34,7 +34,8 @@ CORS(app)
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARNING)
 
-# Node
+admin_passkey = 'admin/cityflow'
+admin_id = md5(admin_passkey.encode()).hexdigest()
 
 @app.route('/check_node', methods=['POST'])
 def _check_node():
@@ -45,7 +46,9 @@ def _check_node():
 @app.route('/save_workflow', methods=['POST'])
 def _save_workflow():
     data = request.json.get('flowData')
-    user_id = request.json.get('userId','test_user_000')
+    user_id = request.json.get('userId')
+    if not user_id:
+        user_id = data.get('authorId',admin_id)
     workflow = save_workflow(data,user_id)
     return jsonify(workflow)
 

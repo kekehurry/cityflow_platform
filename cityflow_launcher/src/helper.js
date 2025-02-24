@@ -133,7 +133,7 @@ function runDockerCommand(args, logPrefix, event, port = null) {
     const proc = spawn(dockerPath, args);
     proc.stdout.on('data', (data) => {
       const log = data.toString();
-      console.log(`[${logPrefix} stdout] ${log}`);
+      console.log(`[${logPrefix}] ${log}`);
       event.reply('install-log', `[${logPrefix}] ${log}`);
       if (log.includes('Ready')) {
         port && loadPlatform(port);

@@ -80,15 +80,12 @@ def search_modules( params, limit=25):
 def add_module(props):
     id = props.get('id')
     user_id = props.get('user_id')
-    author = props.get('author')
     config = props['config']
     basic = props.get('basic',False)
-    name = props.get('name')    
+    name = props.get('name')  
     base = {k:v for k,v in props.items() if k != 'config'}
-
-    hash = md5(f"{author}/{config}".encode()).hexdigest()
-
-    data = {**config,"base": base, "id":id, "hash":hash, "name": name, "user_id": user_id,"basic":basic}
+    hash = md5(json.dumps(config).encode()).hexdigest()
+    data = {**config,"base": base, "id":id, "hash":hash, "name": name, "userId": user_id,"basic":basic}
     
     return add_node('Module', data)
 
@@ -115,14 +112,6 @@ def delete_module(id):
 
 # Workflow
 def get_workflow(id):
-    # workflow = get_node('Workflow',id)
-    # nodes = []
-    # for node in workflow['nodes']:
-    #     module = get_module(node)
-    #     base = module['base']
-    #     config = {k:v for k,v in module.items() if k not in ['base']}
-    #     nodes.append({**base, "config":config})
-    # workflow['nodes'] = nodes
     cypher = '''
             MATCH (m:Module)-[p:part_of]-(workflow:Workflow {id:$id}) 
             RETURN workflow, collect(m) as modules
@@ -196,14 +185,14 @@ def save_module(config,user_id,module=None):
     name = config.get('name')
     source_folder = os.getenv('DATABASE_SOURCE_DIR')
     author = config.get('author')
-    author_id = config.get('author_id')
+    author_id = config.get('authorId')
     # if module author not exists, add author
     if author_id:
         if not get_author(author_id):
-            add_author({"name":author,"id":author_id})
+            add_author({"name":author,"id":author_id,"description":""})
     else:
         author_id = user_id
-        config['author_id'] = user_id
+        config['authorId'] = user_id
     if not name:
         name = uuid.uuid4().hex[:5]
     module_id = md5(f"{user_id}/{name}-{time.time()}".encode()).hexdigest()
@@ -214,7 +203,7 @@ def save_module(config,user_id,module=None):
         icon_data = config['icon']
         if 'base64' in icon_data:
             config['icon'] = base642file(icon_path,icon)
-        else:
+        elif icon_data.startswith('/api/dataset/source/'):
             orig_icon_path = os.path.join(source_folder,"icons",os.path.basename(config['icon']))
             if os.path.exists(orig_icon_path):
                 shutil.copy(orig_icon_path, icon_path)
@@ -229,7 +218,7 @@ def save_module(config,user_id,module=None):
         file_path = os.path.join(source_folder,f"files/{file_id}")
         if 'base64' in file_data:
             file['data'] = base642file(file_path,file_data)
-        else:
+        elif file_data.startswith('/api/dataset/source/'):
             orig_file_path = os.path.join(source_folder,"files",os.path.basename(file['data']))
             if os.path.exists(orig_file_path):
                 shutil.copy(orig_file_path,file_path)
@@ -241,17 +230,20 @@ def save_module(config,user_id,module=None):
     if html:
         html_id = md5(f"{module_id}/{html}".encode()).hexdigest()
         html_path = os.path.join(source_folder,f"html/{html_id}")
-        if not html.startswith('/api/dataset/source'):
-            config['html'] = text2file(html_path,html)
-        else:
+        if html.startswith('/api/dataset/source'):
             orig_html_path = os.path.join(source_folder,"html",os.path.basename(html))
             if os.path.exists(orig_html_path):
                 shutil.copy(orig_html_path,html_path)
                 config['html'] =  '/api/dataset/source/'+f"html/{html_id}"
-
+        elif (html.startswith('http')):
+            
+            config['html'] = html
+        else:
+            config['html'] = text2file(html_path,html)
+            
     # update the module id
     module['id'] = module_id
-    module['user_id'] = user_id
+    module['userId'] = user_id
     module['config'] = config
     module['name'] = name
 
@@ -287,7 +279,7 @@ def save_workflow(data,user_id):
     source_id = workflow_data.get('source')
     previous_id = workflow_data.get('flowId')
     workflow_data['id'] = workflow_id 
-    workflow_data['author_id'] = user_id
+    workflow_data['authorId'] = user_id
     screenshot = workflow_data.get('screenShot') 
     if screenshot and 'base64' in screenshot:
         screenshot_path = os.path.join(source_folder,f"images/{workflow_id}_{time.strftime('%H-%M-%S')}.png")
@@ -320,7 +312,7 @@ def save_workflow(data,user_id):
     author = workflow_data.get('author')
     if not user_id:
         user_id = md5(f"{author}".encode()).hexdigest()
-    author_props = {"name":author,"id":user_id}
+    author_props = {"name":author,"id":user_id,"description":""}
     add_author(author_props)
     add_link("created_by", workflow_data['id'], user_id)
 

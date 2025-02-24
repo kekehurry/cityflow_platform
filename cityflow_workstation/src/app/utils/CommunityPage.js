@@ -9,7 +9,7 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FlowList from '@/components/FlowList';
 import theme from '@/theme';
 import { initStore } from '@/store/actions';
@@ -55,7 +55,7 @@ const Community = () => {
           const p = getCommunityFlow(url).then((data) => {
             if (data) {
               index += 1;
-              setProgress(`Fetching ${index}/${totalLength} ...`);
+              setProgress(`Fetching workflows ${index}/${totalLength} ...`);
             }
           });
           flowPromises.push(p);
@@ -67,11 +67,13 @@ const Community = () => {
 
   const handleUpdate = () => {
     setLoading(true);
+    setProgress(`Fetching menu ...`);
     getCommunityMenu().then((menu) => {
+      console.log(menu);
       setMenu(menu);
       fetchFlows(menu).then(() => {
         setLoading(false);
-        window.location.href = '/';
+        window.location.reload();
       });
     });
   };
@@ -126,7 +128,7 @@ const Community = () => {
                 )
             )}
         {menu && tab == Object.keys(menu).length + 1 && (
-          <FlowList params={{ private: false, category: null }} cols={2} />
+          <FlowList params={{ private: false }} cols={2} />
         )}
       </Box>
       {loading ? (

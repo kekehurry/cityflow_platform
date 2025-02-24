@@ -3,11 +3,9 @@ const {
   app,
   BrowserWindow,
   dialog,
-  Tray,
   Menu,
   globalShortcut,
 } = require('electron');
-const { exec, spawn } = require('child_process');
 const path = require('path');
 const {
   checkDockerInstallation,
@@ -18,6 +16,7 @@ const {
   cleanDockerContainers,
   loadPlatform,
 } = require('./helper');
+const fs = require('fs');
 
 const ViewManager = require('./view');
 
@@ -27,6 +26,31 @@ let platformDockerImage = null;
 let cleanup = false;
 
 let viewManager = null;
+
+const app_dir = path.join(app.getPath('userData'), 'cityflow_platform');
+
+// Create the app directory if it doesn't exist
+if (!fs.existsSync(app_dir)) {
+  fs.mkdirSync(app_dir);
+}
+
+const temp_dir = path.join(app_dir, 'temp');
+// Create the temp directory if it doesn't exist
+if (!fs.existsSync(temp_dir)) {
+  fs.mkdirSync(temp_dir);
+}
+
+const data_dir = path.join(app_dir, 'data');
+// Create the data directory if it doesn't exist
+if (!fs.existsSync(data_dir)) {
+  fs.mkdirSync(data_dir);
+}
+
+const source_dir = path.join(app_dir, 'source');
+// Create the source directory if it doesn't exist
+if (!fs.existsSync(source_dir)) {
+  fs.mkdirSync(source_dir);
+}
 
 // Create the browser window
 function createWindow() {
@@ -260,11 +284,11 @@ ipcMain.on(
         '-v',
         '/var/run/docker.sock:/var/run/docker.sock',
         '-v',
-        `./temp:/cityflow_platform/cityflow_executor/code`,
+        `${temp_dir}:/cityflow_platform/cityflow_executor/code`,
         '-v',
-        `./data:/cityflow_platform/cityflow_database/data`,
+        `${data_dir}:/cityflow_platform/cityflow_database/data`,
         '-v',
-        `./source:/cityflow_platform/cityflow_database/source`,
+        `${source_dir}:/cityflow_platform/cityflow_database/source`,
         platformImage,
       ];
 

@@ -343,29 +343,13 @@ export const getCommunityMenu = async () => {
 };
 
 export const getCommunityFlow = async (url) => {
-  const flowURL =
-    getLocalStorage('communityURL') ||
-    defaultCommunityURL + url.replace('/cityflow_community', '');
   const res = await fetch(basePath + '/api/local/getCommunityFlow', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ flowURL }),
+    body: JSON.stringify({ flowURL: url }),
   });
   const data = await res.json();
   return data;
-};
-
-export const getCommunityFlows = async () => {
-  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
-  const res = await fetch(basePath + '/api/local/getCommunityFlows', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ communityURL }),
-  });
-  const { communityFlows } = await res.json();
-  return communityFlows;
 };
