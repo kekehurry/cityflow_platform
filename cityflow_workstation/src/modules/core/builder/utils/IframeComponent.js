@@ -34,7 +34,9 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
     error,
     isLoading,
   } = useSWR(
-    config?.html && config.html.startsWith('/api/dataset/source')
+    config?.html &&
+      (config.html.startsWith('/api/dataset/source') ||
+        config.html.startsWith('http'))
       ? config.html
       : null,
     fetcher,
@@ -97,7 +99,10 @@ const IframeComponent = ({ config, input, setConfig, setOutput, zoom }) => {
     `;
     // fetch html from server if startswith /api/dataset/source
     if (config?.html && config?.type == 'interface') {
-      if (config.html.startsWith('/api/dataset/source')) {
+      if (
+        config.html.startsWith('/api/dataset/source') ||
+        config.html.startsWith('http')
+      ) {
         setLoading(isLoading);
         fetchedHtml ? setHtml(fetchedHtml) : setHtml(placehoderHtml);
       } else {

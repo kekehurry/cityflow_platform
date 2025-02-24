@@ -1,7 +1,10 @@
 {
-  "name": "next-cityflow",
-  "version": "0.1.0",
-  "private": true,
+  "name": "cityflow_platform",
+  "version": "0.25.02.23",
+  "author": {
+    "name": "Kai Hu",
+    "email": "arhukai1111@gmail.com"
+  },
   "scripts": {
     "dev": "next dev",
     "start": "next start",

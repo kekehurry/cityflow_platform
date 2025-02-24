@@ -15,7 +15,7 @@ const SearchList = ({
     setSelectedNode(id);
     if (typeof window !== 'undefined' && id === selectedNode) {
       const url = label === 'Module' ? `/flow?module=${id}` : `/flow?id=${id}`;
-      window.open(url, '_self');
+      window.open(url, '_blank');
     }
   };
 

@@ -183,6 +183,7 @@ export default function LLMSetting({
               valueLabelFormat={(value) => value}
               size="small"
               id="frequencyPenalty"
+              disabled
             />
           </Stack>
           <Stack direction={'row'} spacing={2}>
@@ -206,6 +207,7 @@ export default function LLMSetting({
               valueLabelFormat={(value) => value}
               size="small"
               id="presencePenalty"
+              disabled
             />
           </Stack>
         </Box>

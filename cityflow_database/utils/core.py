@@ -33,7 +33,58 @@ def init_db():
     cypher = """
     MATCH (n) DETACH DELETE n
     """
-    return write(cypher)
+    write(cypher)
+    print('creating fulltex indexes...')
+
+    #drop existing indexes
+    cypher = '''
+    DROP INDEX fulltextIndex IF EXISTS
+    '''
+    write(cypher)
+
+    cypher = '''
+    DROP INDEX moduleVectorIndex IF EXISTS
+    '''
+    write(cypher)
+
+    cypher = '''
+    DROP INDEX workflowVectorIndex IF EXISTS
+    '''
+
+    # create index
+    cypher = '''
+            CREATE FULLTEXT INDEX fulltextIndex IF NOT EXISTS
+            FOR (n:Workflow|Module|Author) 
+            ON EACH [n.name, n.description, n.code, n.city, n.tag]
+    '''
+    write(cypher)
+
+    print('creating vector indexes...')
+
+    # create index
+    cypher = """
+    CREATE VECTOR INDEX workflowVectorIndex IF NOT EXISTS
+    FOR (n:Workflow) 
+    ON n.embeddings
+    OPTIONS { indexConfig: {
+    `vector.dimensions`: 384,
+    `vector.similarity_function`: 'cosine'
+    }}
+    """
+    write(cypher)
+
+    cypher = """
+    CREATE VECTOR INDEX moduleVectorIndex IF NOT EXISTS
+    FOR (n:Module) 
+    ON n.embeddings
+    OPTIONS { indexConfig: {
+    `vector.dimensions`: 384,
+    `vector.similarity_function`: 'cosine'
+    }}
+    """
+    write(cypher)
+    
+    return print('Database initialized.')
 
 # Node
 def check_node_exists(id):

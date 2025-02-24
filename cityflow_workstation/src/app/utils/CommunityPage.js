@@ -9,7 +9,7 @@ import {
   Tooltip,
   CircularProgress,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import FlowList from '@/components/FlowList';
 import theme from '@/theme';
 import { initStore } from '@/store/actions';
@@ -20,7 +20,6 @@ import {
   getCommunityFlow,
   useLocalStorage,
 } from '@/utils/local';
-import { saveWorkflow } from '@/utils/dataset';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -37,7 +36,7 @@ const Community = () => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState('');
   const [menu, setMenu] = useLocalStorage('COMMUNITY_MENU', null);
-  const [showTooltop, setShowTooltip] = useState(true);
+  const [showTooltop, setShowTooltip] = useState(false);
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
@@ -46,20 +45,17 @@ const Community = () => {
   const fetchFlows = async (menu) => {
     const flowPromises = [];
     let index = 0;
-    const community = true;
     const totalLength = Object.entries(menu).reduce(
       (acc, [key, value]) => acc + value.length,
       0
     );
     Object.entries(menu).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        value.forEach((flowURL) => {
-          const p = getCommunityFlow(flowURL).then((flow) => {
-            if (flow) {
-              flow.category = key;
+        value.forEach((url) => {
+          const p = getCommunityFlow(url).then((data) => {
+            if (data) {
               index += 1;
-              setProgress(`Fetching ${index}/${totalLength} ...`);
-              return saveWorkflow(flow, community);
+              setProgress(`Fetching workflows ${index}/${totalLength} ...`);
             }
           });
           flowPromises.push(p);
@@ -71,11 +67,13 @@ const Community = () => {
 
   const handleUpdate = () => {
     setLoading(true);
+    setProgress(`Fetching menu ...`);
     getCommunityMenu().then((menu) => {
+      console.log(menu);
       setMenu(menu);
       fetchFlows(menu).then(() => {
         setLoading(false);
-        window.location.href = '/';
+        window.location.reload();
       });
     });
   };
@@ -119,7 +117,7 @@ const Community = () => {
             .map((key, index) => <Tab key={key} label={key} />)}
         <Tab key={'workflow'} label="Workflow" />
       </Tabs>
-      <Box sx={{ pt: 1 }}>
+      <Box sx={{ pt: 1, height: '100%', overflow: 'auto' }}>
         {menu &&
           Object.keys(menu)
             .filter((k) => k != 'basic' && k != 'featured')
@@ -130,78 +128,85 @@ const Community = () => {
                 )
             )}
         {menu && tab == Object.keys(menu).length + 1 && (
-          <FlowList params={{ private: false, category: null }} cols={2} />
+          <FlowList params={{ private: false }} cols={2} />
         )}
       </Box>
-      {loading ? (
-        <Stack
-          direction="row"
-          spacing={2}
+      <Stack
+        direction={'row'}
+        alignItems={'center'}
+        justifyContent={'space-between'}
+        sx={{
+          width: '100%',
+        }}
+      >
+        <Typography
           sx={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
+            position: 'relative',
             opacity: 0.5,
+            color: '#616161',
+            fontSize: 12,
+            cursor: 'pointer',
+            left: '50%',
+            transform: 'translateX(-50%)',
           }}
+          onClick={() =>
+            window.open(
+              'https://github.com/kekehurry/cityflow_community',
+              '_blank'
+            )
+          }
         >
-          <Typography>{progress}</Typography>
-          <CircularProgress size={25} sx={{ color: 'white' }} />
-        </Stack>
-      ) : menu ? (
-        <Tooltip title="Update" aria-label="update">
-          <IconButton
+          CityFlow Community
+        </Typography>
+        {loading ? (
+          <Stack
+            direction="row"
+            spacing={2}
             sx={{
-              position: 'fixed',
-              bottom: 20,
+              position: 'absolute',
               right: 20,
               opacity: 0.5,
             }}
-            onClick={handleUpdate}
           >
-            <CachedIcon
-              sx={{
-                width: 25,
-                height: 25,
-              }}
-            />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip
-          title="Update community workflows here"
-          open={showTooltop}
-          onClose={() => setShowTooltip(false)}
-          arrow
-          placement="left"
-          componentsProps={{
-            arrow: { sx: { color: theme.palette.primary.main } },
-            tooltip: {
-              sx: {
-                height: 30,
-                backgroundColor: theme.palette.primary.main,
-                fontSize: 12,
+            <Typography>{progress}</Typography>
+            <CircularProgress size={25} sx={{ color: 'white' }} />
+          </Stack>
+        ) : (
+          <Tooltip
+            title="Update community workflows here"
+            open={!menu || showTooltop}
+            onClose={() => setShowTooltip(false)}
+            arrow
+            placement="left"
+            componentsProps={{
+              arrow: { sx: { color: theme.palette.primary.main } },
+              tooltip: {
+                sx: {
+                  height: 30,
+                  backgroundColor: theme.palette.primary.main,
+                  fontSize: 12,
+                },
               },
-            },
-          }}
-        >
-          <IconButton
-            sx={{
-              position: 'fixed',
-              bottom: 20,
-              right: 20,
-              opacity: 0.5,
             }}
-            onClick={handleUpdate}
           >
-            <CachedIcon
+            <IconButton
               sx={{
-                width: 25,
-                height: 25,
+                position: 'absolute',
+                right: 20,
+                opacity: 0.5,
               }}
-            />
-          </IconButton>
-        </Tooltip>
-      )}
+              onClick={handleUpdate}
+            >
+              <CachedIcon
+                sx={{
+                  width: 25,
+                  height: 25,
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Stack>
     </Stack>
   );
 };

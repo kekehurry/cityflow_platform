@@ -49,7 +49,7 @@ def get_sub_graph(nodeIds):
         MATCH (n)-[l]-()
         WHERE n.id IN {json.dumps(nodeIds)}
         WITH startNode(l) as m1, endNode(l) as m2, l
-        WHERE NOT ((labels(m1)[0] <> "Author" AND m1.author = '"admin"') OR (labels(m2)[0] <> "Author" AND  m2.author = '"admin"'))
+        WHERE NOT (labels(m2)[0]='Workflow' AND m2.category = '"basic"')
         WITH 
         COLLECT( DISTINCT{{
             id: m1.hash,
@@ -61,7 +61,6 @@ def get_sub_graph(nodeIds):
         COLLECT( DISTINCT{{
             id: m2.hash,
             name: m2.name, 
-            flow_id: m2.id,
             type: labels(m2)[0],
             description: m2.description
         }})
@@ -98,14 +97,10 @@ def get_sub_graph(nodeIds):
     for node in result['nodes']:
         node['value'] = value_map[node['id']]
         node['nodeId'] = hash_map[node['id']]
-        if admin_id not in node['nodeId']:
-            nodes.add(tuple(node.items()))
+        nodes.add(tuple(node.items()))
 
     for link in result['links']:
-        source = hash_map[link['source']]
-        target = hash_map[link['target']]
-        if (admin_id not in source) and (admin_id not in target):
-            links.add(tuple(link.items()))
+        links.add(tuple(link.items()))
 
     result['nodes'] = [dict(node) for node in nodes]
     result['links'] = [dict(link) for link in links]
@@ -143,7 +138,7 @@ def semantic_query(query_string, limit=20):
     vector = get_embedding(query_string)[0]
     cypher =f'''
     CALL db.index.vector.queryNodes($index,10,{vector}) YIELD node, score
-    WHERE NOT (labels(node)[0] = 'Module' AND node.category = "basic") 
+    WHERE NOT (labels(node)[0] = 'Workflow' AND node.category = '"basic"') 
     WITH node.id AS id, node.name AS name, labels(node)[0] AS label,score,node
     ORDER BY score DESC
     LIMIT {limit}

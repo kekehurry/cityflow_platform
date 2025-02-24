@@ -328,7 +328,9 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
 // };
 
 export const getCommunityMenu = async () => {
-  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
+  const communityURL =
+    getLocalStorage('communityURL') ||
+    defaultCommunityURL + '/community_workflows.json';
   const res = await fetch(basePath + '/api/local/getCommunityMenu', {
     method: 'POST',
     headers: {
@@ -340,31 +342,14 @@ export const getCommunityMenu = async () => {
   return communityMenu;
 };
 
-export const getCommunityFlow = async (flowURL) => {
+export const getCommunityFlow = async (url) => {
   const res = await fetch(basePath + '/api/local/getCommunityFlow', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ flowURL }),
+    body: JSON.stringify({ flowURL: url }),
   });
-  const { flow } = await res.json();
-  if (flow) {
-    flow.private = false;
-    flow.globalScale = 0.01;
-  }
-  return flow;
-};
-
-export const getCommunityFlows = async () => {
-  const communityURL = getLocalStorage('communityURL') || defaultCommunityURL;
-  const res = await fetch(basePath + '/api/local/getCommunityFlows', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ communityURL }),
-  });
-  const { communityFlows } = await res.json();
-  return communityFlows;
+  const data = await res.json();
+  return data;
 };

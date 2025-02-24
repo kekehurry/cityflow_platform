@@ -21,7 +21,7 @@ const WorkflowCard = ({ id, type }) => {
         borderRadius={2}
         showInfo={true}
         titleSize="h6"
-        onClick={() => window.open(url, '_self')}
+        onClick={() => window.open(url, '_blank')}
         // selected={selectedNode === item.id}
       />
     </div>
@@ -144,7 +144,7 @@ const CustomMarkdown = ({ markdown, sendCode }) => {
         workflow({ node, children }) {
           return (
             <WorkflowCard
-              id={node.properties.flow_id}
+              id={node.properties.nodeid}
               type={node.properties.type}
             />
           );
