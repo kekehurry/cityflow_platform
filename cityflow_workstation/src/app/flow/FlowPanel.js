@@ -35,10 +35,10 @@ export const FlowPanel = (props) => {
 
   return (
     <>
-      <Box sx={{ pl: 2, pt: 2 }}>
-        <IconButton onClick={() => window.close()}>
+      <Box sx={{ pl: 2, pt: 2, height: 50 }}>
+        {/* <IconButton onClick={() => window.close()}>
           <WestIcon />
-        </IconButton>
+        </IconButton> */}
       </Box>
       <Box
         id="FlowPanel"
