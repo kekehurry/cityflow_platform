@@ -19,6 +19,7 @@ const {
 const fs = require('fs');
 const os = require('os');
 const ViewManager = require('./view');
+const template = require('./menu');
 
 // Global variables to keep track of the docker images
 let runnerDockerImage = null;
@@ -93,6 +94,9 @@ function createWindow() {
   globalShortcut.register('CmdOrCtrl+Shift+C', () => {
     win.webContents.openDevTools({ mode: 'detach' });
   });
+  globalShortcut.register('CmdOrCtrl+Option+I', () => {
+    win.webContents.openDevTools({ mode: 'detach' });
+  });
 }
 
 function onBeforeQuit(event, stopServer = false) {
@@ -138,47 +142,6 @@ function onBeforeQuit(event, stopServer = false) {
 
 app.whenReady().then(() => {
   createWindow();
-  // Define a menu template with devtools toggle using Chrome's default hotkey
-  const isMac = process.platform === 'darwin';
-  const template = [
-    ...(isMac
-      ? [
-          {
-            label: app.name,
-            submenu: [
-              { role: 'toggleDevTools', accelerator: 'Cmd+Alt+I' },
-              {
-                label: 'Inspect Element',
-                accelerator: 'Cmd+Shift+C',
-                click: (menuItem, browserWindow) => {
-                  if (browserWindow) {
-                    browserWindow.webContents.inspectElement(0, 0);
-                  }
-                },
-              },
-              { type: 'separator' },
-              { role: 'quit' },
-            ],
-          },
-        ]
-      : [
-          {
-            label: 'View',
-            submenu: [
-              { role: 'toggleDevTools', accelerator: 'Cmd+Alt+I' },
-              {
-                label: 'Inspect Element',
-                accelerator: 'Ctrl+Shift+C',
-                click: (menuItem, browserWindow) => {
-                  if (browserWindow) {
-                    browserWindow.webContents.inspectElement(0, 0);
-                  }
-                },
-              },
-            ],
-          },
-        ]),
-  ];
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
