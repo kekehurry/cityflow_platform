@@ -17,7 +17,7 @@ const {
   loadPlatform,
 } = require('./helper');
 const fs = require('fs');
-
+const os = require('os');
 const ViewManager = require('./view');
 
 // Global variables to keep track of the docker images
@@ -27,7 +27,7 @@ let cleanup = false;
 
 let viewManager = null;
 
-const app_dir = path.join(app.getPath('userData'), 'cityflow_platform');
+const app_dir = path.join(os.homedir(), 'cityflow_platform');
 
 // Create the app directory if it doesn't exist
 if (!fs.existsSync(app_dir)) {
@@ -95,7 +95,7 @@ function createWindow() {
   });
 }
 
-function onBeforeQuit(event) {
+function onBeforeQuit(event, stopServer = false) {
   if (!cleanup) {
     cleanup = true;
     event.preventDefault();
@@ -111,18 +111,27 @@ function onBeforeQuit(event) {
     if (runnerDockerImage) {
       cleanupTasks.push(cleanDockerContainers(runnerDockerImage, 'rm'));
     }
-    if (platformDockerImage) {
-      cleanupTasks.push(cleanDockerContainers(platformDockerImage, 'stop'));
+    if (platformDockerImage && stopServer) {
+      cleanupTasks.push(cleanDockerContainers(platformDockerImage, 'rm'));
     }
     Promise.all(cleanupTasks)
       .then(() => {
-        app.removeListener('before-quit', onBeforeQuit);
-        app.quit();
+        if (!stopServer) {
+          app.removeListener('before-quit', onBeforeQuit);
+          app.quit();
+        } else {
+          mainWindow && mainWindow.send('install-log', 'Server stopped');
+        }
       })
       .catch((error) => {
         console.error('Error during cleanup:', error);
-        app.removeListener('before-quit', onBeforeQuit);
-        app.quit();
+        if (!stopServer) {
+          app.removeListener('before-quit', onBeforeQuit);
+          app.quit();
+        } else {
+          mainWindow &&
+            mainWindow.send('install-log', `Server stop Error : ${error}`);
+        }
       });
   }
 }
@@ -343,4 +352,10 @@ ipcMain.handle('switch-tab', async (event, { id }) => {
 
 ipcMain.handle('close-tab', async (event, { id }) => {
   viewManager.removeView(id);
+});
+
+ipcMain.handle('stop-server', async (event, { runnerImage, platformImage }) => {
+  runnerDockerImage = runnerImage;
+  platformDockerImage = platformImage;
+  await onBeforeQuit(event, true);
 });

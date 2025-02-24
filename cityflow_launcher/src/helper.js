@@ -131,6 +131,21 @@ function runDockerCommand(args, logPrefix, event, port = null) {
   return new Promise((resolve, reject) => {
     const dockerPath = getDockerPath();
     const proc = spawn(dockerPath, args);
+    // Start the timer when the process starts
+    proc.on('spawn', () => {
+      startTime = new Date();
+      // Send the elapsed time every second
+      const timer = setInterval(() => {
+        const now = new Date();
+        const elapsedTime = Math.round((now - startTime) / 1000); // in seconds
+        event.reply('install-time', elapsedTime);
+      }, 1000);
+
+      // Clear the timer when the process exits
+      proc.on('close', () => {
+        clearInterval(timer);
+      });
+    });
     proc.stdout.on('data', (data) => {
       const log = data.toString();
       console.log(`[${logPrefix}] ${log}`);

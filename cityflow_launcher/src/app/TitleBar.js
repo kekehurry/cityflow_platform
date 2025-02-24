@@ -28,7 +28,7 @@ const TitleBar = ({ setNewTabOpen }) => {
       title: getTitle(url),
       url,
     };
-    setTabs([...tabs, newTab]);
+    setTabs((prevTabs) => [...prevTabs, newTab]);
     setActiveTab(newTab.id);
     setNewTabOpen(true);
     // create a new tab in the main process
@@ -68,17 +68,6 @@ const TitleBar = ({ setNewTabOpen }) => {
     });
   }, []);
 
-  // Override window.open
-  useEffect(() => {
-    const originalWindowOpen = window.open;
-    window.open = (url, name, features) => {
-      addTab(url);
-    };
-    return () => {
-      window.open = originalWindowOpen;
-    };
-  }, []);
-
   return (
     <div className="titlebar-container">
       <div className="titlebar">
@@ -105,9 +94,7 @@ const TitleBar = ({ setNewTabOpen }) => {
                 onClick={() => handleTabClick(tab.id)}
               >
                 {tab.title == 'Home' ? (
-                  <>
-                    <HomeIcon sx={{ width: 15, height: 15 }} />
-                  </>
+                  <HomeIcon sx={{ width: 15, height: 15 }} />
                 ) : (
                   <>
                     <span>{tab.title}</span>

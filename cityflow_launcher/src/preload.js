@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimizeWindow: () => ipcRenderer.send('minimize-window'),
   maximizeWindow: () => ipcRenderer.send('maximize-window'),
   onInstallLog: (callback) => ipcRenderer.on('install-log', callback),
+  onInstallTime: (callback) => ipcRenderer.on('install-time', callback),
   onDockerStatus: (callback) => ipcRenderer.on('docker-status', callback),
   onUpdateInfo: (callback) => ipcRenderer.on('update-info', callback),
   onNewWindow: (callback) => {

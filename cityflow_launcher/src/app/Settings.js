@@ -29,6 +29,7 @@ const Settings = () => {
     update: false,
   });
   const [log, setLog] = useState('');
+  const [time, setTime] = useState('');
   const [dockerStatus, setDockerStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +60,9 @@ const Settings = () => {
       window.electronAPI.checkDockerInstallation();
       window.electronAPI.onInstallLog((event, message) => {
         setLog(message);
+      });
+      window.electronAPI.onInstallTime((event, message) => {
+        setTime(message);
       });
       window.electronAPI.onDockerStatus((event, status) => {
         setDockerStatus(status);
@@ -107,7 +111,14 @@ const Settings = () => {
               ? dockerStatus
               : 'Docker not found, please install docker first'}
           </Typography>
-          {log}
+          <Stack direction="row" spacing={1}>
+            <Typography variant="subtitle1" width="80%">
+              {log}
+            </Typography>
+            <Typography variant="subtitle1" width="20%" color="#E6EE9C">
+              {time && `${time}s`}
+            </Typography>
+          </Stack>
         </Box>
       </Box>
       <Box
@@ -216,33 +227,52 @@ const Settings = () => {
           )}
         </Button>
 
-        <FormControlLabel
-          control={
-            <Checkbox
-              id="update"
-              size="small"
-              checked={formValue.update}
-              onChange={() => {
-                setFormValue({
-                  ...formValue,
-                  update: !formValue.update,
-                });
-              }}
-              sx={{
-                '& .MuiSvgIcon-root': { fontSize: 12 },
-              }}
-            />
-          }
-          label="Check Update"
-          labelPlacement="start"
-          sx={{
-            marginLeft: 'auto',
-            '& .MuiFormControlLabel-label': {
-              fontSize: 12,
-              color: 'text.secondary',
-            },
-          }}
-        />
+        <Stack
+          direction={'row'}
+          spacing={1}
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{ fontSize: 12, color: 'text.secondary', cursor: 'pointer' }}
+            onClick={() => {
+              window?.electronAPI?.invoke('stop-server', {
+                runnerImage: formValue.runnerImage,
+                platformImage: formValue.platformImage,
+              });
+            }}
+          >
+            Stop Server
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="update"
+                size="small"
+                checked={formValue.update}
+                onChange={() => {
+                  setFormValue({
+                    ...formValue,
+                    update: !formValue.update,
+                  });
+                }}
+                sx={{
+                  '& .MuiSvgIcon-root': { fontSize: 12 },
+                }}
+              />
+            }
+            label="Check Update"
+            labelPlacement="start"
+            sx={{
+              marginLeft: 'auto',
+              '& .MuiFormControlLabel-label': {
+                fontSize: 12,
+                color: 'text.secondary',
+              },
+            }}
+          />
+        </Stack>
       </Box>
     </>
   );

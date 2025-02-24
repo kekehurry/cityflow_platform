@@ -35,11 +35,11 @@ export const FlowPanel = (props) => {
 
   return (
     <>
-      {/* <Box sx={{ pl: 2, pt: 2 }}>
-        <IconButton onClick={() => window.open('/', '_self')}>
+      <Box sx={{ pl: 2, pt: 2 }}>
+        <IconButton onClick={() => window.close()}>
           <WestIcon />
         </IconButton>
-      </Box> */}
+      </Box>
       <Box
         id="FlowPanel"
         onKeyDown={(event) => {
@@ -63,7 +63,7 @@ export const FlowPanel = (props) => {
             height: 'auto',
             p: 1,
             pl: 2,
-            pt: 8,
+            pt: 2,
           }}
         >
           <FlowSetting tab={tab} />
