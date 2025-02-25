@@ -80,7 +80,7 @@ function createWindow() {
     win.webContents.send('new-window-open', url);
     return { action: 'deny' };
   });
-  win.webContents.openDevTools({ mode: 'detach' });
+
   // Register a global shortcut to open DevTools
   globalShortcut.register('CmdOrCtrl+Shift+C', () => {
     win.webContents.openDevTools({ mode: 'detach' });
@@ -196,7 +196,11 @@ ipcMain.on(
       );
 
       if (!platformExists) {
-        await runDockerCommand(['pull', platformImage], 'pull platform', event);
+        await runDockerCommand(
+          ['pull', '--platform', 'linux/amd64', platformImage],
+          'pull platform',
+          event
+        );
       } else if (update) {
         const containerExists = await dockerContainerExists(
           'cityflow_platform'
@@ -207,7 +211,11 @@ ipcMain.on(
             'remove container',
             event
           ));
-        await runDockerCommand(['pull', platformImage], 'pull platform', event);
+        await runDockerCommand(
+          ['pull', '--platform', 'linux/amd64', platformImage],
+          'pull platform',
+          event
+        );
       } else if (platformRunning) {
         console.log('Platform is already running');
         event.reply('install-log', 'Platform is already running');
@@ -233,7 +241,11 @@ ipcMain.on(
           `Runner image ${runnerImage} already exists, skipping pull.`
         );
       } else {
-        await runDockerCommand(['pull', runnerImage], 'pull runner', event);
+        await runDockerCommand(
+          ['pull', '--platform', 'linux/amd64', runnerImage],
+          'pull runner',
+          event
+        );
       }
 
       // Build docker run arguments
@@ -254,6 +266,8 @@ ipcMain.on(
         `${source_dir}:/cityflow_platform/cityflow_database/source`,
         '-e',
         `DEFAULT_RUNNER:${runnerImage}`,
+        '--platform',
+        'linux/amd64',
         platformImage,
       ];
 
