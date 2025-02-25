@@ -14,19 +14,58 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-const Settings = () => {
-  const localSettings = localStorage.getItem('cityflowSettings') || '{}';
-  const localSettingsParsed = JSON.parse(localSettings);
+// const getLocalStorage = (key) => {
+//   if (typeof localStorage === 'undefined') {
+//     return null;
+//   }
+//   const data = localStorage.getItem('cs_flow') || '{}';
+//   const cs_data = JSON.parse(data);
+//   return cs_data[key];
+// };
 
+const useLocalStorage = (key, defaultValue) => {
+  const [localValue, setLocalValue] = useState(() => {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    const data = localStorage.getItem('cs_flow') || '{}';
+    const cs_data = JSON.parse(data);
+    let value = cs_data[key];
+    value = value ? value : defaultValue;
+    return value;
+  });
+  const setValue = (value) => {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    setLocalValue(value);
+    const data = localStorage.getItem('cs_flow') || '{}';
+    const cs_data = JSON.parse(data);
+    cs_data[key] = value;
+    localStorage.setItem('cs_flow', JSON.stringify(cs_data));
+  };
+
+  return [localValue, setValue];
+};
+
+const Settings = () => {
+  const [defaultRunner, setDefaultRunner] = useLocalStorage(
+    'DEFAULT_RUNNER',
+    'ghcr.io/kekehurry/cityflow_runner:full'
+  );
+  const [defaultSettings, setDefaultSettings] = useLocalStorage(
+    'DEFAULT_SETTINGS',
+    {
+      platformImage: 'ghcr.io/kekehurry/cityflow_platform:latest',
+      port: 3001,
+      update: false,
+    }
+  );
   const [formValue, setFormValue] = useState({
-    runnerImage:
-      localSettingsParsed?.runnerImage ||
-      'ghcr.io/kekehurry/cityflow_runner:full',
-    platformImage:
-      localSettingsParsed?.platformImage ||
-      'ghcr.io/kekehurry/cityflow_platform:latest',
-    port: localSettingsParsed?.port || 3001,
-    update: false,
+    runnerImage: defaultRunner,
+    platformImage: defaultSettings?.platformImage,
+    port: defaultSettings?.port,
+    update: defaultSettings?.update,
   });
   const [log, setLog] = useState('');
   const [time, setTime] = useState('');
@@ -52,7 +91,12 @@ const Settings = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem('cityflowSettings', JSON.stringify(formValue));
+    setDefaultRunner(formValue.runnerImage);
+    setDefaultSettings({
+      platformImage: formValue.platformImage,
+      port: formValue.port,
+      update: formValue.update,
+    });
   }, [formValue]);
 
   useEffect(() => {
