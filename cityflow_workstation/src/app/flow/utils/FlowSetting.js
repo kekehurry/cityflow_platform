@@ -14,7 +14,11 @@ import { connect } from 'react-redux';
 import { setupExecutor, check, killExecutor } from '@/utils/executor';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Assistant from '@/utils/assistant';
-import { getLocalStorage, useLocalStorage } from '@/utils/local';
+import {
+  getLocalStorage,
+  useLocalStorage,
+  getDefaultRunner,
+} from '@/utils/local';
 import theme from '@/theme';
 
 import LogBoard from './LogBoard';
@@ -62,11 +66,7 @@ const FlowSettings = (props) => {
   const [loading, setLoading] = useState(false);
   const userName = getLocalStorage('USER_NAME');
   const localLLMConfig = getLocalStorage('LLM_CONFIG');
-  const [defaultRunner, setDefaultRunner] = useLocalStorage(
-    'DEFAULT_RUNNER',
-    process.env.NEXT_PUBLIC_DEFAULT_RUNNER ||
-      'ghcr.io/kekehurry/cityflow_runner:latest'
-  );
+  const [defaultRunner, setDefaultRunner] = useLocalStorage('DEFAULT_RUNNER');
   const [logOpen, setLogOpen] = useState(false);
 
   // sumbit workflow settings
@@ -148,6 +148,12 @@ const FlowSettings = (props) => {
       setLoading(false);
     });
   };
+
+  useEffect(() => {
+    getDefaultRunner().then((data) => {
+      setDefaultRunner(data);
+    });
+  }, [setDefaultRunner]);
 
   useEffect(() => {
     if (!props.state?.flowId) return;

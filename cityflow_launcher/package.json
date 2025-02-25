@@ -27,7 +27,7 @@
     ],
     "extraResources": [
       {
-        "from": "/usr/local/bin/docker",
+        "from": "./docker/docker",
         "to": "docker/darwin/docker"
       },
       {
@@ -65,7 +65,6 @@
     "babel-loader": "^9.2.1",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^7.1.2",
-    "electron": "^34.2.0",
     "electron-builder": "^25.1.8",
     "style-loader": "^4.0.0",
     "webpack": "^5.98.0",
@@ -77,6 +76,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.5",
     "@mui/material": "^6.4.5",
+    "electron": "^34.2.0",
     "electron-icon-builder": "^2.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

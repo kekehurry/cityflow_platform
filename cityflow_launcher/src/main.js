@@ -261,6 +261,8 @@ ipcMain.on(
         `${data_dir}:/cityflow_platform/cityflow_database/data`,
         '-v',
         `${source_dir}:/cityflow_platform/cityflow_database/source`,
+        '-e',
+        `DEFAULT_RUNNER:${runnerImage}`,
         platformImage,
       ];
 

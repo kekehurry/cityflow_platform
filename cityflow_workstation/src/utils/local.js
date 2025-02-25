@@ -353,3 +353,11 @@ export const getCommunityFlow = async (url) => {
   const data = await res.json();
   return data;
 };
+
+export const getDefaultRunner = async () => {
+  const defaultRuuner = await fetch(
+    basePath + '/api/local/getDefaultRunner'
+  ).then((res) => res.json());
+  console.log(defaultRuuner);
+  return defaultRuuner;
+};
