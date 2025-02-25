@@ -11,7 +11,7 @@ COPY ./.env.production .
 RUN npm install && npm run build
 
 # Stage 2: Production
-FROM neo4j:latest
+FROM neo4j:5.20.0
 
 USER root
 

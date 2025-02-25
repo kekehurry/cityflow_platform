@@ -77,19 +77,10 @@ function createWindow() {
   });
 
   win.webContents.setWindowOpenHandler(({ url, frameName, disposition }) => {
-    // Only intercept window.open() calls
-    if (disposition === 'new-window') {
-      console.log('window.open intercepted:', url);
-      win.webContents.send('new-window-open', url);
-      return { action: 'deny' };
-    }
-    // Allow target="_blank" links
-    if (disposition === 'foreground-tab') {
-      return { action: 'allow' };
-    }
+    win.webContents.send('new-window-open', url);
     return { action: 'deny' };
   });
-
+  win.webContents.openDevTools({ mode: 'detach' });
   // Register a global shortcut to open DevTools
   globalShortcut.register('CmdOrCtrl+Shift+C', () => {
     win.webContents.openDevTools({ mode: 'detach' });
