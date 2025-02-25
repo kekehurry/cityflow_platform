@@ -14,19 +14,46 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-const Settings = () => {
-  const localSettings = localStorage.getItem('cityflowSettings') || '{}';
-  const localSettingsParsed = JSON.parse(localSettings);
+const useLocalStorage = (key, defaultValue) => {
+  const [localValue, setLocalValue] = useState(() => {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    const data = localStorage.getItem('cs_settings') || '{}';
+    const cs_data = JSON.parse(data);
+    let value = cs_data[key];
+    value = value ? value : defaultValue;
+    return value;
+  });
+  const setValue = (value) => {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    setLocalValue(value);
+    const data = localStorage.getItem('cs_settings') || '{}';
+    const cs_data = JSON.parse(data);
+    cs_data[key] = value;
+    localStorage.setItem('cs_settings', JSON.stringify(cs_data));
+  };
 
+  return [localValue, setValue];
+};
+
+const Settings = () => {
+  const [defaultSettings, setDefaultSettings] = useLocalStorage(
+    'DEFAULT_SETTINGS',
+    {
+      runnerImage: 'ghcr.io/kekehurry/cityflow_runner:full',
+      platformImage: 'ghcr.io/kekehurry/cityflow_platform:latest',
+      port: 3001,
+      update: false,
+    }
+  );
   const [formValue, setFormValue] = useState({
-    runnerImage:
-      localSettingsParsed?.runnerImage ||
-      'ghcr.io/kekehurry/cityflow_runner:full',
-    platformImage:
-      localSettingsParsed?.platformImage ||
-      'ghcr.io/kekehurry/cityflow_platform:latest',
-    port: localSettingsParsed?.port || 3001,
-    update: false,
+    runnerImage: defaultSettings?.runnerImage,
+    platformImage: defaultSettings?.platformImage,
+    port: defaultSettings?.port,
+    update: defaultSettings?.update,
   });
   const [log, setLog] = useState('');
   const [time, setTime] = useState('');
@@ -52,7 +79,7 @@ const Settings = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem('cityflowSettings', JSON.stringify(formValue));
+    setDefaultSettings(formValue);
   }, [formValue]);
 
   useEffect(() => {

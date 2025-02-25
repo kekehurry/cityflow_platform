@@ -12,7 +12,8 @@
     "build-icons": "electron-icon-builder --input=./public/icon.png --output=./assets --flatten",
     "electron": "npm run build && electron .",
     "start": "react-scripts start",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder --mac --arm64",
+    "dist-win": "npm run build && electron-builder --win --x64"
   },
   "build": {
     "appId": "com.example.cityflow",
@@ -26,15 +27,15 @@
     ],
     "extraResources": [
       {
-        "from": "/usr/local/bin/docker",
+        "from": "./docker/docker",
         "to": "docker/darwin/docker"
       },
       {
-        "from": "/usr/bin/docker",
+        "from": "./docker/docker",
         "to": "docker/linux/docker"
       },
       {
-        "from": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
+        "from": "./docker/docker.exe",
         "to": "docker/win32/docker.exe"
       }
     ],

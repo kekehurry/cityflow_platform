@@ -19,7 +19,6 @@ class ViewManager {
 
     // Handle new window events within the view
     view.webContents.setWindowOpenHandler(({ url, disposition }) => {
-      console.log(disposition, url);
       this.mainWindow.webContents.send('new-window-open', url);
       return { action: 'deny' };
     });

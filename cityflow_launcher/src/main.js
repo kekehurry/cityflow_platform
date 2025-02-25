@@ -77,16 +77,7 @@ function createWindow() {
   });
 
   win.webContents.setWindowOpenHandler(({ url, frameName, disposition }) => {
-    // Only intercept window.open() calls
-    if (disposition === 'new-window') {
-      console.log('window.open intercepted:', url);
-      win.webContents.send('new-window-open', url);
-      return { action: 'deny' };
-    }
-    // Allow target="_blank" links
-    if (disposition === 'foreground-tab') {
-      return { action: 'allow' };
-    }
+    win.webContents.send('new-window-open', url);
     return { action: 'deny' };
   });
 
@@ -205,18 +196,26 @@ ipcMain.on(
       );
 
       if (!platformExists) {
-        await runDockerCommand(['pull', platformImage], 'pull platform', event);
+        await runDockerCommand(
+          ['pull', '--platform', 'linux/amd64', platformImage],
+          'pull platform',
+          event
+        );
       } else if (update) {
         const containerExists = await dockerContainerExists(
           'cityflow_platform'
         );
         containerExists &&
           (await runDockerCommand(
-            ['rm', 'cityflow_platform'],
+            ['rm', '-f', 'cityflow_platform'],
             'remove container',
             event
           ));
-        await runDockerCommand(['pull', platformImage], 'pull platform', event);
+        await runDockerCommand(
+          ['pull', '--platform', 'linux/amd64', platformImage],
+          'pull platform',
+          event
+        );
       } else if (platformRunning) {
         console.log('Platform is already running');
         event.reply('install-log', 'Platform is already running');
@@ -242,7 +241,11 @@ ipcMain.on(
           `Runner image ${runnerImage} already exists, skipping pull.`
         );
       } else {
-        await runDockerCommand(['pull', runnerImage], 'pull runner', event);
+        await runDockerCommand(
+          ['pull', '--platform', 'linux/amd64', runnerImage],
+          'pull runner',
+          event
+        );
       }
 
       // Build docker run arguments
@@ -261,6 +264,10 @@ ipcMain.on(
         `${data_dir}:/cityflow_platform/cityflow_database/data`,
         '-v',
         `${source_dir}:/cityflow_platform/cityflow_database/source`,
+        '-e',
+        `DEFAULT_RUNNER:${runnerImage}`,
+        '--platform',
+        'linux/amd64',
         platformImage,
       ];
 
