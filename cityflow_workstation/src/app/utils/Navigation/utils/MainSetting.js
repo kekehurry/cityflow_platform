@@ -3,6 +3,7 @@ import {
   Avatar,
   Stack,
   Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -113,8 +114,8 @@ export default function MainSetting({ open, setOpen }) {
               sx={{
                 alignItems: 'center',
                 display: 'flex',
-                pt: 2,
-                pb: 2,
+                pt: 1,
+                pb: 1,
               }}
             >
               <Avatar
@@ -257,6 +258,17 @@ export default function MainSetting({ open, setOpen }) {
               fullWidth
               inputProps={inputProps}
             />
+          </Stack>
+          <Divider />
+          <Stack sx={{ pt: 1, pb: 1 }}>
+            <Button
+              variant="contained"
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              Submit
+            </Button>
           </Stack>
           <Divider />
           <Stack
