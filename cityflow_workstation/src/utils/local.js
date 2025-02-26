@@ -364,7 +364,9 @@ export const useGetDefaultRunner = () => {
   const { data, error } = useSWR(
     [basePath + '/api/local/getDefaultRunner'],
     () =>
-      fetch(basePath + '/api/local/getDefaultRunner').then((res) => res.json())
+      fetch(basePath + '/api/local/getDefaultRunner').then(async (res) => {
+        return await res.json();
+      })
   );
   return {
     data,

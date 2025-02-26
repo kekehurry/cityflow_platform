@@ -18,7 +18,6 @@ import {
   getLocalStorage,
   useLocalStorage,
   useGetDefaultRunner,
-  // getDefaultRunner,
 } from '@/utils/local';
 import theme from '@/theme';
 
@@ -153,7 +152,7 @@ const FlowSettings = (props) => {
 
   useEffect(() => {
     if (getDefaultRunner?.data) {
-      // console.log('getDefaultRunner', getDefaultRunner?.data);
+      console.log('getDefaultRunner', getDefaultRunner?.data);
       setDefaultRunner(getDefaultRunner?.data);
     }
   }, [getDefaultRunner]);
