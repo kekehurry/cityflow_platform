@@ -19,6 +19,7 @@ import {
   getCommunityMenu,
   getCommunityFlow,
   useLocalStorage,
+  getLocalStorage,
 } from '@/utils/local';
 
 const mapStateToProps = (state, ownProps) => {
@@ -37,7 +38,8 @@ const Community = () => {
   const [progress, setProgress] = useState('');
   const [menu, setMenu] = useLocalStorage('COMMUNITY_MENU', null);
   const [showTooltop, setShowTooltip] = useState(false);
-
+  const communityURL =
+    getLocalStorage('COMMUNITY_URL') || 'https://community.cityflow.cn';
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
@@ -68,8 +70,7 @@ const Community = () => {
   const handleUpdate = () => {
     setLoading(true);
     setProgress(`Fetching menu ...`);
-    getCommunityMenu().then((menu) => {
-      console.log(menu);
+    getCommunityMenu(communityURL).then((menu) => {
       setMenu(menu);
       fetchFlows(menu).then(() => {
         setLoading(false);
@@ -149,12 +150,7 @@ const Community = () => {
             left: '50%',
             transform: 'translateX(-50%)',
           }}
-          onClick={() =>
-            window.open(
-              'https://github.com/kekehurry/cityflow_community',
-              '_blank'
-            )
-          }
+          onClick={() => window.open(communityURL, '_blank')}
         >
           CityFlow Community
         </Typography>

@@ -327,10 +327,8 @@ export const saveUserFlow = async ({ rfInstance, state }) => {
 //   localStorage.setItem('cs_flow', JSON.stringify(cs_data));
 // };
 
-export const getCommunityMenu = async () => {
-  const communityURL =
-    getLocalStorage('communityURL') ||
-    defaultCommunityURL + '/community_workflows.json';
+export const getCommunityMenu = async (hostURL) => {
+  const communityURL = `${hostURL}/community_workflows.json`;
   const res = await fetch(basePath + '/api/local/getCommunityMenu', {
     method: 'POST',
     headers: {
