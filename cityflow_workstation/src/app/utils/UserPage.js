@@ -123,7 +123,7 @@ const UserPage = () => {
       <Typography variant="h3" sx={{ mt: 5, mb: 3 }}>
         My WorkFlows
       </Typography>
-      <FlowList params={{ authorId: userId, private: true }} />
+      <FlowList params={{ private: true }} />
     </Box>
   );
 };
