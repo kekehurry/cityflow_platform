@@ -32,14 +32,15 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   initStore: (state) => dispatch(initStore(state)),
 });
 
+const defaultCommunityURL = process.env.NEXT_PUBLIC_COMMUNITY_URL;
+
 const Community = () => {
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState('');
   const [menu, setMenu] = useLocalStorage('COMMUNITY_MENU', null);
   const [showTooltop, setShowTooltip] = useState(false);
-  const communityURL =
-    getLocalStorage('COMMUNITY_URL') || 'https://community.cityflow.cn';
+  const communityURL = getLocalStorage('COMMUNITY_URL') || defaultCommunityURL;
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
