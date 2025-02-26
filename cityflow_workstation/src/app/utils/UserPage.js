@@ -17,7 +17,6 @@ import { initUserId } from '@/utils/local';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import FlowList from '@/components/FlowList';
-import Link from 'next/link';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -124,7 +123,7 @@ const UserPage = () => {
       <Typography variant="h3" sx={{ mt: 5, mb: 3 }}>
         My WorkFlows
       </Typography>
-      <FlowList params={{ author_id: userId, private: true }} />
+      <FlowList params={{ authorId: userId, private: true }} />
     </Box>
   );
 };

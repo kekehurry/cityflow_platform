@@ -17,7 +17,8 @@ import Assistant from '@/utils/assistant';
 import {
   getLocalStorage,
   useLocalStorage,
-  getDefaultRunner,
+  useGetDefaultRunner,
+  // getDefaultRunner,
 } from '@/utils/local';
 import theme from '@/theme';
 
@@ -67,6 +68,7 @@ const FlowSettings = (props) => {
   const userName = getLocalStorage('USER_NAME');
   const localLLMConfig = getLocalStorage('LLM_CONFIG');
   const [defaultRunner, setDefaultRunner] = useLocalStorage('DEFAULT_RUNNER');
+  const getDefaultRunner = useGetDefaultRunner();
   const [logOpen, setLogOpen] = useState(false);
 
   // sumbit workflow settings
@@ -150,10 +152,11 @@ const FlowSettings = (props) => {
   };
 
   useEffect(() => {
-    getDefaultRunner().then((data) => {
-      setDefaultRunner(data);
-    });
-  }, [setDefaultRunner]);
+    if (getDefaultRunner?.data) {
+      // console.log('getDefaultRunner', getDefaultRunner?.data);
+      setDefaultRunner(getDefaultRunner?.data);
+    }
+  }, [getDefaultRunner]);
 
   useEffect(() => {
     if (!props.state?.flowId) return;

@@ -1,4 +1,4 @@
-.github/workflows/build.yml merge=ours
+.github/workflows/build_main.yml merge=ours
 .gitattributes merge=ours
 .gitignore merge=ours
 # cityflow_database/models/minilm.onnx filter=lfs diff=lfs merge=lfs -text

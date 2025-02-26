@@ -265,7 +265,7 @@ ipcMain.on(
         '-v',
         `${source_dir}:/cityflow_platform/cityflow_database/source`,
         '-e',
-        `DEFAULT_RUNNER:${runnerImage}`,
+        `DEFAULT_RUNNER=${runnerImage}`,
         '--platform',
         'linux/amd64',
         platformImage,
