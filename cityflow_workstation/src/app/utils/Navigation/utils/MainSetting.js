@@ -28,6 +28,7 @@ const inputProps = {
 };
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const defaultCommunityURL = process.env.NEXT_PUBLIC_COMMUNITY_URL;
 
 export default function MainSetting({ open, setOpen }) {
   const [localLLMConfig, setLocalLLMConfig] = useLocalStorage('LLM_CONFIG', {
@@ -74,7 +75,7 @@ export default function MainSetting({ open, setOpen }) {
   const [autoSave, setAutoSave] = useLocalStorage('AUTO_SAVE', 'true');
   const [communityURL, setCommunityURL] = useLocalStorage(
     'COMMUNITY_URL',
-    'https://community.cityflow.cn'
+    defaultCommunityURL
   );
   const [edit, setEdit] = useState(false);
 
