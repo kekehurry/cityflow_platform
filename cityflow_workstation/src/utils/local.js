@@ -4,6 +4,7 @@ import FingerprintJS from 'fingerprintjs2';
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
 import theme from '@/theme';
+import useSWR from 'swr';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const defaultCommunityURL = process.env.NEXT_PUBLIC_COMMUNITY_URL || '';
@@ -352,10 +353,22 @@ export const getCommunityFlow = async (url) => {
   return data;
 };
 
-export const getDefaultRunner = async () => {
-  const defaultRuuner = await fetch(
-    basePath + '/api/local/getDefaultRunner'
-  ).then((res) => res.json());
-  console.log(defaultRuuner);
-  return defaultRuuner;
+// export const getDefaultRunner = async () => {
+//   const defaultRuuner = await fetch(
+//     basePath + '/api/local/getDefaultRunner'
+//   ).then((res) => res.json());
+//   return defaultRuuner;
+// };
+
+export const useGetDefaultRunner = () => {
+  const { data, error } = useSWR(
+    [basePath + '/api/local/getDefaultRunner'],
+    () =>
+      fetch(basePath + '/api/local/getDefaultRunner').then((res) => res.json())
+  );
+  return {
+    data,
+    error,
+    isLoading: !data && !error,
+  };
 };

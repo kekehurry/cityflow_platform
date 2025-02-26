@@ -22,6 +22,7 @@ const Header = (props) => {
         background: theme.palette.flow.main,
         height: height || '5.5vh',
         width: width || '50%',
+        minWidth: '450px',
         zIndex: 1111,
         bottom: bottom || '2vh',
         left: '50%',
