@@ -4,3 +4,4 @@ data
 source
 dist
 docker
+package-lock.json
