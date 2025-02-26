@@ -53,7 +53,6 @@ def get_sub_graph(nodeIds):
         WITH 
         COLLECT( DISTINCT{{
             id: m1.hash,
-            flow_id: m1.id,
             name: m1.name, 
             type: labels(m1)[0],
             description: m1.description
