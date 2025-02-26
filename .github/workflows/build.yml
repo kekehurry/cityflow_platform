@@ -1,8 +1,8 @@
-name: Build and Push to GHCR (Dev)
+name: Build and Push to GHCR (Main)
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
 
 jobs:
   build-and-push:
@@ -12,7 +12,6 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
       uses: docker/setup-buildx-action@v3
 
     - name: Log in to GHCR
