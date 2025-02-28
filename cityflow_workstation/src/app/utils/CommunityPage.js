@@ -117,7 +117,7 @@ const Community = () => {
           Object.keys(menu)
             .filter((k) => k != 'basic' && k != 'featured')
             .map((key, index) => <Tab key={key} label={key} />)}
-        <Tab key={'workflow'} label="Workflow" />
+        <Tab key={'workflows'} label="Workflows" />
       </Tabs>
       <Box sx={{ pt: 1, height: '100%', overflow: 'auto' }}>
         {menu &&
@@ -126,12 +126,18 @@ const Community = () => {
             .map(
               (key, index) =>
                 tab == index && (
-                  <FlowList key={index} params={{ category: key }} cols={5} />
+                  <FlowList key={index} params={{ category: key }} cols={4} />
                 )
             )}
-        {menu && tab == Object.keys(menu).length + 1 && (
-          <FlowList params={{ private: false }} cols={2} />
-        )}
+        {menu &&
+          tab ==
+            Object.keys(menu).filter((k) => k != 'basic' && k != 'featured')
+              .length && (
+            <FlowList
+              params={{ private: false, category: 'workflows' }}
+              cols={4}
+            />
+          )}
       </Box>
       <Stack
         direction={'row'}
