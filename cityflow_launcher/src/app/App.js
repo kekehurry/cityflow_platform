@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { DialogsProvider } from '@toolpad/core/useDialogs';
 import './global.css';
 import HomeBackground from './HomeBackground';
 import Settings from './Settings';
@@ -9,10 +10,12 @@ const App = () => {
   const [newTabOpen, setNewTabOpen] = useState(false);
   return (
     <div className="app">
-      <TitleBar setNewTabOpen={setNewTabOpen} />
-      {newTabOpen || <HomeBackground />}
-      {newTabOpen || <Settings />}
-      {newTabOpen || <Footer />}
+      <DialogsProvider>
+        <TitleBar setNewTabOpen={setNewTabOpen} />
+        {newTabOpen || <HomeBackground />}
+        {newTabOpen || <Settings />}
+        {newTabOpen || <Footer />}
+      </DialogsProvider>
     </div>
   );
 };

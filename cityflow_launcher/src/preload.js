@@ -14,4 +14,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onNewWindow: (callback) => {
     ipcRenderer.on('new-window-open', (_, data) => callback(data));
   },
+  onUpdateAvailable: (callback) => {
+    ipcRenderer.on('update-available', () => {
+      callback;
+    });
+  },
+  onUpdateDownloaded: (callback) => {
+    ipcRenderer.on('update-downloaded', () => {
+      callback();
+      ipcRenderer.removeAllListeners('update-downloaded');
+    });
+  },
+  restartApp: () => {
+    ipcRenderer.send('restart_app');
+  },
 });

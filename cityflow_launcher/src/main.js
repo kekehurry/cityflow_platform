@@ -6,6 +6,7 @@ const {
   Menu,
   globalShortcut,
 } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const {
   checkDockerInstallation,
@@ -66,7 +67,6 @@ function createWindow() {
     },
   });
   viewManager = new ViewManager(win);
-
   win.loadFile(path.join(__dirname, '../dist/index.html'));
   win.webContents.on('did-finish-load', async () => {
     try {
@@ -75,7 +75,6 @@ function createWindow() {
       console.error('Docker check failed:', error);
     }
   });
-
   win.webContents.setWindowOpenHandler(({ url, frameName, disposition }) => {
     win.webContents.send('new-window-open', url);
     return { action: 'deny' };
@@ -88,6 +87,16 @@ function createWindow() {
   globalShortcut.register('CmdOrCtrl+Option+I', () => {
     win.webContents.openDevTools({ mode: 'detach' });
   });
+  // check for updates
+  autoUpdater.autoDownload = true;
+  autoUpdater
+    .checkForUpdatesAndNotify()
+    .then((updateInfo) => {
+      console.log('Update info:', updateInfo);
+    })
+    .catch((err) => {
+      console.error('Error during update check:', err);
+    });
 }
 
 function onBeforeQuit(event, stopServer = false) {
@@ -191,9 +200,8 @@ ipcMain.on(
 
       // Pull platform docker image
       const platformExists = await dockerImageExists(platformImage);
-      const platformRunning = await dockerContainerIsRunning(
-        'cityflow_platform'
-      );
+      const platformRunning =
+        await dockerContainerIsRunning('cityflow_platform');
 
       if (!platformExists) {
         await runDockerCommand(
@@ -202,9 +210,8 @@ ipcMain.on(
           event
         );
       } else if (update) {
-        const containerExists = await dockerContainerExists(
-          'cityflow_platform'
-        );
+        const containerExists =
+          await dockerContainerExists('cityflow_platform');
         containerExists &&
           (await runDockerCommand(
             ['rm', '-f', 'cityflow_platform'],
@@ -328,4 +335,17 @@ ipcMain.handle('stop-server', async (event, { runnerImage, platformImage }) => {
   runnerDockerImage = runnerImage;
   platformDockerImage = platformImage;
   await onBeforeQuit(event, true);
+});
+
+ipcMain.on('restart_app', () => {
+  autoUpdater.quitAndInstall();
+});
+
+// listen for update events
+
+autoUpdater.on('update-available', () => {
+  mainWindow.webContents.send('update-available');
+});
+autoUpdater.on('update-downloaded', () => {
+  mainWindow.webContents.send('update-downloaded');
 });
