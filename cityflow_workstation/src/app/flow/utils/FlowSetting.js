@@ -191,7 +191,7 @@ const FlowSettings = (props) => {
 
   return (
     <Box id="FlowSettings" hidden={tab !== 0}>
-      <Stack spacing={2} sx={{ mt: 0 }}>
+      <Stack spacing={2} sx={{ mt: 0, minHeight: '100vh' }}>
         <TextField
           label="name"
           id="name"

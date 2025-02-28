@@ -89,7 +89,13 @@ const ShareBoard = (props) => {
       const { nodes, edges, ...res } = props.state;
       const flowData = await getFlowData({
         rfInstance,
-        state: { ...res, ...formValue, basic: false, private: false },
+        state: {
+          ...res,
+          ...formValue,
+          basic: false,
+          private: false,
+          category: 'workflows',
+        },
       });
       const flowId = await saveWorkflow(flowData)
         .then((flowId) => {
