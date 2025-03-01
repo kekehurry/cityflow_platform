@@ -53,7 +53,6 @@ const getContext = async (query) => {
   const context = `This is the knowledge graph context might related to the question: ${JSON.stringify(
     knowledgeGraph
   )}`;
-  console.log(knowledgeGraph);
   return context;
 };
 
@@ -87,6 +86,10 @@ export default class Assistant {
               }
             : { role: 'user', content: msg || '' }
         );
+        messages.push({
+          role: 'assistant',
+          content: 'I understand the context, what do you want to know?',
+        });
       });
     }
     if (inputMessage) {
@@ -162,6 +165,10 @@ export default class Assistant {
               }
             : { role: 'user', content: msg || '' }
         );
+        messages.push({
+          role: 'assistant',
+          content: 'I understand the context, what do you want to know?',
+        });
       });
     }
     if (tool == 'search') {
@@ -169,6 +176,11 @@ export default class Assistant {
       messages.push({
         role: 'user',
         content: context,
+      });
+      messages.push({
+        role: 'assistant',
+        content:
+          'I understand the knowledge graph context, what do you want to know?',
       });
     }
     if (inputMessage) {
