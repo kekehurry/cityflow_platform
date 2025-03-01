@@ -97,19 +97,9 @@
       }
     },
     {
-      "label": "Build Cityflow Lancher App (Mac)",
+      "label": "Build Cityflow Lancher App",
       "type": "shell",
       "command": "cd cityflow_launcher && npm run dist",
-      "isBackground": true,
-      "problemMatcher": [],
-      "presentation": {
-        "group": "dev"
-      }
-    },
-    {
-      "label": "Build Cityflow Lancher App (Win)",
-      "type": "shell",
-      "command": "cd cityflow_launcher && npm run dist-win",
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {

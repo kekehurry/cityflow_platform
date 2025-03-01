@@ -12,8 +12,7 @@
     "build-icons": "electron-icon-builder --input=./public/icon.png --output=./assets --flatten",
     "electron": "npm run build && electron .",
     "start": "react-scripts start",
-    "dist": "npm run build && electron-builder --mac --arm64",
-    "dist-win": "npm run build && electron-builder --win --x64"
+    "dist": "npm run build && electron-builder --mac --win --publish always"
   },
   "build": {
     "appId": "com.example.cityflow",
@@ -51,15 +50,36 @@
       "buildResources": "assets"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "assets/icon.ico"
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "icon": "assets/icon.icns"
     },
     "linux": {
-      "target": "AppImage",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "assets"
     }
   },
