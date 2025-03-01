@@ -13,6 +13,7 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
+import { useDialogs } from '@toolpad/core/useDialogs';
 
 const useLocalStorage = (key, defaultValue) => {
   const [localValue, setLocalValue] = useState(() => {
@@ -59,6 +60,7 @@ const Settings = () => {
   const [time, setTime] = useState('');
   const [dockerStatus, setDockerStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const dialogs = useDialogs();
 
   const handleValueChange = (e) => {
     setFormValue({
@@ -93,6 +95,21 @@ const Settings = () => {
       });
       window.electronAPI.onDockerStatus((event, status) => {
         setDockerStatus(status);
+      });
+      window.electronAPI.onUpdateAvailable(() => {
+        setFormValue({
+          ...formValue,
+          update: true,
+        });
+        dialogs.alert('CityFlow Launcher update available');
+      });
+      window.electronAPI.onUpdateDownloaded(() => {
+        const isRestart = dialogs.confirm(
+          'CityFlow Launcher update downloaded, restart now?'
+        );
+        if (isRestart) {
+          window.electronAPI.restartApp();
+        }
       });
     }
   }, []);
