@@ -7,7 +7,7 @@ const FlowList = ({
   params,
   cardWidth = '14vw',
   cardHeight = '14vw',
-  cols = 5,
+  cols = 4,
   gap = 20,
 }) => {
   const [items, setItems] = useState([]);
