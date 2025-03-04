@@ -296,7 +296,7 @@ class CodeExecutor:
 
             # Find the bind folder for /cityflow_platform/cityflow_executor/code
             for bind in bind_mounts:
-                host_path, container_path = bind.split(':')
+                host_path, container_path = bind.rsplit(':', 1)
                 if container_path == os.getenv("EXECUTOR_WORK_DIR"):
                     return host_path
         return None

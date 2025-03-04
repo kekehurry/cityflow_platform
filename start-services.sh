@@ -7,7 +7,7 @@ source /cityflow_platform/.env
 set +a
 
 # if no cityflow runner image, pull latest cityflow_runner
-if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '^ghcr.io/kekehurry/cityflow_runner:'; then
+if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q 'kekehurry/cityflow_runner'; then
     echo "Image cityflow_runner not found, pulling latest..."
     docker pull ghcr.io/kekehurry/cityflow_runner:latest
 else
