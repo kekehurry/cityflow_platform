@@ -27,6 +27,8 @@ cd /cityflow_platform
 
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
+  python3 ./cityflow_database/init_db.py --force
+else
   python3 ./cityflow_database/init_db.py
 fi
 

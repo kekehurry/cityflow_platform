@@ -5,20 +5,8 @@ from hashlib import md5
 import os
 import shutil
 
-
-print('Initializing database...')
-
-data_dir = './cityflow_database/json/'
-source_dir = os.getenv('DATABASE_SOURCE_DIR','./cityflow_database/source')
-    
-for folder in ['files','icons','images','html']:
-    if not os.path.exists(os.path.join(source_dir,folder)): 
-        os.makedirs(os.path.join(source_dir,folder))
-
-init_db()
 admin_passkey = 'admin/cityflow'
 admin_id = md5(admin_passkey.encode()).hexdigest()
-
 print('Admin ID:',admin_id)
 
 def load_flow_data(file,basic=True,category='basic'):
@@ -43,26 +31,56 @@ def load_flow_data(file,basic=True,category='basic'):
             module['basic'] = basic
     return flow
 
-print('Loading workflows...')
+def load_basic():
+    print('Loading basic workflows...')
+    data_dir = './cityflow_database/json/'
+    for folder in os.listdir(data_dir):
+        basic = False
+        category = folder   
+        if folder == 'basic':
+            basic = True
+        folder = os.path.join(data_dir,folder)
+        if os.path.isdir(folder):
+            for file in os.listdir(folder):
+                try:
+                    if file.endswith('.json'):
+                        file = os.path.join(folder,file)
+                        flow = load_flow_data(file,basic=basic,category=category)
+                        save_workflow(flow,user_id=admin_id)
+                except Exception as e:
+                    print('Error loading workflow:',file,e)
 
-for folder in os.listdir(data_dir):
-    basic = False
-    category = folder   
-    if folder == 'basic':
-        basic = True
-    folder = os.path.join(data_dir,folder)
-    if os.path.isdir(folder):
-        for file in os.listdir(folder):
-            try:
-                if file.endswith('.json'):
-                    file = os.path.join(folder,file)
-                    flow = load_flow_data(file,basic=basic,category=category)
-                    save_workflow(flow,user_id=admin_id)
-            except Exception as e:
-                print('Error loading workflow:',file,e)
+
+def init_source_dir(source_dir):
+    for folder in ['files','icons','images','html']:
+        if not os.path.exists(os.path.join(source_dir,folder)): 
+            os.makedirs(os.path.join(source_dir,folder))
+    return
+    
+def init_database(force_init=False):
+    print('Initializing database...')
+    source_dir = os.getenv('DATABASE_SOURCE_DIR','./cityflow_database/source')
+    if not os.path.exists(source_dir):
+        init_source_dir(source_dir)
+        init_db()
+        load_basic()
+    elif force_init:
+        shutil.rmtree(source_dir)
+        init_source_dir(source_dir)
+        init_db()
+        load_basic()
+    else:
+        print('Database already initialized. Skipping...')
+    return 
 
 
+if __name__=='__main__':
 
-
+    import argparse
+    parser = argparse.ArgumentParser(description='Initialize CityFlow database.')
+    parser.add_argument('--force', action='store_true', help='Force initialization.')
+    args = parser.parse_args()
+    init_database(args.force)
+    print('Database initialization complete.')
 
 
