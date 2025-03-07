@@ -5,8 +5,8 @@ import { useSearchWorkflow } from '@/utils/dataset';
 
 const FlowList = ({
   params,
-  cardWidth = '14vw',
-  cardHeight = '14vw',
+  cardWidth = '12vw',
+  cardHeight = '12vw',
   cols = 5,
   gap = 20,
 }) => {

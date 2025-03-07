@@ -94,7 +94,7 @@ const ShareBoard = (props) => {
           ...formValue,
           basic: false,
           private: false,
-          category: 'workflows',
+          category: formValue?.category || 'workflows',
         },
       });
       const flowId = await saveWorkflow(flowData)
