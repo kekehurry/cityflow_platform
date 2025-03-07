@@ -1,6 +1,6 @@
 {
   "name": "cityflow_launcher",
-  "version": "0.25.2+20250228",
+  "version": "0.25.3+20250305",
   "description": "",
   "author": {
     "name": "Kai Hu",
@@ -18,7 +18,7 @@
     "appId": "com.example.cityflow",
     "productName": "CityFlow",
     "copyright": "Copyright © 2025 CityFlow",
-    "buildVersion": "0.25.2+20250228",
+    "buildVersion": "0.25.3+20250305",
     "files": [
       "dist/**/*",
       "src/**/*",
