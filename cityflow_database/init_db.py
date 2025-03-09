@@ -70,6 +70,7 @@ def init_database(force_init=False):
         init_db()
         load_basic()
     else:
+        init_source_dir(source_dir)
         load_basic()
     return 
 
