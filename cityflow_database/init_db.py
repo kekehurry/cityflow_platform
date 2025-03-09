@@ -70,7 +70,7 @@ def init_database(force_init=False):
         init_db()
         load_basic()
     else:
-        print('Database already initialized. Skipping...')
+        load_basic()
     return 
 
 

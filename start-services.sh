@@ -27,12 +27,15 @@ cd /cityflow_platform
 
 # Initialize database
 if [ "$INIT_DATABASE" ]; then
+  echo "Force initializing database..."
   python3 ./cityflow_database/init_db.py --force
 else
+  echo "Initializing database..."
   python3 ./cityflow_database/init_db.py
 fi
 
 # Start services
+chown -R neo4j /data
 cd /cityflow_platform/cityflow_database && python3 server.py &
 cd /cityflow_platform/cityflow_executor && python3 server.py &
 cd /cityflow_platform/cityflow_workstation && node server.js &
