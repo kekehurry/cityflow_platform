@@ -167,9 +167,10 @@ def delete_workflow(id):
     workflow = get_workflow(id)
     if workflow:
         screenshot = workflow.get('screenShot')
-        source_folder = os.getenv('DATABASE_SOURCE_DIR')
-        screenshot_path = os.path.join(source_folder,'images',os.path.basename(screenshot))
-        delete_file(screenshot_path)
+        if screenshot:
+            source_folder = os.getenv('DATABASE_SOURCE_DIR')
+            screenshot_path = os.path.join(source_folder,'images',os.path.basename(screenshot))
+            delete_file(screenshot_path)
         for node in workflow['nodes']:
             delete_module(node.get('id'))
     return delete_node('Workflow',id)

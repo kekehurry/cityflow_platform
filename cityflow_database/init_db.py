@@ -44,8 +44,8 @@ def load_basic():
             for file in os.listdir(folder):
                 try:
                     if file.endswith('.json'):
-                        file = os.path.join(folder,file)
-                        flow = load_flow_data(file,basic=basic,category=category)
+                        file_path = os.path.join(folder,file)
+                        flow = load_flow_data(file_path,basic=basic,category=category)
                         save_workflow(flow,user_id=admin_id)
                 except Exception as e:
                     print('Error loading workflow:',file,e)
