@@ -60,7 +60,7 @@ def init_source_dir(source_dir):
 def init_database(force_init=False):
     print('Initializing database...')
     source_dir = os.getenv('DATABASE_SOURCE_DIR','./cityflow_database/source')
-    if not os.path.exists(source_dir):
+    if (not os.path.exists(source_dir)) or (len(os.listdir(source_dir))==0):
         init_source_dir(source_dir)
         init_db()
         load_basic()
