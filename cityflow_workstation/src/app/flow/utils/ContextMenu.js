@@ -56,8 +56,8 @@ const ContextMenu = (props) => {
             ...node,
             id: nanoid(),
             position: {
-              x: anchorPosition ? anchorPosition.mouseX : node.position.x,
-              y: anchorPosition ? anchorPosition.mouseY : node.position.y,
+              x: node.position.x,
+              y: node.position.y,
             },
             local: false,
             basic: false,

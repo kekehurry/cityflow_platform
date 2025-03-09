@@ -102,7 +102,7 @@ const Community = () => {
         </Typography>
         <FlowList
           params={{ category: 'featured' }}
-          cardWidth={'36vw'}
+          cardWidth={'35vw'}
           cardHeight={'14vw'}
           cols={2}
         />
@@ -126,7 +126,7 @@ const Community = () => {
             .map(
               (key, index) =>
                 tab == index && (
-                  <FlowList key={index} params={{ category: key }} cols={4} />
+                  <FlowList key={index} params={{ category: key }} cols={5} />
                 )
             )}
         {menu &&
@@ -135,7 +135,7 @@ const Community = () => {
               .length && (
             <FlowList
               params={{ private: false, category: 'workflows' }}
-              cols={4}
+              cols={5}
             />
           )}
       </Box>

@@ -151,8 +151,7 @@ const FlowSettings = (props) => {
   };
 
   useEffect(() => {
-    if (getDefaultRunner?.data) {
-      console.log('getDefaultRunner', getDefaultRunner?.data);
+    if (getDefaultRunner?.data && !defaultRunner) {
       setDefaultRunner(getDefaultRunner?.data);
     }
   }, [getDefaultRunner]);
@@ -164,7 +163,7 @@ const FlowSettings = (props) => {
       name: props.state?.name || '',
       description: props.state?.description || '',
       tag: props.state?.tag || '',
-      city: props.state?.city || '',
+      category: props.state?.category || '',
       author: props.state?.author || userName || '',
       image: props.state?.image || defaultRunner,
       packages: props.state?.packages || '',
@@ -204,11 +203,11 @@ const FlowSettings = (props) => {
           <Stack direction="row" spacing={2} justifyContent="space-between">
             <TextField
               fullWidth
-              label="city"
-              id="city"
-              value={formValue?.city || ''}
+              label="category"
+              id="category"
+              value={formValue?.category || ''}
               onChange={handleFormChange}
-              placeholder="which city is this workflow related to?"
+              placeholder="which category is this workflow related to?"
               InputLabelProps={{ shrink: true }}
             />
             <TextField

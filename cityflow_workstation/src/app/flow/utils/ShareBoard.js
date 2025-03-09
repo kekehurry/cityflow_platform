@@ -94,7 +94,7 @@ const ShareBoard = (props) => {
           ...formValue,
           basic: false,
           private: false,
-          category: 'workflows',
+          category: formValue?.category || 'workflows',
         },
       });
       const flowId = await saveWorkflow(flowData)
@@ -125,7 +125,7 @@ const ShareBoard = (props) => {
       name: props.state?.name || '',
       description: props.state?.description || '',
       tag: props.state?.tag || '',
-      city: props.state?.city || '',
+      category: props.state?.category || '',
       author: userName || '',
       packages: props.state?.packages || '',
       image: props.state?.image || defaultRunner,
@@ -170,9 +170,9 @@ const ShareBoard = (props) => {
               <Stack direction="row" spacing={2} justifyContent="space-between">
                 <TextField
                   fullWidth
-                  label="city"
-                  id="city"
-                  value={formValue?.city || ''}
+                  label="category"
+                  id="category"
+                  value={formValue?.category || ''}
                   onChange={handleValueChange}
                   InputLabelProps={{ shrink: true }}
                 />

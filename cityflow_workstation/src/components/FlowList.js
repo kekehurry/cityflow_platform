@@ -5,9 +5,9 @@ import { useSearchWorkflow } from '@/utils/dataset';
 
 const FlowList = ({
   params,
-  cardWidth = '14vw',
-  cardHeight = '14vw',
-  cols = 4,
+  cardWidth = '12vw',
+  cardHeight = '12vw',
+  cols = 5,
   gap = 20,
 }) => {
   const [items, setItems] = useState([]);

@@ -44,8 +44,8 @@ def load_basic():
             for file in os.listdir(folder):
                 try:
                     if file.endswith('.json'):
-                        file = os.path.join(folder,file)
-                        flow = load_flow_data(file,basic=basic,category=category)
+                        file_path = os.path.join(folder,file)
+                        flow = load_flow_data(file_path,basic=basic,category=category)
                         save_workflow(flow,user_id=admin_id)
                 except Exception as e:
                     print('Error loading workflow:',file,e)
@@ -70,7 +70,8 @@ def init_database(force_init=False):
         init_db()
         load_basic()
     else:
-        print('Database already initialized. Skipping...')
+        init_source_dir(source_dir)
+        load_basic()
     return 
 
 
