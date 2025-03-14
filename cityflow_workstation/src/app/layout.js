@@ -1,10 +1,11 @@
 'use client';
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '@/theme';
 import store from '@/store/store';
 import { Provider } from 'react-redux';
+import { DialogsProvider } from '@toolpad/core/useDialogs';
 import './global.css';
 
 const RootLayout = ({ children }) => {
@@ -52,7 +53,9 @@ const RootLayout = ({ children }) => {
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <Provider store={store}>
-              <Suspense fallback={<div>loading</div>}>{children}</Suspense>
+              <DialogsProvider>
+                <Suspense fallback={<div>loading</div>}>{children}</Suspense>
+              </DialogsProvider>
             </Provider>
           </ThemeProvider>
         </main>

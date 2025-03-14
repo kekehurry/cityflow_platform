@@ -13,7 +13,6 @@ import { LoadingButton } from '@mui/lab';
 import theme from '@/theme';
 import { runCommand, exportImage } from '@/utils/executor';
 import LogViewer from '@/components/Logger';
-import { set } from 'lodash';
 
 const enableCommand = process.env.NEXT_PUBLIC_ENABLE_COMMAND === 'true';
 
@@ -22,8 +21,6 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   const [command, setCommand] = useState('');
   const [terminalLogs, setTerminalLogs] = useState('');
   const [saving, setSaving] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [imageName, setImageName] = useState('');
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -42,7 +39,8 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   };
 
   const handleExport = async () => {
-    if (imageName != '') {
+    const imageName = await prompt('Enter image name');
+    if (imageName) {
       setSaving(true);
       exportImage(flowId, imageName, 'latest')
         .then((res) => {
@@ -54,7 +52,6 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
         })
         .finally(() => {
           setSaving(false);
-          setExporting(false);
         });
     } else {
       alert('Please enter image name');
@@ -64,11 +61,6 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
   useEffect(() => {
     setTerminalLogs(logs);
   }, [logs]);
-
-  useEffect(() => {
-    setExporting(false);
-    setImageName('');
-  }, [logOpen]);
 
   return (
     <>
@@ -87,106 +79,71 @@ const LogBoard = ({ flowId, logOpen, setLogOpen, isAlive, logs }) => {
           },
         }}
       >
-        <DialogTitle sx={{ fontSize: 20 }}>
-          {!exporting ? 'Terminal' : 'Export'}
-        </DialogTitle>
+        <DialogTitle sx={{ fontSize: 20 }}>Terminal</DialogTitle>
         <DialogContent>
           <Stack width={400} spacing={2} alignItems={'center'}>
-            {!exporting ? (
-              <>
-                <LogViewer
-                  key="terminal"
-                  logs={terminalLogs}
-                  width={400}
-                  height={260}
-                />
-                <TextField
-                  value={command}
-                  onChange={(e) => setCommand(e.target.value)}
-                  placeholder={`Enter command ${
-                    enableCommand ? '' : '(Disabled)'
-                  }`}
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  disabled={!enableCommand}
-                  sx={{
-                    background: theme.palette.flow.main,
-                    fontFamily: 'monospace',
-                  }}
-                />
-              </>
-            ) : (
-              <TextField
-                value={imageName}
-                onChange={(e) => setImageName(e.target.value)}
-                placeholder={`Enter image name`}
-                variant="outlined"
-                size="small"
-                fullWidth
-                disabled={!exporting}
-                sx={{
-                  background: theme.palette.flow.main,
-                  fontFamily: 'monospace',
-                }}
-              />
-            )}
+            <LogViewer
+              key="terminal"
+              logs={terminalLogs}
+              width={400}
+              height={260}
+            />
+            <TextField
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              placeholder={`Enter command ${enableCommand ? '' : '(Disabled)'}`}
+              variant="outlined"
+              size="small"
+              fullWidth
+              disabled={!enableCommand}
+              sx={{
+                background: theme.palette.flow.main,
+                fontFamily: 'monospace',
+              }}
+            />
           </Stack>
         </DialogContent>
         <DialogActions variant="outlined">
-          {!exporting ? (
-            <>
-              <div
-                style={{
-                  display: 'flex',
-                  width: '100%',
-                  justifyContent: 'flex-start',
-                  paddingLeft: 10,
-                }}
-              >
-                <Button
-                  onClick={() => setExporting(true)}
-                  style={{
-                    color: theme.palette.text.secondary,
-                  }}
-                  disabled={!isAlive}
-                >
-                  SAVE IMAGE
-                </Button>
-              </div>
-
-              <LoadingButton
-                loading={loading}
-                onClick={handleSubmit}
-                color="primary"
-                style={{
-                  color: !isAlive
-                    ? theme.palette.text.secondary
-                    : theme.palette.primary.main,
-                }}
-              >
-                RUN
-              </LoadingButton>
-              <Button
-                onClick={handleClose}
-                style={{
-                  color: theme.palette.text.secondary,
-                }}
-              >
-                CLOSE
-              </Button>
-            </>
-          ) : (
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              justifyContent: 'flex-start',
+              paddingLeft: 10,
+            }}
+          >
             <LoadingButton
-              onClick={handleExport}
               loading={saving}
+              onClick={handleExport}
               style={{
                 color: theme.palette.text.secondary,
               }}
+              disabled={!isAlive}
             >
-              {saving || 'Export IMAGE'}
+              {saving || 'SAVE IMAGE'}
             </LoadingButton>
-          )}
+          </div>
+
+          <LoadingButton
+            loading={loading}
+            onClick={handleSubmit}
+            color="primary"
+            style={{
+              color: !isAlive
+                ? theme.palette.text.secondary
+                : theme.palette.primary.main,
+            }}
+          >
+            {loading || 'RUN'}
+          </LoadingButton>
+          <Button
+            onClick={handleClose}
+            style={{
+              color: theme.palette.text.secondary,
+            }}
+          >
+            CLOSE
+          </Button>
         </DialogActions>
       </Dialog>
     </>

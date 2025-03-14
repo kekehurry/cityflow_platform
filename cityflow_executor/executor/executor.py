@@ -3,6 +3,7 @@ from docker.errors import ImageNotFound,NotFound
 import logging
 import uuid
 from hashlib import md5
+import traceback
 import time
 from typing import Any, ClassVar, Dict, List
 from .utils import CodeResult 
@@ -238,9 +239,10 @@ class CodeExecutor:
                 }) + '\n'
                 
         except Exception as e:
+            error_traceback = traceback.format_exc()
             yield json.dumps({
                     'container_name': self._container_name,
-                    'console': str(e),
+                    'console': f"{str(e)}\n{error_traceback}",
                 }) + '\n'
             
     def compile(self, code_block) -> CodeResult:
@@ -296,7 +298,10 @@ class CodeExecutor:
 
             # Find the bind folder for /cityflow_platform/cityflow_executor/code
             for bind in bind_mounts:
-                host_path, container_path = bind.rsplit(':', 1)
+                if "rw" or "rbind" in bind:
+                    host_path, container_path,_ = bind.rsplit(':', 2)
+                else:
+                    host_path, container_path = bind.rsplit(':', 1)
                 if container_path == os.getenv("EXECUTOR_WORK_DIR"):
                     return host_path
         return None

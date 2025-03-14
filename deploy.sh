@@ -11,9 +11,8 @@ fi
 
 docker system prune --all --force
 
-docker pull ghcr.io/kekehurry/cityflow_runner:dev
-docker pull ghcr.io/kekehurry/cityflow_platform:dev
-
+docker pull --platform=linux/amd64 ghcr.io/kekehurry/cityflow_runner:dev
+docker pull --platform=linux/amd64 ghcr.io/kekehurry/cityflow_platform:dev
 docker image tag ghcr.io/kekehurry/cityflow_runner:dev ghcr.io/kekehurry/cityflow_runner:full
 
 # create cityflow_platform directory
@@ -25,8 +24,9 @@ mkdir -p cityflow_platform
 cd cityflow_platform
 
 # Run the cityflow_platform container
-docker run -d \
+docker run -d --privileged \
     --name cityflow_platform \
+    --platform=linux/amd64 \
     -p 3001:3000 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/temp:/cityflow_platform/cityflow_executor/code \
