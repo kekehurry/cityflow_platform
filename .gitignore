@@ -3,4 +3,3 @@
 *.env.local
 temp
 .env
-.github/workflows/build_main.yml
