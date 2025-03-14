@@ -223,13 +223,12 @@ export default function ModuleBuilder(props) {
   }, [codeSubmited, config.run, formValue.language, input]);
 
   useEffect(() => {
-    if (config && !config.run) {
-      console.log('interupt', flowId);
+    if (config && !config.run && config?.language == 'python') {
       interuptCode(flowId).then(() => {
         setLoading(false);
       });
     }
-  }, [config?.run]);
+  }, [config?.run, config?.language]);
 
   return (
     <>
