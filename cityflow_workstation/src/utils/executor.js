@@ -241,6 +241,26 @@ export const useExecuteCode = ({
   };
 };
 
+export const interuptCode = async (flowId) => {
+  const api = `${executorServer}/interupt`;
+  const userId = await initUserId();
+  const res = await fetch(basePath + api, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      flowId,
+      userId,
+    }),
+  }).catch((err) => {
+    console.error(err);
+  });
+  if (res && res.ok) {
+    return await res.json();
+  }
+};
+
 export const removeSession = async (flowId, sessionId) => {
   const userId = await initUserId();
   const api = `${executorServer}/remove_session`;

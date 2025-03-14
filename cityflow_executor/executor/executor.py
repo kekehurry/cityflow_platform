@@ -209,6 +209,11 @@ class CodeExecutor:
         command = ["/bin/bash", "-c", f"cd {runner_work_dir} && {_cmd(lang)} ."]
         return command, lang, foldername
     
+    def interupt(self) -> None:
+        try:
+            self._container.exec_run(f"pkill -SIGINT -f 'python'", tty=True)
+        except Exception as e:
+            print(e)
 
     def execute(self, code_block):
         """Execute the code blocks."""
