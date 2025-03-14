@@ -44,8 +44,8 @@ def load_basic():
             for file in os.listdir(folder):
                 try:
                     if file.endswith('.json'):
-                        file = os.path.join(folder,file)
-                        flow = load_flow_data(file,basic=basic,category=category)
+                        file_path = os.path.join(folder,file)
+                        flow = load_flow_data(file_path,basic=basic,category=category)
                         save_workflow(flow,user_id=admin_id)
                 except Exception as e:
                     print('Error loading workflow:',file,e)
@@ -60,7 +60,7 @@ def init_source_dir(source_dir):
 def init_database(force_init=False):
     print('Initializing database...')
     source_dir = os.getenv('DATABASE_SOURCE_DIR','./cityflow_database/source')
-    if not os.path.exists(source_dir):
+    if (not os.path.exists(source_dir)) or (len(os.listdir(source_dir))==0):
         init_source_dir(source_dir)
         init_db()
         load_basic()
@@ -70,6 +70,7 @@ def init_database(force_init=False):
         init_db()
         load_basic()
     else:
+        init_source_dir(source_dir)
         load_basic()
     return 
 
