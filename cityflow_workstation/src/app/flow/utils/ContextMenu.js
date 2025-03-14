@@ -114,7 +114,7 @@ const ContextMenu = (props) => {
     setAnchorPosition(null);
   };
 
-  const handleSave = async () => {
+  const handleSave = async ({ fetchSource = true }) => {
     const { name, nodes, edges, ...res } = props.state;
     setSaving(true);
     const flowData = await getFlowData({
@@ -125,7 +125,7 @@ const ContextMenu = (props) => {
         basic: false,
         name: name || 'Temp',
       },
-      fetchSource: false,
+      fetchSource,
     });
     const flowId = await saveWorkflow(flowData).then((flowId) => {
       setSaving(false);
@@ -154,9 +154,12 @@ const ContextMenu = (props) => {
   useEffect(() => {
     if (props.state?.autoSave) {
       // autoSave every 5 minutes
-      const intervalId = setInterval(() => {
-        handleSave();
-      }, 60 * 1000 * 5);
+      const intervalId = setInterval(
+        () => {
+          handleSave({ fetchSource: false });
+        },
+        60 * 1000 * 5
+      );
 
       return () => clearInterval(intervalId);
     }

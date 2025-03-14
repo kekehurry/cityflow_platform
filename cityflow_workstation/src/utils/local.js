@@ -129,10 +129,11 @@ export const getFlowData = async ({
                 )),
               html:
                 node.config.html &&
-                (node.config.html.startsWith('/api/dataset/source') &&
-                fetchSource
+                fetchSource &&
+                (node.config.html.startsWith('/api/dataset/source') ||
+                  node.config.html.startsWith('http'))
                   ? await fetch(node.config.html).then((res) => res.text())
-                  : node.config.html),
+                  : node.config.html,
               run: false,
             },
           };
