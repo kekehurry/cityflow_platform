@@ -65,6 +65,21 @@ def is_alive():
         return jsonify({"alive":alive})
     else:
         return jsonify({"alive":False})
+    
+@app.route('/interupt', methods=['POST'])
+def interupt():
+    id = request.json.get('flowId')
+    user_id = request.json.get('userId')
+    container_name = f"csflow-{user_id}-{id}"
+    executor = manager.get_executor(container_name)
+    if executor:
+        executor.interupt()
+        return jsonify({
+        'container_name': executor._container_name,
+        'console': 'Interupted',
+    })
+    else:
+        return jsonify({'container_name': container_name, 'console': 'Container not found.'}), 400
 
 @app.route('/execute', methods=['POST'])
 def execute():

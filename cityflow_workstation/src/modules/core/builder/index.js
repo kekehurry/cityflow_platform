@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Stack, Tabs, Tab } from '@mui/material';
 import _, { set } from 'lodash';
-import { removeSession, executeCode, compileCode } from '@/utils/executor';
+import {
+  removeSession,
+  executeCode,
+  interuptCode,
+  compileCode,
+} from '@/utils/executor';
 import { initUserId } from '@/utils/local';
 
 import { useReactFlow } from 'reactflow';
@@ -216,6 +221,15 @@ export default function ModuleBuilder(props) {
       getResults();
     }
   }, [codeSubmited, config.run, formValue.language, input]);
+
+  useEffect(() => {
+    if (config && !config.run) {
+      console.log('interupt', flowId);
+      interuptCode(flowId).then(() => {
+        setLoading(false);
+      });
+    }
+  }, [config?.run]);
 
   return (
     <>

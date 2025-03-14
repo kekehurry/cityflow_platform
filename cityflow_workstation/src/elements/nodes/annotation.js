@@ -45,8 +45,13 @@ class AnnotationNode extends PureComponent {
     this.setState({ localOutput: output });
   };
 
-  handleDelete = () => {
-    this.props.removeNode(this.props.id);
+  handleDelete = async () => {
+    const comfirmed = await window.confirm(
+      'Are you sure you want to delete this node?'
+    );
+    if (comfirmed) {
+      this.props.removeNode(this.props.id);
+    }
   };
 
   handleRotateStart = (e) => {
