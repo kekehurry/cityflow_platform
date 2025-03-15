@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onInstallLog: (callback) => ipcRenderer.on('install-log', callback),
   onInstallTime: (callback) => ipcRenderer.on('install-time', callback),
   onDockerStatus: (callback) => ipcRenderer.on('docker-status', callback),
-  onUpdateInfo: (callback) => ipcRenderer.on('update-info', callback),
+  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', callback),
   onNewWindow: (callback) => {
     ipcRenderer.on('new-window-open', (_, data) => callback(data));
   },

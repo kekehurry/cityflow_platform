@@ -95,6 +95,12 @@ const Settings = () => {
       window.electronAPI.onDockerStatus((event, status) => {
         setDockerStatus(status);
       });
+      window.electronAPI.onUpdateAvailable(() => {
+        setFormValue({
+          ...formValue,
+          update: true,
+        });
+      });
     }
   }, []);
 

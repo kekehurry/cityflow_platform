@@ -93,7 +93,7 @@ function getSocketPath() {
 }
 
 async function startMachine() {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   win && win.webContents.send('install-time', '');
   win && win.webContents.send('install-log', 'starting machine...');
   win && win.webContents.send('docker-status', false);
@@ -139,7 +139,7 @@ function stopMachine() {
 }
 
 function pruneMachine() {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   console.log('pruning machine...');
   win && win.webContents.send('install-log', 'pruning machine...');
   const command = `"${dockerPath}" system prune --all --volumes --force`;
@@ -155,7 +155,7 @@ function pruneMachine() {
 }
 
 function resetMachine() {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   console.log('resetting machine...');
   win && win.webContents.send('install-log', 'resetting machine...');
   const command = `"${dockerPath}" machine reset --force`;
@@ -175,7 +175,7 @@ function resetMachine() {
 
 function initMachine() {
   dockerPath = getDockerPath();
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   const command = `"${dockerPath}" machine init --rootful --memory=4096 --disk-size=20`;
   win && win.webContents.send('install-log', 'init machine...');
   const proc = spawn(command, { shell: true });
@@ -213,7 +213,7 @@ function initMachine() {
 function loadPlatform(port) {
   const url = `http://localhost:${port}`;
   console.log(url);
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   if (win) {
     // Test the URL to check if the server is ready
     http

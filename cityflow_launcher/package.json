@@ -18,7 +18,9 @@
     "appId": "com.cityflow.cityflow_launcher",
     "productName": "CityFlow",
     "copyright": "Copyright © 2025 CityFlow",
-    "buildVersion": "0.25.4-beta",
+    "releaseInfo": {
+      "releaseNotesFile": "release.md"
+    },
     "files": [
       "dist/**/*",
       "src/**/*",
@@ -27,7 +29,8 @@
     "publish": {
       "provider": "github",
       "owner": "kekehurry",
-      "repo": "cityflow_platform"
+      "repo": "cityflow_platform",
+      "releaseType": "release"
     },
     "extraMetadata": {
       "main": "src/main.js"
@@ -44,14 +47,7 @@
     },
     "win": {
       "requestedExecutionLevel": "requireAdministrator",
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
+      "target": "default",
       "icon": "assets/icon.ico",
       "extraResources": [
         {
@@ -61,14 +57,7 @@
       ]
     },
     "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "arm64"
-          ]
-        }
-      ],
+      "target": "dmg",
       "icon": "assets/icon.icns",
       "extraResources": [
         {

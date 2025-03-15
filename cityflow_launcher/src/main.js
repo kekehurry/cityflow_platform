@@ -5,6 +5,7 @@ const {
   dialog,
   Menu,
   globalShortcut,
+  shell,
 } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
@@ -66,7 +67,7 @@ function createWindow() {
   win.webContents.on('did-finish-load', async () => {
     try {
       // init  machine
-      await initMachine();
+      initMachine();
     } catch (error) {
       console.error('Docker check failed:', error.message);
       dialog.showErrorBox('Error', error.message);
@@ -89,16 +90,23 @@ function createWindow() {
     }
   });
 
-  // check for updates
   autoUpdater.autoDownload = false;
-  autoUpdater.checkForUpdatesAndNotify().then((updateInfo) => {
-    updateInfo &&
-      dialog.showMessageBox(win, {
-        type: 'info',
-        title: 'Update',
-        message: updateInfo,
+  setImmediate(() => {
+    autoUpdater
+      .checkForUpdatesAndNotify()
+      .then((updateInfo) => {
+        if (updateInfo) {
+          dialog.showMessageBox(win, {
+            type: 'info',
+            title: 'Update',
+            message: updateInfo,
+          });
+        }
+        console.log('Update info:', updateInfo);
+      })
+      .catch((error) => {
+        console.error('Update check error:', error);
       });
-    console.log('Update info:', updateInfo);
   });
 }
 
@@ -107,7 +115,7 @@ async function onBeforeQuit(event, stopServer = false) {
     cleanup = true;
     event.preventDefault();
     // Get the main window and send the message through it
-    const mainWindow = BrowserWindow.getFocusedWindow();
+    const mainWindow = BrowserWindow.getAllWindows()[0];
     mainWindow &&
       mainWindow.webContents.send(
         'install-log',
@@ -154,17 +162,17 @@ app.on('window-all-closed', () => {
 app.on('before-quit', onBeforeQuit);
 
 ipcMain.on('close-window', () => {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   if (win) win.close();
 });
 
 ipcMain.on('minimize-window', () => {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   if (win) win.minimize();
 });
 
 ipcMain.on('maximize-window', () => {
-  const win = BrowserWindow.getFocusedWindow();
+  const win = BrowserWindow.getAllWindows()[0];
   if (win) {
     if (win.isMaximized()) {
       win.unmaximize();
@@ -331,8 +339,8 @@ ipcMain.handle('prune-machine', async (event, data) => {
 });
 
 // listen for update events
-autoUpdater.on('update-available', () => {
-  const win = BrowserWindow.getFocusedWindow();
+autoUpdater.on('update-available', (info) => {
+  const win = BrowserWindow.getAllWindows()[0];
   dialog
     .showMessageBox(win, {
       type: 'info',
@@ -345,26 +353,14 @@ autoUpdater.on('update-available', () => {
     })
     .then(({ response }) => {
       if (response === 0) {
-        autoUpdater.downloadUpdate();
-      }
-    });
-});
-
-autoUpdater.on('update-downloaded', () => {
-  const win = BrowserWindow.getFocusedWindow();
-  dialog
-    .showMessageBox(win, {
-      type: 'question',
-      buttons: ['Restart', 'Later'],
-      defaultId: 0,
-      cancelId: 1,
-      title: 'Install Updates',
-      message:
-        'Update downloaded. Would you like to restart the application to apply the updates?',
-    })
-    .then(({ response }) => {
-      if (response === 0) {
-        autoUpdater.quitAndInstall();
+        try {
+          win?.webContents?.send('update-available');
+          const updateUrl =
+            'https://github.com/kekehurry/cityflow_platform/releases';
+          shell.openExternal(updateUrl);
+        } catch (error) {
+          dialog.showErrorBox('Error opening external link:', info.url);
+        }
       }
     });
 });
