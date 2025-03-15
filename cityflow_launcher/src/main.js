@@ -9,13 +9,17 @@ const {
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const {
-  checkDockerInstallation,
   runDockerCommand,
   dockerImageExists,
   dockerContainerExists,
   dockerContainerIsRunning,
   cleanDockerContainers,
   loadPlatform,
+  initMachine,
+  stopMachine,
+  resetMachine,
+  pruneMachine,
+  getAppPath,
 } = require('./helper');
 const fs = require('fs');
 const os = require('os');
@@ -26,32 +30,23 @@ const template = require('./menu');
 let runnerDockerImage = null;
 let platformDockerImage = null;
 let cleanup = false;
-
 let viewManager = null;
 
-const app_dir = path.join(os.homedir(), 'cityflow_platform');
+// Create the directory if it doesn't exist
+// const resourcePath = process.resourcesPath;
+const appDir = getAppPath();
+const tempDir = path.join(appDir, 'usr', 'temp');
+const dataDir = path.join(appDir, 'usr', 'data');
+const sourceDir = path.join(appDir, 'usr', 'source');
 
-// Create the app directory if it doesn't exist
-if (!fs.existsSync(app_dir)) {
-  fs.mkdirSync(app_dir);
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
 }
-
-const temp_dir = path.join(app_dir, 'temp');
-// Create the temp directory if it doesn't exist
-if (!fs.existsSync(temp_dir)) {
-  fs.mkdirSync(temp_dir);
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { mode: 0o777, recursive: true });
 }
-
-const data_dir = path.join(app_dir, 'data');
-// Create the data directory if it doesn't exist
-if (!fs.existsSync(data_dir)) {
-  fs.mkdirSync(data_dir);
-}
-
-const source_dir = path.join(app_dir, 'source');
-// Create the source directory if it doesn't exist
-if (!fs.existsSync(source_dir)) {
-  fs.mkdirSync(source_dir);
+if (!fs.existsSync(sourceDir)) {
+  fs.mkdirSync(sourceDir, { recursive: true });
 }
 
 // Create the browser window
@@ -70,9 +65,11 @@ function createWindow() {
   win.loadFile(path.join(__dirname, '../dist/index.html'));
   win.webContents.on('did-finish-load', async () => {
     try {
-      await checkDockerInstallation();
+      // init  machine
+      await initMachine();
     } catch (error) {
-      console.error('Docker check failed:', error);
+      console.error('Docker check failed:', error.message);
+      dialog.showErrorBox('Error', error.message);
     }
   });
   win.webContents.setWindowOpenHandler(({ url, frameName, disposition }) => {
@@ -82,61 +79,56 @@ function createWindow() {
 
   // Register a global shortcut to open DevTools
   globalShortcut.register('CmdOrCtrl+Shift+C', () => {
-    win.webContents.openDevTools({ mode: 'detach' });
+    if (viewManager.activeViewId) {
+      const activeView = viewManager.views.get(viewManager.activeViewId);
+      if (activeView) {
+        activeView.webContents.openDevTools({ mode: 'detach' });
+      }
+    } else {
+      win.webContents.openDevTools({ mode: 'detach' });
+    }
   });
-  globalShortcut.register('CmdOrCtrl+Option+I', () => {
-    win.webContents.openDevTools({ mode: 'detach' });
-  });
+
   // check for updates
-  autoUpdater.autoDownload = true;
-  autoUpdater
-    .checkForUpdatesAndNotify()
-    .then((updateInfo) => {
-      console.log('Update info:', updateInfo);
-    })
-    .catch((err) => {
-      console.error('Error during update check:', err);
-    });
+  autoUpdater.autoDownload = false;
+  autoUpdater.checkForUpdatesAndNotify().then((updateInfo) => {
+    updateInfo &&
+      dialog.showMessageBox(win, {
+        type: 'info',
+        title: 'Update',
+        message: updateInfo,
+      });
+    console.log('Update info:', updateInfo);
+  });
 }
 
-function onBeforeQuit(event, stopServer = false) {
+async function onBeforeQuit(event, stopServer = false) {
   if (!cleanup) {
     cleanup = true;
     event.preventDefault();
     // Get the main window and send the message through it
     const mainWindow = BrowserWindow.getFocusedWindow();
-    if (mainWindow) {
+    mainWindow &&
       mainWindow.webContents.send(
         'install-log',
         `Cleaning up containers and exiting. Please wait...`
       );
-    }
     const cleanupTasks = [];
     if (runnerDockerImage) {
       cleanupTasks.push(cleanDockerContainers(runnerDockerImage, 'rm'));
     }
-    if (platformDockerImage && stopServer) {
-      cleanupTasks.push(cleanDockerContainers(platformDockerImage, 'rm'));
+    if (stopServer) {
+      await cleanDockerContainers(platformDockerImage, 'rm');
+      await stopMachine();
+      app.removeListener('before-quit', onBeforeQuit);
+      app.quit();
     }
-    Promise.all(cleanupTasks)
-      .then(() => {
-        if (!stopServer) {
-          app.removeListener('before-quit', onBeforeQuit);
-          app.quit();
-        } else {
-          mainWindow && mainWindow.send('install-log', 'Server stopped');
-        }
-      })
-      .catch((error) => {
-        console.error('Error during cleanup:', error);
-        if (!stopServer) {
-          app.removeListener('before-quit', onBeforeQuit);
-          app.quit();
-        } else {
-          mainWindow &&
-            mainWindow.send('install-log', `Server stop Error : ${error}`);
-        }
-      });
+    await Promise.all(cleanupTasks).finally(async () => {
+      mainWindow &&
+        mainWindow.webContents.send('install-log', `Stopping machine...`);
+      app.removeListener('before-quit', onBeforeQuit);
+      app.quit();
+    });
   }
 }
 
@@ -179,14 +171,6 @@ ipcMain.on('maximize-window', () => {
     } else {
       win.maximize();
     }
-  }
-});
-
-ipcMain.on('check-dorkder-installation', () => {
-  try {
-    checkDockerInstallation();
-  } catch (e) {
-    console.error(e);
   }
 });
 
@@ -259,6 +243,7 @@ ipcMain.on(
       const dockerArgs = [
         'run',
         // '-d',
+        '--privileged',
         '--name',
         'cityflow_platform',
         '-p',
@@ -266,11 +251,11 @@ ipcMain.on(
         '-v',
         '/var/run/docker.sock:/var/run/docker.sock',
         '-v',
-        `${temp_dir}:/cityflow_platform/cityflow_executor/code`,
+        `${tempDir}:/cityflow_platform/cityflow_executor/code:rw`,
         '-v',
-        `${data_dir}:/cityflow_platform/cityflow_database/data`,
+        `${dataDir}:/data:rw`,
         '-v',
-        `${source_dir}:/cityflow_platform/cityflow_database/source`,
+        `${sourceDir}:/cityflow_platform/cityflow_database/source:rw`,
         '-e',
         `DEFAULT_RUNNER=${runnerImage}`,
         '--platform',
@@ -337,15 +322,49 @@ ipcMain.handle('stop-server', async (event, { runnerImage, platformImage }) => {
   await onBeforeQuit(event, true);
 });
 
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall();
+ipcMain.handle('reset-machine', async (event, data) => {
+  resetMachine();
+});
+
+ipcMain.handle('prune-machine', async (event, data) => {
+  pruneMachine();
 });
 
 // listen for update events
-
 autoUpdater.on('update-available', () => {
-  mainWindow.webContents.send('update-available');
+  const win = BrowserWindow.getFocusedWindow();
+  dialog
+    .showMessageBox(win, {
+      type: 'info',
+      buttons: ['Download', 'Cancel'],
+      defaultId: 0,
+      cancelId: 1,
+      title: 'Update Available',
+      message:
+        'A new cityflow launcher update is available. Do you want to download it now?',
+    })
+    .then(({ response }) => {
+      if (response === 0) {
+        autoUpdater.downloadUpdate();
+      }
+    });
 });
+
 autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update-downloaded');
+  const win = BrowserWindow.getFocusedWindow();
+  dialog
+    .showMessageBox(win, {
+      type: 'question',
+      buttons: ['Restart', 'Later'],
+      defaultId: 0,
+      cancelId: 1,
+      title: 'Install Updates',
+      message:
+        'Update downloaded. Would you like to restart the application to apply the updates?',
+    })
+    .then(({ response }) => {
+      if (response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
 });

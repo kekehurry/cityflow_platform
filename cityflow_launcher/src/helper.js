@@ -1,114 +1,219 @@
 const http = require('http');
-const { exec, spawn } = require('child_process');
+const { exec, spawn, execSync } = require('child_process');
 const { BrowserWindow, shell, dialog, app } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
-// Helper function to get the path to the Docker executable
-function getDockerPath() {
-  const isDev = process.env.NODE_ENV === 'development';
+let dockerPath;
 
-  if (isDev) {
-    // Use system Docker in development
-    switch (process.platform) {
-      case 'darwin':
-        return '/usr/local/bin/docker';
-      case 'linux':
-        return '/usr/bin/docker';
-      case 'win32':
-        return 'C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe';
-      default:
-        return 'docker';
-    }
+function getAppPath() {
+  let appDir;
+  if (process.platform === 'win32') {
+    const exePath = app.getPath('exe');
+    const installDir = path.dirname(exePath);
+    appDir = path.join(installDir, 'cityflow_platform');
   } else {
-    // Use bundled Docker in production
-    const resourcePath = process.resourcesPath;
-    switch (process.platform) {
-      case 'darwin':
-        return path.join(resourcePath, 'docker', 'darwin', 'docker');
-      case 'linux':
-        return path.join(resourcePath, 'docker', 'linux', 'docker');
-      case 'win32':
-        return path.join(resourcePath, 'docker', 'win32', 'docker.exe');
-      default:
-        return 'docker';
-    }
+    appDir = path.join(os.homedir(), 'cityflow_platform');
+  }
+  if (!fs.existsSync(appDir)) {
+    fs.mkdirSync(appDir, { recursive: true });
+  }
+  return appDir;
+}
+
+function getDockerPath() {
+  const resourcePath = process.resourcesPath;
+  const currentPaths = process.env.PATH.split(path.delimiter);
+  const dockerDir = path.join(resourcePath, 'docker', process.platform, 'bin');
+  if (!currentPaths.includes(dockerDir)) {
+    process.env.PATH = dockerDir + path.delimiter + process.env.PATH;
+  }
+
+  // Ensure the directory exists
+  const appDir = getAppPath();
+  const configDir = path.join(appDir, 'storage', 'config');
+  const dataDir = path.join(appDir, 'storage', 'data');
+  const runDir = path.join(appDir, 'storage', 'run');
+
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  if (!fs.existsSync(runDir)) {
+    fs.mkdirSync(runDir, { recursive: true });
+  }
+
+  // Create or update containers.conf
+  const configFile = path.join(configDir, 'containers.conf');
+  // Escape backslashes in dockerDir for Windows paths
+  const safeDockerDir = dockerDir.replace(/\\/g, '\\\\');
+  const configContent = `[engine]\nhelper_binaries_dir = ["${safeDockerDir}"]`;
+  fs.writeFileSync(configFile, configContent, { encoding: 'utf8' });
+
+  // Set XDG environment variables
+  process.env.CONTAINERS_CONF = configFile;
+  process.env.XDG_CONFIG_HOME = configDir;
+  process.env.XDG_DATA_HOME = dataDir;
+  process.env.XDG_RUNTIME_DIR = runDir;
+
+  if (process.platform === 'win32') {
+    return path.win32.join(dockerDir, 'podman.exe');
+  } else {
+    return path.join(dockerDir, 'podman');
   }
 }
 
-// Helper function to check if Docker is available
-function checkDockerAvailability() {
-  const dockerPath = getDockerPath();
+function getSocketPath() {
+  let socketPath;
+  if (process.platform === 'win32') {
+    socketPath = execSync(
+      `"${dockerPath}" machine inspect --format '{{.ConnectionInfo.PodmanPipe.Path}}'`
+    )
+      .toString()
+      .trim();
+    return `npipe://${socketPath}`;
+  } else if (process.platform === 'darwin') {
+    socketPath = execSync(
+      `"${dockerPath}" machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}'`
+    )
+      .toString()
+      .trim();
+    return `unix://${socketPath}`;
+  } else {
+    socketPath = execSync(
+      `"${dockerPath}" info --format '{{.Host.RemoteSocket.Path}}'`
+    )
+      .toString()
+      .trim();
+    return `unix://${socketPath}`;
+  }
+}
+
+async function startMachine() {
+  const win = BrowserWindow.getFocusedWindow();
+  win && win.webContents.send('install-time', '');
+  win && win.webContents.send('install-log', 'starting machine...');
+  win && win.webContents.send('docker-status', false);
+  try {
+    // start machine
+    const startOut = execSync(`"${dockerPath}" machine start`).toString();
+    win && win.webContents.send('install-log', 'machine is ready!');
+  } catch (err) {
+    if (err.message.includes('already running')) {
+      win && win.webContents.send('install-log', 'machine is ready!');
+    } else {
+      win && win.webContents.send('install-log', err.message);
+      throw err;
+    }
+  }
+  try {
+    // get podman socket path
+    const dockerHost = getSocketPath();
+    process.env.DOCKER_HOST = dockerHost;
+  } catch (err) {
+    win && win.webContents.send('install-log', err.message);
+    throw err;
+  }
+
+  try {
+    // get podman version
+    const versionOut = execSync(`"${dockerPath}" --version`).toString();
+    win && win.webContents.send('docker-status', versionOut);
+  } catch (err) {
+    win && win.webContents.send('install-log', err.message);
+  }
+}
+
+function stopMachine() {
   return new Promise((resolve, reject) => {
-    exec(`"${dockerPath}" info`, (error) => {
-      if (error) {
-        reject(error);
+    exec(`"${dockerPath}" machine stop`, (err, stdout, stderr) => {
+      if (err) {
+        reject(err);
       }
       resolve();
     });
   });
 }
 
-// Helper function to check if Docker is installed
-let isShowingDockerDialog = false;
-async function checkDockerInstallation() {
-  try {
-    await checkDockerAvailability();
-    const dockerPath = getDockerPath();
-    exec(`"${dockerPath}" --version`, (err, stdout, stderr) => {
-      console.log(stdout);
-      const win = BrowserWindow.getAllWindows()[0];
-      if (err) {
-        win && win.webContents.send('docker-status', false);
-      } else {
-        win && win.webContents.send('docker-status', stdout);
-      }
-    });
-    return true;
-  } catch (error) {
-    // Prevent multiple dialogs
-    if (isShowingDockerDialog) {
-      return false;
-    }
-    isShowingDockerDialog = true;
-    const choice = await dialog.showMessageBox({
-      type: 'warning',
-      title: 'Docker Not Running',
-      message: 'Docker Desktop is not running or not installed.',
-      buttons: ['Install Docker', 'Open Docker Desktop', 'Cancel'],
-      defaultId: 0,
-      cancelId: 2,
-    });
+function pruneMachine() {
+  const win = BrowserWindow.getFocusedWindow();
+  console.log('pruning machine...');
+  win && win.webContents.send('install-log', 'pruning machine...');
+  const command = `"${dockerPath}" system prune --all --volumes --force`;
+  const proc = spawn(command, { shell: true });
+  proc.stdout.on('data', (data) => {
+    const log = data.toString();
+    win && win.webContents.send('install-log', log);
+  });
+  proc.stderr.on('data', (data) => {
+    const log = data.toString();
+    win && win.webContents.send('install-log', log);
+  });
+}
 
-    switch (choice.response) {
-      case 0:
-        // Open Docker Desktop download page
-        shell.openExternal('https://www.docker.com/products/docker-desktop');
-        app.quit();
-        return false;
-      case 1:
-        // Try to open Docker Desktop
-        switch (process.platform) {
-          case 'darwin':
-            spawn('open', ['/Applications/Docker.app']);
-            break;
-          case 'win32':
-            spawn('cmd', ['/c', 'start', '""', '"Docker Desktop"']);
-            break;
-        }
-        app.quit();
-        return false;
-      default:
-        app.quit();
-        return false;
+function resetMachine() {
+  const win = BrowserWindow.getFocusedWindow();
+  console.log('resetting machine...');
+  win && win.webContents.send('install-log', 'resetting machine...');
+  const command = `"${dockerPath}" machine reset --force`;
+  const proc = spawn(command, { shell: true });
+  proc.stdout.on('data', (data) => {
+    const log = data.toString();
+    win && win.webContents.send('install-log', log);
+  });
+  proc.stderr.on('data', (data) => {
+    const log = data.toString();
+    win && win.webContents.send('install-log', log);
+  });
+  proc.on('close', () => {
+    app.quit();
+  });
+}
+
+function initMachine() {
+  dockerPath = getDockerPath();
+  const win = BrowserWindow.getFocusedWindow();
+  const command = `"${dockerPath}" machine init --rootful --memory=4096 --disk-size=20`;
+  win && win.webContents.send('install-log', 'init machine...');
+  const proc = spawn(command, { shell: true });
+  let timer;
+  proc.on('spawn', () => {
+    startTime = new Date();
+    // Send the elapsed time every second
+    timer = setInterval(() => {
+      const now = new Date();
+      const elapsedTime = Math.round((now - startTime) / 1000); // in seconds
+      try {
+        win?.webContents?.send('install-time', elapsedTime);
+      } catch (err) {
+        clearInterval(timer);
+      }
+    }, 1000);
+  });
+  proc.stdout.on('data', (data) => {
+    const log = data.toString();
+    win?.webContents?.send('install-log', log);
+  });
+  proc.stderr.on('data', (data) => {
+    const log = data.toString();
+    if (!log.includes('already exists')) {
+      win?.webContents?.send('install-log', log);
     }
-  }
+  });
+  proc.on('close', () => {
+    clearInterval(timer);
+    startMachine();
+  });
 }
 
 // load the cityflow platform in the browser window
 function loadPlatform(port) {
   const url = `http://localhost:${port}`;
   console.log(url);
-  const win = BrowserWindow.getAllWindows()[0];
+  const win = BrowserWindow.getFocusedWindow();
   if (win) {
     // Test the URL to check if the server is ready
     http
@@ -129,7 +234,6 @@ function loadPlatform(port) {
 // Helper function to run a docker command with spawn and stream logs
 function runDockerCommand(args, logPrefix, event, port = null) {
   return new Promise((resolve, reject) => {
-    const dockerPath = getDockerPath();
     const proc = spawn(dockerPath, args);
     // Start the timer when the process starts
     proc.on('spawn', () => {
@@ -144,6 +248,7 @@ function runDockerCommand(args, logPrefix, event, port = null) {
       // Clear the timer when the process exits
       proc.on('close', () => {
         clearInterval(timer);
+        event.reply('install-time', '');
       });
     });
     proc.stdout.on('data', (data) => {
@@ -174,9 +279,8 @@ function runDockerCommand(args, logPrefix, event, port = null) {
 
 // check if a docker image exists
 function dockerImageExists(image) {
-  const dockerPath = getDockerPath();
   return new Promise((resolve) => {
-    exec(`${dockerPath} image inspect ${image}`, (err, stdout, stderr) => {
+    exec(`"${dockerPath}" image inspect ${image}`, (err, stdout, stderr) => {
       resolve(!err);
     });
   });
@@ -184,10 +288,9 @@ function dockerImageExists(image) {
 
 // check if a docker container exists
 function dockerContainerExists(name) {
-  const dockerPath = getDockerPath();
   return new Promise((resolve, reject) => {
     exec(
-      `${dockerPath} ps -a --filter "name=^/${name}$" --format "{{.Names}}"`,
+      `"${dockerPath}" ps -a --filter "name=^/${name}$" --format "{{.Names}}"`,
       (err, stdout, stderr) => {
         if (err) {
           reject(err);
@@ -201,10 +304,9 @@ function dockerContainerExists(name) {
 
 // check if a docker container is running
 function dockerContainerIsRunning(name) {
-  const dockerPath = getDockerPath();
   return new Promise((resolve) => {
     exec(
-      `${dockerPath} inspect ${name} --format '{{.State.Status}}'`,
+      `"${dockerPath}" inspect ${name} --format '{{.State.Status}}'`,
       (err, stdout, stderr) => {
         resolve(stdout.trim() == 'running');
       }
@@ -214,11 +316,10 @@ function dockerContainerIsRunning(name) {
 
 //clean up the containers
 function cleanDockerContainers(dockerImage, action = 'stop') {
-  const dockerPath = getDockerPath();
   return new Promise((resolve, reject) => {
     // get all containers with the specified image
     exec(
-      `${dockerPath} ps -aq --filter "ancestor=${dockerImage}"`,
+      `"${dockerPath}" ps -aq --filter "ancestor=${dockerImage}"`,
       (err, stdout, stderr) => {
         if (err) {
           return reject(`Error fetching containers: ${stderr || err.message}`);
@@ -233,8 +334,8 @@ function cleanDockerContainers(dockerImage, action = 'stop') {
         const containerActions = containerIds.map((id) => {
           const command =
             action === 'stop'
-              ? `${dockerPath} stop ${id}`
-              : `${dockerPath} rm -f ${id}`;
+              ? `"${dockerPath}" stop ${id}`
+              : `"${dockerPath}" rm -f ${id}`;
           return new Promise((res, rej) => {
             exec(command, (err) => {
               if (err) {
@@ -256,12 +357,16 @@ function cleanDockerContainers(dockerImage, action = 'stop') {
 }
 
 module.exports = {
-  checkDockerInstallation,
-  checkDockerAvailability,
   runDockerCommand,
   dockerImageExists,
   dockerContainerExists,
   dockerContainerIsRunning,
   cleanDockerContainers,
   loadPlatform,
+  initMachine,
+  stopMachine,
+  pruneMachine,
+  resetMachine,
+  getDockerPath,
+  getAppPath,
 };

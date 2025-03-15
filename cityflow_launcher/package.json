@@ -1,6 +1,6 @@
 {
   "name": "cityflow_launcher",
-  "version": "0.25.3+20250305",
+  "version": "0.25.4-beta",
   "description": "",
   "author": {
     "name": "Kai Hu",
@@ -12,13 +12,13 @@
     "build-icons": "electron-icon-builder --input=./public/icon.png --output=./assets --flatten",
     "electron": "npm run build && electron .",
     "start": "react-scripts start",
-    "dist": "npm run build && electron-builder --mac --win --publish always"
+    "dist": "npm run build && electron-builder --mac --win --publish=always"
   },
   "build": {
-    "appId": "com.example.cityflow",
+    "appId": "com.cityflow.cityflow_launcher",
     "productName": "CityFlow",
     "copyright": "Copyright © 2025 CityFlow",
-    "buildVersion": "0.25.3+20250305",
+    "buildVersion": "0.25.4-beta",
     "files": [
       "dist/**/*",
       "src/**/*",
@@ -29,27 +29,21 @@
       "owner": "kekehurry",
       "repo": "cityflow_platform"
     },
-    "extraResources": [
-      {
-        "from": "./docker/docker",
-        "to": "docker/darwin/docker"
-      },
-      {
-        "from": "./docker/docker",
-        "to": "docker/linux/docker"
-      },
-      {
-        "from": "./docker/docker.exe",
-        "to": "docker/win32/docker.exe"
-      }
-    ],
     "extraMetadata": {
       "main": "src/main.js"
     },
     "directories": {
       "buildResources": "assets"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
     "win": {
+      "requestedExecutionLevel": "requireAdministrator",
       "target": [
         {
           "target": "nsis",
@@ -58,7 +52,13 @@
           ]
         }
       ],
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "extraResources": [
+        {
+          "from": "./docker/win32",
+          "to": "docker/win32"
+        }
+      ]
     },
     "mac": {
       "target": [
@@ -69,7 +69,13 @@
           ]
         }
       ],
-      "icon": "assets/icon.icns"
+      "icon": "assets/icon.icns",
+      "extraResources": [
+        {
+          "from": "./docker/darwin",
+          "to": "docker/darwin/"
+        }
+      ]
     },
     "linux": {
       "target": [
@@ -80,7 +86,13 @@
           ]
         }
       ],
-      "icon": "assets"
+      "icon": "assets",
+      "extraResources": [
+        {
+          "from": "./docker/darwin",
+          "to": "docker/linux"
+        }
+      ]
     }
   },
   "devDependencies": {

@@ -4,4 +4,5 @@ data
 source
 dist
 docker
+podman
 package-lock.json
