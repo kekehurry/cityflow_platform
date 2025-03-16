@@ -222,7 +222,7 @@ function resetMachine() {
 function initMachine() {
   dockerPath = getDockerPath();
   const win = BrowserWindow.getAllWindows()[0];
-  const command = `"${dockerPath}" machine init --rootful --memory=4096 --disk-size=20`;
+  const command = `"${dockerPath}" machine init --rootful --memory=8192 --cpus=4 --disk-size=20`;
   win && win.webContents.send('install-log', 'init machine...');
   const proc = spawn(command, { shell: true });
   let timer;

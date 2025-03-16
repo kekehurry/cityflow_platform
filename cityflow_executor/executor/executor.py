@@ -303,7 +303,7 @@ class CodeExecutor:
 
             # Find the bind folder for /cityflow_platform/cityflow_executor/code
             for bind in bind_mounts:
-                if "rw" or "rbind" in bind:
+                if "rw" in bind or "rbind" in bind:
                     host_path, container_path,_ = bind.rsplit(':', 2)
                 else:
                     host_path, container_path = bind.rsplit(':', 1)
