@@ -13,7 +13,6 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
-import { useDialogs } from '@toolpad/core/useDialogs';
 
 const useLocalStorage = (key, defaultValue) => {
   const [localValue, setLocalValue] = useState(() => {
@@ -60,7 +59,6 @@ const Settings = () => {
   const [time, setTime] = useState('');
   const [dockerStatus, setDockerStatus] = useState('');
   const [loading, setLoading] = useState(false);
-  const dialogs = useDialogs();
 
   const handleValueChange = (e) => {
     setFormValue({
@@ -86,7 +84,6 @@ const Settings = () => {
 
   useEffect(() => {
     if (window?.electronAPI) {
-      window.electronAPI.checkDockerInstallation();
       window.electronAPI.onInstallLog((event, message) => {
         setLog(message);
       });
@@ -101,15 +98,6 @@ const Settings = () => {
           ...formValue,
           update: true,
         });
-        dialogs.alert('CityFlow Launcher update available');
-      });
-      window.electronAPI.onUpdateDownloaded(() => {
-        const isRestart = dialogs.confirm(
-          'CityFlow Launcher update downloaded, restart now?'
-        );
-        if (isRestart) {
-          window.electronAPI.restartApp();
-        }
       });
     }
   }, []);
@@ -146,14 +134,8 @@ const Settings = () => {
             overflowY: 'auto',
           }}
         >
-          <Typography
-            id="docker-status"
-            variant="subtitle1"
-            color={dockerStatus ? '#626262' : 'red'}
-          >
-            {dockerStatus
-              ? dockerStatus
-              : 'Docker not found, please install docker first'}
+          <Typography variant="subtitle1" width="100%" color="#626262">
+            {dockerStatus}
           </Typography>
           <Stack direction="row" spacing={1}>
             <Typography variant="subtitle1" width="80%">
@@ -263,6 +245,7 @@ const Settings = () => {
           id="start_button"
           onClick={handleStart}
           sx={{ height: 40 }}
+          disabled={!dockerStatus}
         >
           {loading ? (
             <CircularProgress size={20} sx={{ color: 'white', opacity: 0.7 }} />
@@ -277,18 +260,53 @@ const Settings = () => {
           justifyContent={'space-between'}
           alignItems={'center'}
         >
-          <Typography
-            variant="subtitle1"
-            sx={{ fontSize: 12, color: 'text.secondary', cursor: 'pointer' }}
-            onClick={() => {
-              window?.electronAPI?.invoke('stop-server', {
-                runnerImage: formValue.runnerImage,
-                platformImage: formValue.platformImage,
-              });
-            }}
-          >
-            Stop Server
-          </Typography>
+          <Stack direction={'row'} spacing={1}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: 12,
+                color: 'text.secondary',
+                cursor: 'pointer',
+                '&:hover': { color: 'primary.main' },
+              }}
+              onClick={() => {
+                window?.electronAPI?.invoke('stop-server', {
+                  runnerImage: formValue.runnerImage,
+                  platformImage: formValue.platformImage,
+                });
+              }}
+            >
+              Stop /
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: 12,
+                color: 'text.secondary',
+                cursor: 'pointer',
+                '&:hover': { color: 'primary.main' },
+              }}
+              onClick={() => {
+                window?.electronAPI?.invoke('reset-machine', {});
+              }}
+            >
+              Reset /
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: 12,
+                color: 'text.secondary',
+                cursor: 'pointer',
+                '&:hover': { color: 'primary.main' },
+              }}
+              onClick={() => {
+                window?.electronAPI?.invoke('prune-machine', {});
+              }}
+            >
+              Prune /
+            </Typography>
+          </Stack>
           <FormControlLabel
             control={
               <Checkbox
