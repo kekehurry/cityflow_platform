@@ -23,7 +23,6 @@ const {
   getAppPath,
 } = require('./helper');
 const fs = require('fs');
-const os = require('os');
 const ViewManager = require('./view');
 const template = require('./menu');
 
@@ -83,10 +82,10 @@ function createWindow() {
     if (viewManager.activeViewId) {
       const activeView = viewManager.views.get(viewManager.activeViewId);
       if (activeView) {
-        activeView.webContents.openDevTools({ mode: 'detach' });
+        activeView.webContents?.openDevTools({ mode: 'detach' });
       }
     } else {
-      win.webContents.openDevTools({ mode: 'detach' });
+      win?.webContents?.openDevTools({ mode: 'detach' });
     }
   });
 

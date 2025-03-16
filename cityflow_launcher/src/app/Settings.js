@@ -13,7 +13,6 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
-import { useDialogs } from '@toolpad/core/useDialogs';
 
 const useLocalStorage = (key, defaultValue) => {
   const [localValue, setLocalValue] = useState(() => {
@@ -60,7 +59,6 @@ const Settings = () => {
   const [time, setTime] = useState('');
   const [dockerStatus, setDockerStatus] = useState('');
   const [loading, setLoading] = useState(false);
-  const dialogs = useDialogs();
 
   const handleValueChange = (e) => {
     setFormValue({
@@ -136,7 +134,7 @@ const Settings = () => {
             overflowY: 'auto',
           }}
         >
-          <Typography id="docker-status" variant="subtitle1" color="#626262">
+          <Typography variant="subtitle1" width="100%" color="#626262">
             {dockerStatus}
           </Typography>
           <Stack direction="row" spacing={1}>

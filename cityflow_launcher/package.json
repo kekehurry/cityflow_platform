@@ -10,7 +10,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "build-icons": "electron-icon-builder --input=./public/icon.png --output=./assets --flatten",
-    "electron": "npm run build && electron .",
+    "electron": "npm run build && rm -rf node_modules/electron/dist/Electron.app/Contents/Resources/docker && cp -r ./docker node_modules/electron/dist/Electron.app/Contents/Resources/docker && electron .",
     "start": "react-scripts start",
     "dist": "npm run build && electron-builder --mac --win --publish=always"
   },
@@ -47,7 +47,14 @@
     },
     "win": {
       "requestedExecutionLevel": "requireAdministrator",
-      "target": "default",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "assets/icon.ico",
       "extraResources": [
         {
@@ -57,7 +64,14 @@
       ]
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "icon": "assets/icon.icns",
       "extraResources": [
         {
