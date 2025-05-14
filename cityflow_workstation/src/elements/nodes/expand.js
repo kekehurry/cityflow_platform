@@ -39,6 +39,7 @@ const mapStateToProps = (state, ownProps) => ({
   flowAuthor: state.author,
   image: state.image,
   position: state.nodes.find((node) => node.id === ownProps.id)?.position,
+  globalScale: state.globalScale,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -374,6 +375,7 @@ class ExpandNode extends PureComponent {
             >
               {interfaceComponent &&
                 !this.state.expand &&
+                this.props.globalScale <= 0.5 &&
                 mapModule(interfaceComponent)}
             </Paper>
           </Card>
