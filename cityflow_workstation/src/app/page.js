@@ -25,6 +25,9 @@ export default function Interface() {
   );
   const communityPage = <CommunityPage />;
 
+  const footer = process.env.NEXT_PUBLIC_FOOTER;
+  const footerLink = process.env.NEXT_PUBLIC_FOOTERLINK;
+
   useEffect(() => {
     switch (menu) {
       case 'Home':
@@ -60,6 +63,20 @@ export default function Interface() {
         childrenOne={childrenOne}
         childrenTwo={childrenTwo}
       />
+      <a
+        style={{
+          position: 'fixed',
+          right: '10px',
+          bottom: '10px',
+          zIndex: 1000,
+          color: '#424242',
+          fontSize: 12,
+          textDecoration: 'none',
+        }}
+        href={footerLink}
+      >
+        {footer}
+      </a>
     </div>
   );
 }
