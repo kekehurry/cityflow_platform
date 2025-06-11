@@ -39,7 +39,7 @@ const mapStateToProps = (state, ownProps) => ({
   flowAuthor: state.author,
   image: state.image,
   position: state.nodes.find((node) => node.id === ownProps.id)?.position,
-  globalScale: state.globalScale,
+  globalScale: state.globalScale || 0,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
