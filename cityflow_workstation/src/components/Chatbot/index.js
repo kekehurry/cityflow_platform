@@ -38,7 +38,7 @@ export default function ChatBot({
   const [userId, setUserId] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
   const localLLMConfig = useLocalStorage('LLM_CONFIG');
-  const [assistant, setAssistant] = useState(new Assistant(localLLMConfig));
+  const [assistant, setAssistant] = useState(new Assistant({ ...llmConfig }));
 
   const [tool, setTool] = useState(null);
   const messageEndRef = useRef(null);
@@ -53,9 +53,9 @@ export default function ChatBot({
     }
   };
 
-  useEffect(() => {
-    setAssistant(new Assistant({ ...llmConfig }));
-  }, [llmConfig]);
+  // useEffect(() => {
+  //   setAssistant(new Assistant({ ...llmConfig }));
+  // }, [llmConfig]);
 
   useEffect(() => {
     initUserId().then((id) => {

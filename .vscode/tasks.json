@@ -37,7 +37,7 @@
       "label": "Start Cityflow Database",
       "type": "shell",
       "dependsOn": ["Init Environment"],
-      "command": "cd cityflow_database && docker start neo4j && python server.py",
+      "command": "source .venv/bin/activate && cd cityflow_database && docker start neo4j && python server.py",
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {
@@ -48,7 +48,7 @@
       "label": "Start Cityflow Executor",
       "type": "shell",
       "dependsOn": ["Init Environment"],
-      "command": "cd cityflow_executor && python server.py",
+      "command": "source .venv/bin/activate && cd cityflow_executor && python server.py",
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {
